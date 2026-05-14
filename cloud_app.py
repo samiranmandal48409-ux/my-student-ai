@@ -291,7 +291,6 @@ st.markdown("""
 </div>
 
 <div class="stats-row">
-    <div class="stat-pill"><span class="dot dot-green"></span> llama-3.1-8b-instant</div>
     <div class="stat-pill"><span class="dot dot-blue"></span> Instant responses</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> Auto-retry on limits</div>
 </div>
