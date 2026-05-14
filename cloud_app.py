@@ -35,7 +35,7 @@ if prompt := st.chat_input("What do you want to build today?"):
                         {"role": "system", "content": SYSTEM_PROMPT},
                         *st.session_state.messages
                     ],
-                    model="llama3-8b-8192",
+                    model="llama-3.1-8b-instant",  # ✅ Fixed: replaced decommissioned model
                 )
                 response = chat_completion.choices[0].message.content
                 st.markdown(response)
