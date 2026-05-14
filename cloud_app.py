@@ -1,11 +1,10 @@
   import streamlit as st
-  from groq import Groq # We use Groq instead of Ollama
+  from groq import Groq
 
   # 1. Page Setup
   st.set_page_config(page_title="Student Coding AI", page_icon="🎓")
 
   # 2. ENTER YOUR CLOUD KEY HERE
-  # Replace 'your_api_key_here' with the key you copied from Groq
   client = Groq(api_key="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")
 
   SYSTEM_PROMPT = """
@@ -31,7 +30,6 @@
       with st.chat_message("assistant"):
           with st.spinner("Cloud Brain is thinking..."):
               try:
-                  # Calling the Cloud Brain (Llama 3)
                   chat_completion = client.chat.completions.create(
                       messages=[
                           {"role": "system", "content": SYSTEM_PROMPT},
