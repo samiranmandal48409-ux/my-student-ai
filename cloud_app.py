@@ -285,7 +285,7 @@ if "messages" not in st.session_state:
 # ── Hero Header ──────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
-    <div class="hero-badge">LIVE &nbsp;·&nbsp; FREE TO USE &nbsp;·&nbsp; POWERED BY LLAMA 3.1</div>
+    <div class="hero-badge">LIVE &nbsp;·&nbsp; FREE TO USE</div>
     <h1>Code<span>Mentor</span> AI</h1>
     <p>Your personal AI coding partner — ask anything, build anything, learn everything.</p>
 </div>
