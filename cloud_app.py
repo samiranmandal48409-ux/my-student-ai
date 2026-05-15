@@ -1,9 +1,7 @@
 import streamlit as st
 from groq import Groq
 import time
-import urllib.parse
-import requests
-from io import BytesIO
+
 
 st.set_page_config(
     page_title="Nova AI",
@@ -158,57 +156,10 @@ MODEL = "compound-beta"
 SYSTEM_PROMPT = (
     "You are Nova AI — a smart, accurate, and friendly AI assistant with access to the internet. "
     "Always search the web for recent events, sports results, news, and current information. "
-    "IMPORTANT: You can NOT generate images. If the user asks for an image, just say the image is being generated separately. "
     "Help with anything: coding, writing, math, science, general knowledge, creative tasks, advice, and more. "
     "Be clear and thorough. Format code with proper markdown code blocks."
 )
 MAX_HISTORY = 6
-
-# ── Image detection — checks BEFORE sending to AI ─────────────────────────────
-IMAGE_KEYWORDS = [
-    "generate image", "generate an image", "generate a image",
-    "create image", "create an image", "create a image",
-    "make image", "make an image", "make a image",
-    "draw", "draw me", "draw a", "draw an",
-    "illustrate", "paint a", "paint an",
-    "show me a picture", "show me an image", "show me a image",
-    "image of", "picture of", "photo of",
-    "generate a photo", "create a photo", "make a photo",
-    "generate a picture", "create a picture", "make a picture",
-]
-
-def is_image_request(text: str) -> bool:
-    t = text.lower().strip()
-    return any(kw in t for kw in IMAGE_KEYWORDS)
-
-def extract_image_prompt(user_text: str) -> str:
-    """Pull out just the visual subject from the user's message."""
-    t = user_text.lower()
-    # Sort longest first so we match the most specific phrase
-    for kw in sorted(IMAGE_KEYWORDS, key=len, reverse=True):
-        if kw in t:
-            idx = t.find(kw) + len(kw)
-            subject = user_text[idx:].strip().lstrip(":-– of")
-            return subject if subject else user_text
-    return user_text
-
-def generate_image(prompt: str):
-    """Download a real image from Pollinations.ai and return bytes."""
-    encoded = urllib.parse.quote(prompt)
-    seed = int(time.time())
-    url = (
-        f"https://image.pollinations.ai/prompt/{encoded}"
-        f"?width=1024&height=768&nologo=true&seed={seed}&model=flux"
-    )
-    try:
-        resp = requests.get(url, timeout=40)
-        if resp.status_code == 200 and resp.headers.get("Content-Type", "").startswith("image"):
-            return BytesIO(resp.content), url, None
-        return None, url, f"Server returned status {resp.status_code}"
-    except requests.exceptions.Timeout:
-        return None, url, "Request timed out. Try again."
-    except Exception as e:
-        return None, url, str(e)
 
 def get_trimmed_messages():
     return [
@@ -232,7 +183,6 @@ st.markdown("""
     <div class="stat-pill"><span class="dot dot-blue"></span> Live web search</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> Accurate answers</div>
     <div class="stat-pill"><span class="dot dot-green"></span> All topics</div>
-    <div class="stat-pill"><span class="dot dot-pink"></span> Real image generation</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -258,93 +208,46 @@ if not st.session_state.messages:
         <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
         <p style="font-size:.875rem;line-height:2">
-            🎨 <em>"Generate an image of a dragon"</em><br>
             🔍 <em>"Who won IPL 2023?"</em><br>
             💻 <em>"Write a Python web scraper"</em><br>
-            🌍 <em>"Latest AI news today"</em>
+            🌍 <em>"Latest AI news today"</em><br>
+            ✍️ <em>"Write an essay about climate change"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
 else:
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
-            if msg.get("type") == "image":
-                st.markdown(f"🎨 **Generated image of:** _{msg['img_prompt']}_")
-                if msg.get("img_bytes"):
-                    st.image(msg["img_bytes"], use_container_width=True)
-                else:
-                    st.warning("Image could not be loaded.")
-                st.markdown(
-                    "<p style='font-size:11px;color:#64748b;margin-top:.4rem'>"
-                    "🖼️ Real image · Pollinations.ai Flux model · Free & unlimited</p>",
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(msg["content"])
+            st.markdown(msg["content"])
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-if prompt := st.chat_input("Ask anything, or say 'generate an image of a dragon'…"):
+if prompt := st.chat_input("Ask me anything…"):
 
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # ══ Route: IMAGE ══════════════════════════════════════════════════════════
-    if is_image_request(prompt):
-        img_prompt = extract_image_prompt(prompt)
-        if not img_prompt or len(img_prompt) < 2:
-            img_prompt = prompt  # fallback: use full message
-
-        with st.chat_message("assistant"):
-            with st.spinner(f"🎨 Generating real image of '{img_prompt}'… (up to 20s)"):
-                img_bytes, img_url, error = generate_image(img_prompt)
-
-            if img_bytes:
-                st.markdown(f"🎨 **Generated image of:** _{img_prompt}_")
-                st.image(img_bytes, use_container_width=True)
-                st.markdown(
-                    "<p style='font-size:11px;color:#64748b;margin-top:.4rem'>"
-                    "🖼️ Real image · Pollinations.ai Flux model · Free & unlimited</p>",
-                    unsafe_allow_html=True
-                )
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "type": "image",
-                    "img_prompt": img_prompt,
-                    "img_url": img_url,
-                    "img_bytes": img_bytes,
-                    "content": f"[Image generated: {img_prompt}]"
-                })
-            else:
-                st.error(f"❌ Image generation failed: {error}\n\nTry again or rephrase your prompt.")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"Sorry, I couldn't generate the image. Error: {error}"
-                })
-
-    # ══ Route: CHAT (web-search powered) ═════════════════════════════════════
-    else:
-        with st.chat_message("assistant"):
-            for attempt in range(3):
-                try:
-                    msg = "Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
-                    with st.spinner(msg):
-                        if attempt > 0:
-                            time.sleep(60)
-                        completion = client.chat.completions.create(
-                            messages=[
-                                {"role": "system", "content": SYSTEM_PROMPT},
-                                *get_trimmed_messages()
-                            ],
-                            model=MODEL,
-                            max_tokens=1024,
-                        )
-                    response = completion.choices[0].message.content
-                    st.markdown(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                    break
-                except Exception as e:
-                    if "rate_limit_exceeded" in str(e) and attempt < 2:
-                        continue
-                    else:
-                        st.error(f"❌ Failed after 3 attempts: {e}")
+    with st.chat_message("assistant"):
+        for attempt in range(3):
+            try:
+                msg = "Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
+                with st.spinner(msg):
+                    if attempt > 0:
+                        time.sleep(60)
+                    completion = client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            *get_trimmed_messages()
+                        ],
+                        model=MODEL,
+                        max_tokens=1024,
+                    )
+                response = completion.choices[0].message.content
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                break
+            except Exception as e:
+                if "rate_limit_exceeded" in str(e) and attempt < 2:
+                    continue
+                else:
+                    st.error(f"❌ Failed after 3 attempts: {e}")
