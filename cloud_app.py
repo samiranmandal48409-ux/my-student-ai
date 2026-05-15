@@ -150,6 +150,35 @@ code:not(pre code) {
     border-radius: 6px; padding: 3px 10px;
     font-size: 11px; color: var(--green); margin-bottom: .5rem;
 }
+.code-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.3);
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 11px; color: #a78bfa; margin-bottom: .5rem;
+}
+.output-box {
+    background: #0d1117; border: 1px solid var(--border);
+    border-left: 3px solid var(--green); border-radius: 10px;
+    padding: .8rem 1.2rem; font-family: 'Space Mono', monospace;
+    font-size: 13px; color: #a3e635; margin-top: .5rem; white-space: pre-wrap;
+}
+.error-box {
+    background: #1a0a0a; border: 1px solid #7f1d1d;
+    border-left: 3px solid #ef4444; border-radius: 10px;
+    padding: .8rem 1.2rem; font-family: 'Space Mono', monospace;
+    font-size: 13px; color: #fca5a5; margin-top: .5rem; white-space: pre-wrap;
+}
+.preview-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.25);
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 11px; color: var(--accent); margin-bottom: .5rem;
+}
+.preview-frame {
+    width: 100%; border: 1px solid var(--border);
+    border-radius: 12px; margin-top: .5rem;
+    background: #fff; overflow: hidden;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -570,44 +599,197 @@ def is_weather_query(query: str) -> bool:
 
 def needs_search(query: str) -> bool:
     q = query.lower()
-    # Never search for identity questions about Nova AI itself
     identity_keywords = ["who made you", "who created you", "who built you", "who are you", "your creator", "your developer"]
     if any(k in q for k in identity_keywords):
         return False
     return any(trigger in q for trigger in SEARCH_TRIGGERS)
 
 
+# ── Piston API: free, unlimited, 50+ languages code runner ───────────────────
+LANGUAGE_MAP = {
+    "python": ("python", "3.10.0"),
+    "javascript": ("javascript", "18.15.0"), "js": ("javascript", "18.15.0"),
+    "typescript": ("typescript", "5.0.3"),   "ts": ("typescript", "5.0.3"),
+    "java": ("java", "15.0.2"),
+    "c++": ("c++", "10.2.0"),               "cpp": ("c++", "10.2.0"),
+    "c": ("c", "10.2.0"),
+    "rust": ("rust", "1.68.2"),
+    "go": ("go", "1.16.2"),
+    "ruby": ("ruby", "3.0.1"),
+    "php": ("php", "8.2.3"),
+    "swift": ("swift", "5.3.3"),
+    "kotlin": ("kotlin", "1.8.20"),
+    "r": ("r", "4.1.1"),
+    "bash": ("bash", "5.2.0"),              "shell": ("bash", "5.2.0"),
+    "sql": ("sqlite3", "3.36.0"),
+    "lua": ("lua", "5.4.4"),
+    "perl": ("perl", "5.36.0"),
+    "scala": ("scala", "3.2.2"),
+}
+
+def run_code(code: str, language: str) -> str:
+    """Run code using Piston API — free, unlimited, no API key."""
+    try:
+        lang, version = LANGUAGE_MAP.get(language.lower(), ("python", "3.10.0"))
+        payload = {
+            "language": lang,
+            "version": version,
+            "files": [{"name": f"main.{language[:2]}", "content": code}],
+            "stdin": "", "args": [], "compile_timeout": 10000, "run_timeout": 5000,
+        }
+        resp = requests.post(
+            "https://emkc.org/api/v2/piston/execute",
+            json=payload, timeout=15
+        )
+        result = resp.json()
+        run = result.get("run", {})
+        output  = run.get("stdout", "").strip()
+        stderr  = run.get("stderr", "").strip()
+        compile_out = result.get("compile", {}).get("stderr", "").strip()
+
+        if compile_out:
+            return f"❌ Compile Error:\n{compile_out}"
+        if stderr:
+            return f"❌ Error:\n{stderr}"
+        return output or "✅ Code ran successfully (no output)"
+    except Exception as e:
+        return f"❌ Runner failed: {e}"
+
+
+def extract_code_and_language(text: str):
+    """Extract code blocks and language from markdown response."""
+    import re
+    pattern = r"```(\w+)?\n([\s\S]*?)```"
+    matches = re.findall(pattern, text)
+    if matches:
+        lang, code = matches[0]
+        return code.strip(), (lang.lower() if lang else "python")
+    return None, None
+
+
+def is_code_query(query: str) -> bool:
+    """Detect if user wants code written."""
+    import re
+    q = query.lower()
+    if is_stock_query(query) or is_weather_query(query):
+        return False
+    code_triggers = [
+        "write", "code", "program", "script", "function", "implement",
+        "create", "build", "develop", "make", "generate", "algorithm",
+        "sort", "search", "fibonacci", "factorial", "prime", "reverse",
+        "palindrome", "linked list", "binary tree", "api", "flask",
+        "django", "react", "html", "css", "sql query", "regex",
+        "class", "oop", "recursion", "dynamic programming", "leetcode",
+        "debug", "fix", "error in", "bug", "solve", "calculator",
+        "game", "snake game", "todo", "login", "crud", "rest api",
+    ]
+    return any(t in q for t in code_triggers)
+
+
+def is_app_query(query: str) -> bool:
+    """Detect if user wants a full app, UI, website, or software."""
+    q = query.lower()
+    app_triggers = [
+        "app", "application", "website", "web app", "software", "ui", "design",
+        "landing page", "dashboard", "portfolio", "login page", "signup",
+        "admin panel", "e-commerce", "shop", "store", "blog", "chat app",
+        "todo app", "weather app", "calculator app", "quiz app", "game",
+        "snake game", "tic tac toe", "2048", "music player", "timer",
+        "stopwatch", "clock", "form", "registration", "survey",
+        "expense tracker", "budget", "note app", "kanban", "trello",
+        "netflix clone", "youtube clone", "twitter clone", "instagram",
+        "whatsapp ui", "mobile app ui", "responsive", "animated",
+    ]
+    return any(t in q for t in app_triggers)
+
+
+def extract_all_code_blocks(text: str):
+    """Extract ALL code blocks from response."""
+    import re
+    pattern = r"```(\w+)?\n([\s\S]*?)```"
+    matches = re.findall(pattern, text)
+    return [(lang.lower() if lang else "text", code.strip()) for lang, code in matches]
+
+
+def build_html_app(code_blocks: list) -> str:
+    """Merge html/css/js blocks into one complete HTML file."""
+    html_part, css_part, js_part = "", "", ""
+    full_html = ""
+    for lang, code in code_blocks:
+        if lang in ("html",):
+            if "<!doctype" in code.lower() or "<html" in code.lower():
+                full_html = code   # already complete
+            else:
+                html_part = code
+        elif lang == "css":
+            css_part = code
+        elif lang in ("javascript", "js"):
+            js_part = code
+
+    if full_html:
+        return full_html
+    if html_part or css_part or js_part:
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova AI App</title>
+<style>{css_part}</style>
+</head>
+<body>
+{html_part}
+<script>{js_part}</script>
+</body>
+</html>"""
+    return ""
+
+
 # ── Build prompt ──────────────────────────────────────────────────────────────
 def build_messages(user_query: str, search_results: str = "", is_weather: bool = False):
     system = (
-        "You are Nova AI — a smart, accurate, and friendly AI assistant. "
-        "You were created by Samiran. "
-        "If anyone asks who made you, who created you, who built you, or who you are, "
-        "always say: 'I am Nova AI, created by Samiran.' "
-        "Never mention Meta, Llama, OpenAI, Groq, Anthropic, or any underlying model or company. "
+        "You are Nova AI — the world's best AI coding assistant and smart assistant, created by Samiran. "
+        "If anyone asks who made you, always say: 'I am Nova AI, created by Samiran.' "
+        "Never mention Meta, Llama, OpenAI, Groq, Anthropic, or any underlying model. "
+
+        # ── Coding excellence ──
+        "When writing code, you produce WORLD-CLASS, production-ready code. Follow these rules: "
+        "1. Always write complete, fully working code — never write partial or placeholder code. "
+        "2. Use best practices: clean variable names, proper error handling, comments, and structure. "
+        "3. For algorithms, use the most optimal time and space complexity. "
+        "4. Always specify the programming language in the code block (```python, ```javascript, etc). "
+        "5. After the code, briefly explain what it does and the time/space complexity if relevant. "
+        "6. If asked to fix code, explain exactly what was wrong and why. "
+        "7. Support ALL languages: Python, JavaScript, TypeScript, Java, C++, C, Rust, Go, Ruby, PHP, Swift, Kotlin, SQL, Bash, R, Lua, Scala, and more. "
+        "8. For web apps and UI design: write COMPLETE single-file HTML with embedded CSS and JS. "
+        "   Use beautiful modern design — gradients, animations, glassmorphism, dark themes. "
+        "   Make it fully functional and interactive. Include ALL features the user asked for. "
+        "   Use Google Fonts, Font Awesome icons via CDN. Make it mobile responsive. "
+        "9. For app requests: think like a senior UI/UX designer + developer. "
+        "   Create stunning, professional designs that look like real products. "
+        "10. Never truncate code — always write the full implementation. "
+
+        # ── General ──
         "Answer clearly and directly. Never hallucinate. "
-        "If weather data is provided, present it as the current weather report — do NOT say the data is wrong or unrelated. "
-        "If web search results are provided, use ONLY those to answer factual questions — do not guess. "
-        "Format code with markdown code blocks. Be concise."
+        "If web search results are provided, use ONLY those for factual questions. "
+        "Be concise but complete."
     )
     if search_results and is_weather:
         user_content = (
-            f"Here is the live weather data fetched for the user's query '{user_query}':\n\n"
-            f"{search_results}\n\n"
-            f"Present this weather information clearly and helpfully to the user."
+            f"Here is the live weather data fetched for '{user_query}':\n\n"
+            f"{search_results}\n\nPresent this weather information clearly."
         )
     elif search_results:
         user_content = (
-            f"Web search results for '{user_query}':\n"
-            f"{search_results}\n\n"
-            f"Based on the above search results, answer this question accurately: {user_query}"
+            f"Web search results for '{user_query}':\n{search_results}\n\n"
+            f"Based on the above, answer accurately: {user_query}"
         )
     else:
         user_content = user_query
 
     return [
         {"role": "system", "content": system},
-        {"role": "user",   "content": user_content[:2000]}
+        {"role": "user",   "content": user_content[:4000]}
     ]
 
 
@@ -623,11 +805,11 @@ st.markdown("""
     <p>Your personal AI assistant — accurate, fast, and always up to date.</p>
 </div>
 <div class="stats-row">
-    <div class="stat-pill"><span class="dot dot-blue"></span> Live web search</div>
-    <div class="stat-pill"><span class="dot dot-purple"></span> No hallucination</div>
-    <div class="stat-pill"><span class="dot dot-green"></span> All world sports</div>
-    <div class="stat-pill"><span class="dot dot-blue"></span> Latest news</div>
-    <div class="stat-pill"><span class="dot dot-green"></span> Live stock prices</div>
+    <div class="stat-pill"><span class="dot dot-purple"></span> World-class coding</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> Run code live</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span> 20+ languages</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> Stocks · Sports · News</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span> Live weather</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -653,10 +835,11 @@ if not st.session_state.messages:
         <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
         <p style="font-size:.875rem;line-height:2.2">
+            💻 <em>"Write a Python web scraper"</em><br>
+            🔧 <em>"Build a REST API in Flask"</em><br>
             🌤️ <em>"Weather in Guwahati, Assam"</em><br>
-            📈 <em>"Apple stock price"</em> · <em>"Reliance share price"</em><br>
-            💰 <em>"Bitcoin price today"</em> · <em>"Nifty index"</em><br>
-            ⚽ <em>"Latest Premier League scores"</em><br>
+            📈 <em>"Apple stock price"</em> · <em>"Bitcoin price"</em><br>
+            ⚽ <em>"Premier League scores"</em> · <em>"IPL result"</em><br>
             📰 <em>"Latest news about India"</em>
         </p>
     </div>
@@ -766,7 +949,7 @@ if prompt := st.chat_input("Ask me anything…"):
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # ── Web search → AI ───────────────────────────────────────────────────
+        # ── Web search → AI (with world-class coding) ────────────────────────
         else:
             if needs_search(prompt):
                 with st.spinner("🔍 Searching the web…"):
@@ -782,14 +965,54 @@ if prompt := st.chat_input("Ask me anything…"):
                         completion = client.chat.completions.create(
                             messages=build_messages(prompt, search_results),
                             model=MODEL,
-                            max_tokens=600,
-                            temperature=0.3,
+                            max_tokens=2048,   # more tokens for complete code
+                            temperature=0.2,   # lower = more precise code
                         )
                     response = completion.choices[0].message.content
 
                     if searched:
                         st.markdown('<div class="search-badge">🔍 Searched the web</div>', unsafe_allow_html=True)
+
+                    # Extract all code blocks
+                    code_blocks = extract_all_code_blocks(response)
+                    code, lang = extract_code_and_language(response)
+
+                    # Check if it's a web app (has html/css/js)
+                    langs_found = [l for l, _ in code_blocks]
+                    is_web_app  = any(l in ("html", "css", "javascript", "js") for l in langs_found)
+
+                    if code:
+                        if is_web_app:
+                            st.markdown('<div class="preview-badge">🖥️ Live app preview · Scroll down to see it running</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div class="code-badge">💻 Code ready · Click ▶ Run to execute</div>', unsafe_allow_html=True)
+
                     st.markdown(response)
+
+                    # ── Live HTML preview for web apps ────────────────────────
+                    if is_web_app:
+                        html_src = build_html_app(code_blocks)
+                        if html_src:
+                            st.markdown("---")
+                            st.markdown("### 🖥️ Live Preview")
+                            st.components.v1.html(html_src, height=520, scrolling=True)
+
+                            # Download button
+                            import base64
+                            b64 = base64.b64encode(html_src.encode()).decode()
+                            dl_link = f'<a href="data:text/html;base64,{b64}" download="nova_app.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:#00e5ff;padding:6px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-family:DM Sans,sans-serif;margin-top:.5rem">⬇️ Download App</a>'
+                            st.markdown(dl_link, unsafe_allow_html=True)
+
+                    # ── Run button for non-web code ───────────────────────────
+                    elif code and lang and lang not in ("html", "css"):
+                        run_key = f"run_{len(st.session_state.messages)}"
+                        if st.button(f"▶ Run {lang.title()} Code", key=run_key):
+                            with st.spinner(f"⚙️ Running {lang} code…"):
+                                output = run_code(code, lang)
+                            if "❌" in output:
+                                st.markdown(f'<div class="error-box">{output}</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown(f'<div class="output-box">✅ Output:\n\n{output}</div>', unsafe_allow_html=True)
 
                     st.session_state.messages.append({
                         "role": "assistant",
