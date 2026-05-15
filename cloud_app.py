@@ -1,6 +1,7 @@
 import streamlit as st
 from groq import Groq
 import time
+import urllib.parse
 
 st.set_page_config(
     page_title="Nova AI",
@@ -14,7 +15,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-/* ── Root variables ── */
 :root {
     --bg:        #0a0c10;
     --surface:   #111318;
@@ -25,12 +25,10 @@ st.markdown("""
     --text:      #e2e8f0;
     --muted:     #64748b;
     --user-bg:   #131b2e;
-    --ai-bg:     #111318;
     --green:     #10b981;
     --radius:    14px;
 }
 
-/* ── Global reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, [data-testid="stAppViewContainer"] {
@@ -39,26 +37,22 @@ html, body, [data-testid="stAppViewContainer"] {
     font-family: 'DM Sans', sans-serif !important;
 }
 
-/* Hide default Streamlit chrome */
 [data-testid="stHeader"],
 [data-testid="stToolbar"],
 .stDeployButton,
 #MainMenu,
 footer { display: none !important; }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-/* ── Main container ── */
 [data-testid="stAppViewContainer"] > .main > .block-container {
     max-width: 860px !important;
     padding: 0 1.5rem 6rem !important;
     margin: 0 auto !important;
 }
 
-/* ── Hero header ── */
 .hero {
     text-align: center;
     padding: 3rem 1rem 2rem;
@@ -108,34 +102,21 @@ footer { display: none !important; }
     margin: 0 auto;
 }
 
-/* ── Divider ── */
 .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--border), transparent);
     margin: 1.5rem 0;
 }
 
-/* ── Chat messages ── */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
     margin-bottom: .5rem !important;
 }
-[data-testid="stChatMessage"] > div {
-    background: transparent !important;
-}
+[data-testid="stChatMessage"] > div { background: transparent !important; }
+[data-testid="stChatMessageContent"] { background: transparent !important; }
 
-/* User bubble */
-[data-testid="stChatMessage"][data-testid*="user"],
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
-    background: var(--user-bg) !important;
-}
-
-/* Message wrappers */
-[data-testid="stChatMessageContent"] {
-    background: transparent !important;
-}
 .stChatMessage {
     border-radius: var(--radius) !important;
     padding: 1rem 1.2rem !important;
@@ -148,18 +129,12 @@ footer { display: none !important; }
     from { opacity:0; transform:translateY(8px); }
     to   { opacity:1; transform:translateY(0); }
 }
-
-/* User message accent */
 .stChatMessage:has([data-testid="chatAvatarIcon-user"]) {
     background: var(--user-bg) !important;
     border-color: rgba(0,229,255,.15) !important;
 }
 
-/* ── Code blocks ── */
-pre, code {
-    font-family: 'Space Mono', monospace !important;
-    font-size: 13px !important;
-}
+pre, code { font-family: 'Space Mono', monospace !important; font-size: 13px !important; }
 pre {
     background: #0d1117 !important;
     border: 1px solid var(--border) !important;
@@ -176,7 +151,6 @@ code:not(pre code) {
     font-size: 12.5px !important;
 }
 
-/* ── Chat input ── */
 [data-testid="stChatInputContainer"] {
     position: fixed !important;
     bottom: 0 !important;
@@ -197,7 +171,6 @@ code:not(pre code) {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 15px !important;
     padding: .8rem 1rem !important;
-    box-shadow: 0 0 0 0 transparent;
     transition: border-color .2s, box-shadow .2s;
 }
 [data-testid="stChatInput"]:focus {
@@ -212,11 +185,8 @@ code:not(pre code) {
     color: #000 !important;
     font-weight: 600 !important;
 }
-[data-testid="stChatInputSubmitButton"] button:hover {
-    background: #33ecff !important;
-}
+[data-testid="stChatInputSubmitButton"] button:hover { background: #33ecff !important; }
 
-/* ── Buttons ── */
 .stButton > button {
     background: var(--surface2) !important;
     border: 1px solid var(--border) !important;
@@ -227,7 +197,6 @@ code:not(pre code) {
     font-weight: 500 !important;
     padding: .4rem 1rem !important;
     transition: all .2s !important;
-    letter-spacing: .01em;
 }
 .stButton > button:hover {
     border-color: var(--accent) !important;
@@ -235,17 +204,12 @@ code:not(pre code) {
     background: rgba(0,229,255,.06) !important;
 }
 
-/* ── Spinner ── */
-[data-testid="stSpinner"] {
-    color: var(--accent) !important;
-}
-
-/* ── Stats row ── */
 .stats-row {
     display: flex;
     gap: 1rem;
     margin: 1.2rem 0 1.8rem;
     justify-content: center;
+    flex-wrap: wrap;
 }
 .stat-pill {
     display: flex;
@@ -259,13 +223,14 @@ code:not(pre code) {
     color: var(--muted);
 }
 .stat-pill .dot { width:7px; height:7px; border-radius:50%; }
-.dot-green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot-green  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
 .dot-blue   { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-.dot-purple { background: #7c3aed; box-shadow: 0 0 6px #7c3aed; }
+.dot-purple { background: #7c3aed;       box-shadow: 0 0 6px #7c3aed; }
+.dot-pink   { background: #ec4899;       box-shadow: 0 0 6px #ec4899; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Groq client ─────────────────────────────────────────────────────────────
+# ── Groq client ──────────────────────────────────────────────────────────────
 client = Groq(api_key="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")
 
 SYSTEM_PROMPT = (
@@ -276,31 +241,57 @@ SYSTEM_PROMPT = (
 )
 MAX_HISTORY = 4
 
+# ── Image detection helpers ───────────────────────────────────────────────────
+IMAGE_TRIGGERS = [
+    "generate image", "generate an image", "create image", "create an image",
+    "make image", "make an image", "draw", "illustrate", "paint",
+    "show me a picture", "show me an image", "image of", "picture of",
+    "generate a photo", "create a photo", "make a photo", "photo of",
+]
+
+def is_image_request(text: str) -> bool:
+    t = text.lower()
+    return any(trigger in t for trigger in IMAGE_TRIGGERS)
+
+def extract_image_prompt(text: str) -> str:
+    t = text.lower()
+    for trigger in sorted(IMAGE_TRIGGERS, key=len, reverse=True):
+        if trigger in t:
+            idx = t.find(trigger) + len(trigger)
+            remainder = text[idx:].strip().lstrip(":-– ")
+            return remainder if remainder else text
+    return text
+
+def build_image_url(prompt: str) -> str:
+    encoded = urllib.parse.quote(prompt)
+    return f"https://image.pollinations.ai/prompt/{encoded}?width=800&height=600&nologo=true"
+
 def get_trimmed_messages():
     return st.session_state.messages[-MAX_HISTORY:]
 
-# ── Session state ────────────────────────────────────────────────────────────
+# ── Session state ─────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ── Hero Header ──────────────────────────────────────────────────────────────
+# ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
     <div class="hero-badge">LIVE &nbsp;·&nbsp; FREE TO USE</div>
     <h1>Nova<span> AI</span></h1>
-    <p>Your personal AI assistant — ask anything, get answers instantly.</p>
+    <p>Your personal AI assistant — chat, create, imagine, build.</p>
 </div>
 
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-blue"></span> Instant responses</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> Auto-retry on limits</div>
     <div class="stat-pill"><span class="dot dot-green"></span> All topics</div>
+    <div class="stat-pill"><span class="dot dot-pink"></span> Image generation</div>
 </div>
 
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
-# ── Toolbar ──────────────────────────────────────────────────────────────────
+# ── Toolbar ───────────────────────────────────────────────────────────────────
 col1, col2, col3 = st.columns([5, 1, 1])
 with col2:
     msg_count = len(st.session_state.messages)
@@ -314,7 +305,7 @@ with col3:
         st.session_state.messages = []
         st.rerun()
 
-# ── Chat history ─────────────────────────────────────────────────────────────
+# ── Chat history ──────────────────────────────────────────────────────────────
 if not st.session_state.messages:
     st.markdown("""
     <div style="text-align:center;padding:3rem 1rem;color:var(--muted);">
@@ -323,42 +314,84 @@ if not st.session_state.messages:
             How can I help you today?
         </p>
         <p style="font-size:.875rem">
-            Try: <em>"Write a poem about the ocean"</em> · <em>"Explain quantum physics simply"</em> · <em>"Build a Python web scraper"</em>
+            Try: <em>"Generate an image of a dragon"</em> &nbsp;·&nbsp;
+            <em>"Write a Python web scraper"</em> &nbsp;·&nbsp;
+            <em>"Explain black holes simply"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
 else:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+            if message.get("type") == "image":
+                st.markdown(f"🎨 **Generated:** _{message['img_prompt']}_")
+                st.image(message["img_url"], use_container_width=True)
+                st.markdown(
+                    "<p style='font-size:11px;color:#64748b;margin-top:.3rem'>"
+                    "Powered by Pollinations.ai · Free & unlimited</p>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(message["content"])
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-if prompt := st.chat_input("Ask me anything — code, write, explain, create…"):
+if prompt := st.chat_input("Ask anything, or say 'generate an image of…'"):
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        for attempt in range(3):
-            try:
-                spinner_msg = "Thinking…" if attempt == 0 else f"Rate limited — retrying in 60s ⏳"
-                with st.spinner(spinner_msg):
-                    if attempt > 0:
-                        time.sleep(60)
-                    chat_completion = client.chat.completions.create(
-                        messages=[
-                            {"role": "system", "content": SYSTEM_PROMPT},
-                            *get_trimmed_messages()
-                        ],
-                        model="llama-3.1-8b-instant",
-                        max_tokens=512,
-                    )
-                    response = chat_completion.choices[0].message.content
-                    st.markdown(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                    break
-            except Exception as e:
-                if "rate_limit_exceeded" in str(e) and attempt < 2:
-                    continue
-                else:
-                    st.error(f"❌ Failed after 3 attempts: {e}")
+    # ── Image path ────────────────────────────────────────────────────────
+    if is_image_request(prompt):
+        img_prompt = extract_image_prompt(prompt)
+        img_url = build_image_url(img_prompt)
+
+        with st.chat_message("assistant"):
+            with st.spinner("🎨 Generating your image…"):
+                time.sleep(1)  # small pause so spinner shows
+            st.markdown(f"🎨 **Generated:** _{img_prompt}_")
+            st.image(img_url, use_container_width=True)
+            st.markdown(
+                "<p style='font-size:11px;color:#64748b;margin-top:.3rem'>"
+                "Powered by Pollinations.ai · Free & unlimited</p>",
+                unsafe_allow_html=True
+            )
+
+        st.session_state.messages.append({
+            "role": "assistant",
+            "type": "image",
+            "img_prompt": img_prompt,
+            "img_url": img_url,
+            "content": f"[Image generated: {img_prompt}]"
+        })
+
+    # ── Text / chat path ──────────────────────────────────────────────────
+    else:
+        with st.chat_message("assistant"):
+            for attempt in range(3):
+                try:
+                    spinner_msg = "Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
+                    with st.spinner(spinner_msg):
+                        if attempt > 0:
+                            time.sleep(60)
+                        chat_completion = client.chat.completions.create(
+                            messages=[
+                                {"role": "system", "content": SYSTEM_PROMPT},
+                                *[{"role": m["role"], "content": m["content"]}
+                                  for m in get_trimmed_messages()]
+                            ],
+                            model="llama-3.1-8b-instant",
+                            max_tokens=1024,
+                        )
+                        response = chat_completion.choices[0].message.content
+                        st.markdown(response)
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": response
+                        })
+                        break
+                except Exception as e:
+                    if "rate_limit_exceeded" in str(e) and attempt < 2:
+                        continue
+                    else:
+                        st.error(f"❌ Failed after 3 attempts: {e}")
