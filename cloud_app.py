@@ -51,15 +51,11 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 auto !important;
 }
 
-/* Hero */
 .hero {
-    text-align: center;
-    padding: 3rem 1rem 2rem;
-    position: relative;
+    text-align: center; padding: 3rem 1rem 2rem; position: relative;
 }
 .hero::before {
-    content: '';
-    position: absolute; top: 0; left: 50%;
+    content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%);
     width: 600px; height: 300px;
     background: radial-gradient(ellipse at center, rgba(0,229,255,.07) 0%, transparent 70%);
@@ -67,54 +63,40 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 .hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(0,229,255,.08);
-    border: 1px solid rgba(0,229,255,.2);
+    background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2);
     border-radius: 999px; padding: 4px 14px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px; color: var(--accent);
-    letter-spacing: .05em; margin-bottom: 1.2rem;
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    color: var(--accent); letter-spacing: .05em; margin-bottom: 1.2rem;
 }
 .hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
 .hero h1 {
     font-family: 'Space Mono', monospace !important;
-    font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
-    font-weight: 700 !important; color: #fff !important;
-    line-height: 1.15 !important; letter-spacing: -.02em;
-    margin-bottom: .6rem !important;
+    font-size: clamp(1.8rem, 4vw, 2.8rem) !important; font-weight: 700 !important;
+    color: #fff !important; line-height: 1.15 !important;
+    letter-spacing: -.02em; margin-bottom: .6rem !important;
 }
 .hero h1 span { color: var(--accent); }
 .hero p { font-size: 1rem; color: var(--muted); font-weight: 300; max-width: 440px; margin: 0 auto; }
-
 .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 1.5rem 0; }
 
-/* Chat */
 [data-testid="stChatMessage"] { background: transparent !important; border: none !important; padding: 0 !important; }
 [data-testid="stChatMessage"] > div { background: transparent !important; }
 [data-testid="stChatMessageContent"] { background: transparent !important; }
-
 .stChatMessage {
-    border-radius: var(--radius) !important;
-    padding: 1rem 1.2rem !important;
-    border: 1px solid var(--border) !important;
-    margin-bottom: .75rem !important;
-    background: var(--surface) !important;
-    animation: fadeUp .25s ease;
+    border-radius: var(--radius) !important; padding: 1rem 1.2rem !important;
+    border: 1px solid var(--border) !important; margin-bottom: .75rem !important;
+    background: var(--surface) !important; animation: fadeUp .25s ease;
 }
 @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 .stChatMessage:has([data-testid="chatAvatarIcon-user"]) {
-    background: var(--user-bg) !important;
-    border-color: rgba(0,229,255,.15) !important;
+    background: var(--user-bg) !important; border-color: rgba(0,229,255,.15) !important;
 }
 
-/* Code */
 pre, code { font-family: 'Space Mono', monospace !important; font-size: 13px !important; }
 pre {
-    background: #0d1117 !important;
-    border: 1px solid var(--border) !important;
-    border-left: 3px solid var(--accent) !important;
-    border-radius: 10px !important;
+    background: #0d1117 !important; border: 1px solid var(--border) !important;
+    border-left: 3px solid var(--accent) !important; border-radius: 10px !important;
     padding: 1rem 1.2rem !important; overflow-x: auto !important;
 }
 code:not(pre code) {
@@ -122,11 +104,9 @@ code:not(pre code) {
     border-radius: 5px !important; padding: 2px 6px !important; font-size: 12.5px !important;
 }
 
-/* Input */
 [data-testid="stChatInputContainer"] {
-    position: fixed !important; bottom: 0 !important;
-    left: 50% !important; transform: translateX(-50%) !important;
-    width: 100% !important; max-width: 860px !important;
+    position: fixed !important; bottom: 0 !important; left: 50% !important;
+    transform: translateX(-50%) !important; width: 100% !important; max-width: 860px !important;
     padding: 1rem 1.5rem 1.5rem !important;
     background: linear-gradient(to top, var(--bg) 70%, transparent) !important;
     backdrop-filter: blur(10px); z-index: 999 !important;
@@ -146,7 +126,6 @@ code:not(pre code) {
     border-radius: 8px !important; color: #000 !important; font-weight: 600 !important;
 }
 [data-testid="stChatInputSubmitButton"] button:hover { background: #33ecff !important; }
-
 .stButton > button {
     background: var(--surface2) !important; border: 1px solid var(--border) !important;
     color: var(--muted) !important; border-radius: 8px !important;
@@ -158,7 +137,6 @@ code:not(pre code) {
     background: rgba(0,229,255,.06) !important;
 }
 
-/* Stats */
 .stats-row { display: flex; gap: 1rem; margin: 1.2rem 0 1.8rem; justify-content: center; flex-wrap: wrap; }
 .stat-pill {
     display: flex; align-items: center; gap: 7px;
@@ -173,56 +151,71 @@ code:not(pre code) {
 </style>
 """, unsafe_allow_html=True)
 
-# ── Groq client ───────────────────────────────────────────────────────────────
+# ── Clients ───────────────────────────────────────────────────────────────────
 client = Groq(api_key="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")
-
-# compound-beta = Llama 3.3 70B + live web search built-in
 MODEL = "compound-beta"
 
 SYSTEM_PROMPT = (
     "You are Nova AI — a smart, accurate, and friendly AI assistant with access to the internet. "
     "Always search the web for recent events, sports results, news, and current information. "
-    "You can help with anything: coding, writing, math, science, general knowledge, creative tasks, "
-    "answering questions, giving advice, summarizing, translating, brainstorming, and more. "
-    "Be clear, concise, and thorough. Format code with proper markdown code blocks when needed."
+    "IMPORTANT: You can NOT generate images. If the user asks for an image, just say the image is being generated separately. "
+    "Help with anything: coding, writing, math, science, general knowledge, creative tasks, advice, and more. "
+    "Be clear and thorough. Format code with proper markdown code blocks."
 )
 MAX_HISTORY = 6
 
-# ── Image helpers ─────────────────────────────────────────────────────────────
-IMAGE_TRIGGERS = [
-    "generate image", "generate an image", "create image", "create an image",
-    "make image", "make an image", "draw", "illustrate", "paint",
-    "show me a picture", "show me an image", "image of", "picture of",
-    "generate a photo", "create a photo", "make a photo", "photo of",
+# ── Image detection — checks BEFORE sending to AI ─────────────────────────────
+IMAGE_KEYWORDS = [
+    "generate image", "generate an image", "generate a image",
+    "create image", "create an image", "create a image",
+    "make image", "make an image", "make a image",
+    "draw", "draw me", "draw a", "draw an",
+    "illustrate", "paint a", "paint an",
+    "show me a picture", "show me an image", "show me a image",
+    "image of", "picture of", "photo of",
+    "generate a photo", "create a photo", "make a photo",
+    "generate a picture", "create a picture", "make a picture",
 ]
 
 def is_image_request(text: str) -> bool:
-    t = text.lower()
-    return any(trigger in t for trigger in IMAGE_TRIGGERS)
+    t = text.lower().strip()
+    return any(kw in t for kw in IMAGE_KEYWORDS)
 
-def extract_image_prompt(text: str) -> str:
-    t = text.lower()
-    for trigger in sorted(IMAGE_TRIGGERS, key=len, reverse=True):
-        if trigger in t:
-            idx = t.find(trigger) + len(trigger)
-            remainder = text[idx:].strip().lstrip(":-– ")
-            return remainder if remainder else text
-    return text
+def extract_image_prompt(user_text: str) -> str:
+    """Pull out just the visual subject from the user's message."""
+    t = user_text.lower()
+    # Sort longest first so we match the most specific phrase
+    for kw in sorted(IMAGE_KEYWORDS, key=len, reverse=True):
+        if kw in t:
+            idx = t.find(kw) + len(kw)
+            subject = user_text[idx:].strip().lstrip(":-– of")
+            return subject if subject else user_text
+    return user_text
 
-def fetch_image_bytes(prompt: str):
-    """Download image from Pollinations and return bytes — avoids Streamlit URL blocking."""
+def generate_image(prompt: str):
+    """Download a real image from Pollinations.ai and return bytes."""
     encoded = urllib.parse.quote(prompt)
-    url = f"https://image.pollinations.ai/prompt/{encoded}?width=1024&height=768&nologo=true&seed={int(time.time())}"
+    seed = int(time.time())
+    url = (
+        f"https://image.pollinations.ai/prompt/{encoded}"
+        f"?width=1024&height=768&nologo=true&seed={seed}&model=flux"
+    )
     try:
-        resp = requests.get(url, timeout=30)
-        if resp.status_code == 200 and "image" in resp.headers.get("Content-Type", ""):
-            return BytesIO(resp.content), url
-        return None, url
-    except Exception:
-        return None, url
+        resp = requests.get(url, timeout=40)
+        if resp.status_code == 200 and resp.headers.get("Content-Type", "").startswith("image"):
+            return BytesIO(resp.content), url, None
+        return None, url, f"Server returned status {resp.status_code}"
+    except requests.exceptions.Timeout:
+        return None, url, "Request timed out. Try again."
+    except Exception as e:
+        return None, url, str(e)
 
 def get_trimmed_messages():
-    return st.session_state.messages[-MAX_HISTORY:]
+    return [
+        {"role": m["role"], "content": m["content"]}
+        for m in st.session_state.messages[-MAX_HISTORY:]
+        if m.get("content")
+    ]
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
@@ -235,24 +228,22 @@ st.markdown("""
     <h1>Nova<span> AI</span></h1>
     <p>Your personal AI assistant — chat, create, imagine, build.</p>
 </div>
-
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-blue"></span> Live web search</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> Accurate answers</div>
     <div class="stat-pill"><span class="dot dot-green"></span> All topics</div>
-    <div class="stat-pill"><span class="dot dot-pink"></span> Image generation</div>
+    <div class="stat-pill"><span class="dot dot-pink"></span> Real image generation</div>
 </div>
-
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
 # ── Toolbar ───────────────────────────────────────────────────────────────────
 col1, col2, col3 = st.columns([5, 1, 1])
 with col2:
-    msg_count = len(st.session_state.messages)
+    count = len([m for m in st.session_state.messages if m["role"] == "user"])
     st.markdown(
         f"<p style='text-align:right;color:var(--muted);font-size:12.5px;padding-top:.5rem'>"
-        f"{msg_count // 2} turn{'s' if msg_count // 2 != 1 else ''}</p>",
+        f"{count} message{'s' if count != 1 else ''}</p>",
         unsafe_allow_html=True
     )
 with col3:
@@ -260,102 +251,98 @@ with col3:
         st.session_state.messages = []
         st.rerun()
 
-# ── Chat history ──────────────────────────────────────────────────────────────
+# ── Render chat history ───────────────────────────────────────────────────────
 if not st.session_state.messages:
     st.markdown("""
     <div style="text-align:center;padding:3rem 1rem;color:var(--muted);">
         <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
-        <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">
-            How can I help you today?
-        </p>
-        <p style="font-size:.875rem;line-height:1.9">
-            🔍 <em>"Who won IPL 2023?"</em> &nbsp;·&nbsp;
+        <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
+        <p style="font-size:.875rem;line-height:2">
             🎨 <em>"Generate an image of a dragon"</em><br>
-            💻 <em>"Write a Python web scraper"</em> &nbsp;·&nbsp;
-            🌍 <em>"Latest news today"</em>
+            🔍 <em>"Who won IPL 2023?"</em><br>
+            💻 <em>"Write a Python web scraper"</em><br>
+            🌍 <em>"Latest AI news today"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
 else:
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            if message.get("type") == "image":
-                st.markdown(f"🎨 **Generated:** _{message['img_prompt']}_")
-                if message.get("img_bytes"):
-                    st.image(message["img_bytes"], use_container_width=True)
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            if msg.get("type") == "image":
+                st.markdown(f"🎨 **Generated image of:** _{msg['img_prompt']}_")
+                if msg.get("img_bytes"):
+                    st.image(msg["img_bytes"], use_container_width=True)
                 else:
-                    st.image(message["img_url"], use_container_width=True)
+                    st.warning("Image could not be loaded.")
                 st.markdown(
                     "<p style='font-size:11px;color:#64748b;margin-top:.4rem'>"
-                    "🖼️ Powered by Pollinations.ai · Free & unlimited</p>",
+                    "🖼️ Real image · Pollinations.ai Flux model · Free & unlimited</p>",
                     unsafe_allow_html=True
                 )
             else:
-                st.markdown(message["content"])
+                st.markdown(msg["content"])
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-if prompt := st.chat_input("Ask anything, or say 'generate an image of…'"):
+if prompt := st.chat_input("Ask anything, or say 'generate an image of a dragon'…"):
 
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # ── Image path ─────────────────────────────────────────────────────────
+    # ══ Route: IMAGE ══════════════════════════════════════════════════════════
     if is_image_request(prompt):
         img_prompt = extract_image_prompt(prompt)
+        if not img_prompt or len(img_prompt) < 2:
+            img_prompt = prompt  # fallback: use full message
 
         with st.chat_message("assistant"):
-            with st.spinner("🎨 Generating your image…"):
-                img_bytes, img_url = fetch_image_bytes(img_prompt)
+            with st.spinner(f"🎨 Generating real image of '{img_prompt}'… (up to 20s)"):
+                img_bytes, img_url, error = generate_image(img_prompt)
 
-            st.markdown(f"🎨 **Generated:** _{img_prompt}_")
             if img_bytes:
+                st.markdown(f"🎨 **Generated image of:** _{img_prompt}_")
                 st.image(img_bytes, use_container_width=True)
+                st.markdown(
+                    "<p style='font-size:11px;color:#64748b;margin-top:.4rem'>"
+                    "🖼️ Real image · Pollinations.ai Flux model · Free & unlimited</p>",
+                    unsafe_allow_html=True
+                )
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "type": "image",
+                    "img_prompt": img_prompt,
+                    "img_url": img_url,
+                    "img_bytes": img_bytes,
+                    "content": f"[Image generated: {img_prompt}]"
+                })
             else:
-                st.image(img_url, use_container_width=True)
-            st.markdown(
-                "<p style='font-size:11px;color:#64748b;margin-top:.4rem'>"
-                "🖼️ Powered by Pollinations.ai · Free & unlimited</p>",
-                unsafe_allow_html=True
-            )
+                st.error(f"❌ Image generation failed: {error}\n\nTry again or rephrase your prompt.")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"Sorry, I couldn't generate the image. Error: {error}"
+                })
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "type": "image",
-            "img_prompt": img_prompt,
-            "img_url": img_url,
-            "img_bytes": img_bytes,
-            "content": f"[Image generated: {img_prompt}]"
-        })
-
-    # ── Chat / web-search path ─────────────────────────────────────────────
+    # ══ Route: CHAT (web-search powered) ═════════════════════════════════════
     else:
         with st.chat_message("assistant"):
             for attempt in range(3):
                 try:
-                    spinner_msg = "Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
-                    with st.spinner(spinner_msg):
+                    msg = "Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
+                    with st.spinner(msg):
                         if attempt > 0:
                             time.sleep(60)
-
-                        chat_completion = client.chat.completions.create(
+                        completion = client.chat.completions.create(
                             messages=[
                                 {"role": "system", "content": SYSTEM_PROMPT},
-                                *[{"role": m["role"], "content": m["content"]}
-                                  for m in get_trimmed_messages()]
+                                *get_trimmed_messages()
                             ],
                             model=MODEL,
                             max_tokens=1024,
                         )
-
-                    response = chat_completion.choices[0].message.content
+                    response = completion.choices[0].message.content
                     st.markdown(response)
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": response
-                    })
+                    st.session_state.messages.append({"role": "assistant", "content": response})
                     break
-
                 except Exception as e:
                     if "rate_limit_exceeded" in str(e) and attempt < 2:
                         continue
