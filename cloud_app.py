@@ -386,48 +386,67 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
-        # Step 1: Handle weather queries with real API
+        # ── Weather: fetch & display directly, NO AI involved ────────────────
         if is_weather_query(prompt):
             with st.spinner("🌤️ Fetching live weather…"):
                 city = extract_city_from_query(prompt)
-                search_results = get_weather(city)
-                searched = True
+                weather_data = get_weather(city)
 
-        # Step 2: Search the web if needed (non-weather)
-        elif needs_search(prompt):
-            with st.spinner("🔍 Searching the web…"):
-                search_results = web_search(prompt)
-                searched = True
+            if "failed" in weather_data.lower() or "error" in weather_data.lower():
+                response = f"❌ Sorry, I couldn't fetch weather for **{city}**. Please try again."
+            else:
+                # Parse the weather string into a nice formatted response
+                lines = dict(line.split(": ", 1) for line in weather_data.strip().splitlines() if ": " in line)
+                response = (
+                    f'<div class="search-badge">🌤️ Live weather data</div>\n\n'
+                    f"### 🌍 Weather Report — {lines.get('City', city)}\n\n"
+                    f"| Detail | Value |\n"
+                    f"|--------|-------|\n"
+                    f"| 🌡️ Temperature | {lines.get('Temperature', 'N/A')} |\n"
+                    f"| 🌤️ Condition | {lines.get('Condition', 'N/A')} |\n"
+                    f"| 💧 Humidity | {lines.get('Humidity', 'N/A')} |\n"
+                    f"| 💨 Wind Speed | {lines.get('Wind Speed', 'N/A')} |\n"
+                    f"| 👁️ Visibility | {lines.get('Visibility', 'N/A')} |\n"
+                    f"| ☀️ UV Index | {lines.get('UV Index', 'N/A')} |\n"
+                )
 
-        # Step 2: Ask the AI (grounded with search results)
-        for attempt in range(3):
-            try:
-                spinner_msg = "✨ Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
-                with st.spinner(spinner_msg):
-                    if attempt > 0:
-                        time.sleep(60)
-                    completion = client.chat.completions.create(
-                        messages=build_messages(prompt, search_results, is_weather=is_weather_query(prompt)),
-                        model=MODEL,
-                        max_tokens=600,
-                        temperature=0.3,
-                    )
-                response = completion.choices[0].message.content
+            st.markdown(response, unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
-                if searched:
-                    badge_label = "🌤️ Live weather data" if is_weather_query(prompt) else "🔍 Searched the web"
-                    st.markdown(f'<div class="search-badge">{badge_label}</div>', unsafe_allow_html=True)
-                st.markdown(response)
+        # ── Web search → AI ───────────────────────────────────────────────────
+        else:
+            if needs_search(prompt):
+                with st.spinner("🔍 Searching the web…"):
+                    search_results = web_search(prompt)
+                    searched = True
 
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response,
-                    "searched": searched
-                })
-                break
+            for attempt in range(3):
+                try:
+                    spinner_msg = "✨ Thinking…" if attempt == 0 else "Rate limited — retrying in 60s ⏳"
+                    with st.spinner(spinner_msg):
+                        if attempt > 0:
+                            time.sleep(60)
+                        completion = client.chat.completions.create(
+                            messages=build_messages(prompt, search_results),
+                            model=MODEL,
+                            max_tokens=600,
+                            temperature=0.3,
+                        )
+                    response = completion.choices[0].message.content
 
-            except Exception as e:
-                if "rate_limit_exceeded" in str(e) and attempt < 2:
-                    continue
-                else:
-                    st.error(f"❌ Error: {e}")
+                    if searched:
+                        st.markdown('<div class="search-badge">🔍 Searched the web</div>', unsafe_allow_html=True)
+                    st.markdown(response)
+
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": response,
+                        "searched": searched
+                    })
+                    break
+
+                except Exception as e:
+                    if "rate_limit_exceeded" in str(e) and attempt < 2:
+                        continue
+                    else:
+                        st.error(f"❌ Error: {e}")
