@@ -193,7 +193,6 @@ def get_weather(city: str) -> str:
 def extract_city_from_query(query: str) -> str:
     """Extract city name from a weather query using regex — much more reliable."""
     import re
-    # Match city after 'in', 'for', 'of', 'at' keywords
     match = re.search(
         r'(?:weather|temperature|forecast|humidity|climate)\s+(?:report\s+)?(?:in|for|of|at)\s+([A-Za-z ,]+?)(?:\?|$)',
         query, re.IGNORECASE
@@ -201,7 +200,6 @@ def extract_city_from_query(query: str) -> str:
     if match:
         city = match.group(1).strip().rstrip(",")
         return city
-    # Fallback: strip common weather phrases word by word
     stopwords = {
         "what", "is", "the", "weather", "report", "temperature", "forecast",
         "today", "current", "now", "like", "how", "give", "me", "show",
@@ -210,6 +208,75 @@ def extract_city_from_query(query: str) -> str:
     words = query.replace("?", "").split()
     city_words = [w for w in words if w.lower() not in stopwords]
     return " ".join(city_words).strip() or "Guwahati"
+
+
+# ── Cricket scores via RSS (free, no API key) ─────────────────────────────────
+def get_cricket_scores() -> str:
+    """Fetch live cricket scores from CricBuzz RSS feed."""
+    try:
+        import xml.etree.ElementTree as ET
+        url = "https://www.cricbuzz.com/rss-feeds/cricket-news"
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        root = ET.fromstring(resp.content)
+        items = root.findall(".//item")[:6]
+        scores = []
+        for item in items:
+            title = item.findtext("title", "").strip()
+            link  = item.findtext("link", "").strip()
+            if title:
+                scores.append(f"• {title}")
+        return "\n".join(scores) if scores else "No live scores available right now."
+    except Exception as e:
+        return f"Cricket fetch failed: {e}"
+
+
+# ── News via Google News RSS (free, no API key, unlimited) ────────────────────
+def get_news(topic: str = "India") -> str:
+    """Fetch latest news from Google News RSS — no API key needed."""
+    try:
+        import xml.etree.ElementTree as ET
+        query = requests.utils.quote(topic)
+        url = f"https://news.google.com/rss/search?q={query}&hl=en-IN&gl=IN&ceid=IN:en"
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        root = ET.fromstring(resp.content)
+        items = root.findall(".//item")[:6]
+        news_list = []
+        for item in items:
+            title = item.findtext("title", "").strip()
+            pub   = item.findtext("pubDate", "").strip()
+            source = item.findtext("source", title)
+            if title:
+                # Clean up title (Google News adds source at end after " - ")
+                clean_title = title.split(" - ")[0].strip()
+                src = title.split(" - ")[-1].strip() if " - " in title else "News"
+                news_list.append(f"• **{clean_title}** _{src}_")
+        return "\n".join(news_list) if news_list else "No news found for this topic."
+    except Exception as e:
+        return f"News fetch failed: {e}"
+
+
+def is_cricket_query(query: str) -> bool:
+    q = query.lower()
+    keywords = ["cricket", "ipl", "score", "match score", "cricket score",
+                "live score", "test match", "odi", "t20", "who is batting",
+                "wicket", "runs", "over", "innings"]
+    return any(k in q for k in keywords)
+
+
+def is_news_query(query: str) -> bool:
+    q = query.lower()
+    keywords = ["news", "headlines", "latest news", "today news", "breaking",
+                "top news", "current news", "what happened today"]
+    return any(k in q for k in keywords)
+
+
+def extract_news_topic(query: str) -> str:
+    """Extract news topic from query."""
+    stopwords = {"news", "latest", "today", "show", "me", "give", "what", "is",
+                 "the", "headlines", "breaking", "top", "current", "about", "on"}
+    words = query.replace("?", "").split()
+    topic_words = [w for w in words if w.lower() not in stopwords]
+    return " ".join(topic_words).strip() or "India"
 
 # ── Web search via DuckDuckGo (free, no API key) ──────────────────────────────
 def web_search(query: str, max_results: int = 4) -> str:
@@ -332,7 +399,8 @@ st.markdown("""
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-blue"></span> Live web search</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> No hallucination</div>
-    <div class="stat-pill"><span class="dot dot-green"></span> All topics</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> Cricket scores</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span> Latest news</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -358,10 +426,10 @@ if not st.session_state.messages:
         <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
         <p style="font-size:.875rem;line-height:2.2">
-            🔍 <em>"Who is the current Prime Minister of India?"</em><br>
-            🏏 <em>"Who won IPL 2023?"</em><br>
-            💻 <em>"Write a Python web scraper"</em><br>
-            🌍 <em>"Latest AI news today"</em>
+            🌤️ <em>"Weather in Guwahati, Assam"</em><br>
+            🏏 <em>"Show me live cricket scores"</em><br>
+            📰 <em>"Latest news about India"</em><br>
+            💻 <em>"Write a Python web scraper"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -386,8 +454,33 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
+        # ── Cricket: fetch & display directly ────────────────────────────────
+        if is_cricket_query(prompt):
+            with st.spinner("🏏 Fetching live cricket scores…"):
+                cricket_data = get_cricket_scores()
+            response = (
+                f'<div class="search-badge">🏏 Live cricket data</div>\n\n'
+                f"### 🏏 Latest Cricket Updates\n\n"
+                f"{cricket_data}"
+            )
+            st.markdown(response, unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+        # ── News: fetch & display directly ────────────────────────────────────
+        elif is_news_query(prompt):
+            with st.spinner("📰 Fetching latest news…"):
+                topic = extract_news_topic(prompt)
+                news_data = get_news(topic)
+            response = (
+                f'<div class="search-badge">📰 Live news</div>\n\n'
+                f"### 📰 Latest News — {topic.title()}\n\n"
+                f"{news_data}"
+            )
+            st.markdown(response, unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
         # ── Weather: fetch & display directly, NO AI involved ────────────────
-        if is_weather_query(prompt):
+        elif is_weather_query(prompt):
             with st.spinner("🌤️ Fetching live weather…"):
                 city = extract_city_from_query(prompt)
                 weather_data = get_weather(city)
