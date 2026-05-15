@@ -191,19 +191,25 @@ def get_weather(city: str) -> str:
 
 
 def extract_city_from_query(query: str) -> str:
-    """Extract city name from a weather query."""
+    """Extract city name from a weather query using regex — much more reliable."""
     import re
-    q = query.lower()
-    # Remove common weather phrases to isolate city name
-    for phrase in [
-        "what is the weather", "weather report", "weather in",
-        "weather of", "weather for", "what's the weather",
-        "current weather", "today's weather", "temperature in",
-        "temperature of", "how is the weather", "in", "at", "?"
-    ]:
-        q = q.replace(phrase, " ")
-    city = re.sub(r'\s+', ' ', q).strip().title()
-    return city if city else "Guwahati"
+    # Match city after 'in', 'for', 'of', 'at' keywords
+    match = re.search(
+        r'(?:weather|temperature|forecast|humidity|climate)\s+(?:report\s+)?(?:in|for|of|at)\s+([A-Za-z ,]+?)(?:\?|$)',
+        query, re.IGNORECASE
+    )
+    if match:
+        city = match.group(1).strip().rstrip(",")
+        return city
+    # Fallback: strip common weather phrases word by word
+    stopwords = {
+        "what", "is", "the", "weather", "report", "temperature", "forecast",
+        "today", "current", "now", "like", "how", "give", "me", "show",
+        "humidity", "climate", "condition", "conditions", "a", "an"
+    }
+    words = query.replace("?", "").split()
+    city_words = [w for w in words if w.lower() not in stopwords]
+    return " ".join(city_words).strip() or "Guwahati"
 
 # ── Web search via DuckDuckGo (free, no API key) ──────────────────────────────
 def web_search(query: str, max_results: int = 4) -> str:
@@ -279,7 +285,7 @@ def needs_search(query: str) -> bool:
 
 
 # ── Build prompt ──────────────────────────────────────────────────────────────
-def build_messages(user_query: str, search_results: str = ""):
+def build_messages(user_query: str, search_results: str = "", is_weather: bool = False):
     system = (
         "You are Nova AI — a smart, accurate, and friendly AI assistant. "
         "You were created by Samiran. "
@@ -287,10 +293,17 @@ def build_messages(user_query: str, search_results: str = ""):
         "always say: 'I am Nova AI, created by Samiran.' "
         "Never mention Meta, Llama, OpenAI, Groq, Anthropic, or any underlying model or company. "
         "Answer clearly and directly. Never hallucinate. "
+        "If weather data is provided, present it as the current weather report — do NOT say the data is wrong or unrelated. "
         "If web search results are provided, use ONLY those to answer factual questions — do not guess. "
         "Format code with markdown code blocks. Be concise."
     )
-    if search_results:
+    if search_results and is_weather:
+        user_content = (
+            f"Here is the live weather data fetched for the user's query '{user_query}':\n\n"
+            f"{search_results}\n\n"
+            f"Present this weather information clearly and helpfully to the user."
+        )
+    elif search_results:
         user_content = (
             f"Web search results for '{user_query}':\n"
             f"{search_results}\n\n"
@@ -394,7 +407,7 @@ if prompt := st.chat_input("Ask me anything…"):
                     if attempt > 0:
                         time.sleep(60)
                     completion = client.chat.completions.create(
-                        messages=build_messages(prompt, search_results),
+                        messages=build_messages(prompt, search_results, is_weather=is_weather_query(prompt)),
                         model=MODEL,
                         max_tokens=600,
                         temperature=0.3,
