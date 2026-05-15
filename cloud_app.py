@@ -392,6 +392,118 @@ def extract_news_topic(query: str) -> str:
     topic_words = [w for w in words if w.lower() not in stopwords]
     return " ".join(topic_words).strip() or "India"
 
+
+# ── Stock prices via Yahoo Finance (free, no API key, unlimited) ──────────────
+
+# Common stock name → ticker symbol map
+STOCK_ALIASES = {
+    # Indian stocks
+    "reliance": "RELIANCE.NS", "tata": "TATAMOTORS.NS", "tcs": "TCS.NS",
+    "infosys": "INFY.NS", "wipro": "WIPRO.NS", "hdfc": "HDFCBANK.NS",
+    "icici": "ICICIBANK.NS", "sbi": "SBIN.NS", "bajaj": "BAJFINANCE.NS",
+    "adani": "ADANIENT.NS", "ongc": "ONGC.NS", "itc": "ITC.NS",
+    "hindustan unilever": "HINDUNILVR.NS", "hul": "HINDUNILVR.NS",
+    "maruti": "MARUTI.NS", "mahindra": "M&M.NS", "nestle": "NESTLEIND.NS",
+    "kotak": "KOTAKBANK.NS", "axis bank": "AXISBANK.NS", "titan": "TITAN.NS",
+    "sun pharma": "SUNPHARMA.NS", "dr reddy": "DRREDDY.NS",
+    "nifty": "^NSEI", "sensex": "^BSESN", "bank nifty": "^NSEBANK",
+
+    # US stocks
+    "apple": "AAPL", "microsoft": "MSFT", "google": "GOOGL",
+    "alphabet": "GOOGL", "amazon": "AMZN", "tesla": "TSLA",
+    "meta": "META", "facebook": "META", "netflix": "NFLX",
+    "nvidia": "NVDA", "samsung": "005930.KS", "intel": "INTC",
+    "amd": "AMD", "uber": "UBER", "twitter": "X", "x corp": "X",
+
+    # Crypto
+    "bitcoin": "BTC-USD", "btc": "BTC-USD", "ethereum": "ETH-USD",
+    "eth": "ETH-USD", "dogecoin": "DOGE-USD", "doge": "DOGE-USD",
+    "solana": "SOL-USD", "bnb": "BNB-USD", "xrp": "XRP-USD",
+
+    # Indices
+    "dow jones": "^DJI", "nasdaq": "^IXIC", "s&p 500": "^GSPC",
+    "s&p": "^GSPC", "ftse": "^FTSE", "nikkei": "^N225",
+}
+
+def extract_stock_symbol(query: str) -> tuple:
+    """Extract stock ticker and display name from query."""
+    q = query.lower()
+    # Check alias map first
+    for name, ticker in STOCK_ALIASES.items():
+        if name in q:
+            return ticker, name.title()
+    # Try to extract uppercase ticker directly e.g. "AAPL stock"
+    import re
+    match = re.search(r'\b([A-Z]{1,5})\b', query)
+    if match:
+        return match.group(1), match.group(1)
+    return None, None
+
+
+def get_stock_price(symbol: str, display_name: str) -> str:
+    """Fetch live stock price from Yahoo Finance — no API key needed."""
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=2d"
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json",
+        }
+        resp = requests.get(url, headers=headers, timeout=8)
+        data = resp.json()
+
+        meta   = data["chart"]["result"][0]["meta"]
+        price  = meta.get("regularMarketPrice", 0)
+        prev   = meta.get("chartPreviousClose", 0)
+        curr   = meta.get("currency", "USD")
+        name   = meta.get("longName") or meta.get("shortName") or display_name
+        exch   = meta.get("exchangeName", "")
+        mktst  = meta.get("marketState", "")
+
+        change     = price - prev
+        change_pct = (change / prev * 100) if prev else 0
+        arrow      = "🟢 ▲" if change >= 0 else "🔴 ▼"
+        sign       = "+" if change >= 0 else ""
+
+        high = meta.get("regularMarketDayHigh", "N/A")
+        low  = meta.get("regularMarketDayLow",  "N/A")
+        vol  = meta.get("regularMarketVolume",  "N/A")
+        if isinstance(vol, int):
+            vol = f"{vol:,}"
+
+        return (
+            f"Name: {name}\n"
+            f"Exchange: {exch}\n"
+            f"Price: {curr} {price:,.2f}\n"
+            f"Change: {arrow} {sign}{change:.2f} ({sign}{change_pct:.2f}%)\n"
+            f"Day High: {high}\n"
+            f"Day Low: {low}\n"
+            f"Volume: {vol}\n"
+            f"Market: {mktst}"
+        )
+    except Exception as e:
+        return f"Stock fetch failed: {e}"
+
+
+def is_stock_query(query: str) -> bool:
+    """Detect stock/crypto price queries strictly."""
+    import re
+    q = query.lower()
+
+    # Must contain a finance action word
+    action_words = [
+        "stock", "share price", "stock price", "price of", "how much is",
+        "market price", "trading at", "crypto", "bitcoin", "ethereum",
+        "sensex", "nifty", "nasdaq", "dow jones", "index", "ticker",
+        "coin price", "token price", "market cap",
+    ]
+    # OR a known alias
+    known = list(STOCK_ALIASES.keys())
+
+    has_action = any(a in q for a in action_words)
+    has_known  = any(k in q for k in known)
+
+    return has_action or has_known
+
 # ── Web search via DuckDuckGo (free, no API key) ──────────────────────────────
 def web_search(query: str, max_results: int = 4) -> str:
     """Search DuckDuckGo and return a clean text summary of results."""
@@ -515,6 +627,7 @@ st.markdown("""
     <div class="stat-pill"><span class="dot dot-purple"></span> No hallucination</div>
     <div class="stat-pill"><span class="dot dot-green"></span> All world sports</div>
     <div class="stat-pill"><span class="dot dot-blue"></span> Latest news</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> Live stock prices</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -541,9 +654,9 @@ if not st.session_state.messages:
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
         <p style="font-size:.875rem;line-height:2.2">
             🌤️ <em>"Weather in Guwahati, Assam"</em><br>
+            📈 <em>"Apple stock price"</em> · <em>"Reliance share price"</em><br>
+            💰 <em>"Bitcoin price today"</em> · <em>"Nifty index"</em><br>
             ⚽ <em>"Latest Premier League scores"</em><br>
-            🏏 <em>"IPL match result today"</em><br>
-            🎾 <em>"Wimbledon latest update"</em><br>
             📰 <em>"Latest news about India"</em>
         </p>
     </div>
@@ -569,8 +682,38 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
+        # ── Stock prices: Yahoo Finance, no API key ───────────────────────────
+        if is_stock_query(prompt):
+            symbol, display_name = extract_stock_symbol(prompt)
+            if not symbol:
+                response = "❌ Sorry, I couldn't identify the stock. Try asking like: *'Apple stock price'* or *'Reliance share price'*."
+            else:
+                with st.spinner(f"📈 Fetching live price for {display_name}…"):
+                    stock_data = get_stock_price(symbol, display_name)
+                if "failed" in stock_data.lower():
+                    response = f"❌ Couldn't fetch price for **{display_name}**. The market may be closed or symbol not found."
+                else:
+                    lines = dict(line.split(": ", 1) for line in stock_data.strip().splitlines() if ": " in line)
+                    chg   = lines.get('Change', '')
+                    color = "#10b981" if "▲" in chg else "#ef4444"
+                    response = (
+                        f'<div class="search-badge">📈 Live market data · Yahoo Finance</div>\n\n'
+                        f"### 📈 {lines.get('Name', display_name)}\n"
+                        f"_{lines.get('Exchange', '')} · Market: {lines.get('Market', 'N/A')}_\n\n"
+                        f"| Detail | Value |\n"
+                        f"|--------|-------|\n"
+                        f"| 💰 Price | **{lines.get('Price', 'N/A')}** |\n"
+                        f"| 📊 Change | {lines.get('Change', 'N/A')} |\n"
+                        f"| 📈 Day High | {lines.get('Day High', 'N/A')} |\n"
+                        f"| 📉 Day Low | {lines.get('Day Low', 'N/A')} |\n"
+                        f"| 🔢 Volume | {lines.get('Volume', 'N/A')} |\n\n"
+                        f"_Data from Yahoo Finance · Delayed ~15 min_"
+                    )
+            st.markdown(response, unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
         # ── Sports: universal handler for ALL world sports ────────────────────
-        if is_sports_query(prompt):
+        elif is_sports_query(prompt):
             sport_term = detect_sport(prompt)
             emoji = get_sport_emoji(sport_term)
             with st.spinner(f"{emoji} Fetching live sports updates…"):
