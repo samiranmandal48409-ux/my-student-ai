@@ -4,6 +4,7 @@ import time
 import requests
 import re
 import base64
+from datetime import datetime, timezone
 
 st.set_page_config(
     page_title="Nova AI",
@@ -28,30 +29,26 @@ st.markdown("""
     --green:    #10b981;
     --purple:   #7c3aed;
     --orange:   #f59e0b;
+    --red:      #ef4444;
     --radius:   14px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html, body, [data-testid="stAppViewContainer"] {
     background: var(--bg) !important;
     color: var(--text) !important;
     font-family: 'DM Sans', sans-serif !important;
 }
-
 [data-testid="stHeader"], [data-testid="stToolbar"],
 .stDeployButton, #MainMenu, footer { display: none !important; }
-
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
 [data-testid="stAppViewContainer"] > .main > .block-container {
     max-width: 900px !important;
     padding: 0 1.5rem 6rem !important;
     margin: 0 auto !important;
 }
-
 .hero { text-align: center; padding: 3rem 1rem 2rem; position: relative; }
 .hero::before {
     content: ''; position: absolute; top: 0; left: 50%;
@@ -72,9 +69,9 @@ html, body, [data-testid="stAppViewContainer"] {
 .hero h1 {
     font-family: 'Space Mono', monospace !important;
     font-size: clamp(1.8rem, 4vw, 2.8rem) !important;
-    font-weight: 700 !important;
-    color: #fff !important; line-height: 1.15 !important;
-    letter-spacing: -.02em; margin-bottom: .6rem !important;
+    font-weight: 700 !important; color: #fff !important;
+    line-height: 1.15 !important; letter-spacing: -.02em;
+    margin-bottom: .6rem !important;
 }
 .hero h1 span { color: var(--accent); }
 .hero p { font-size: 1rem; color: var(--muted); font-weight: 300; max-width: 480px; margin: 0 auto; }
@@ -90,10 +87,8 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 .stChatMessage:has([data-testid="chatAvatarIcon-user"]) {
-    background: var(--user-bg) !important;
-    border-color: rgba(0,229,255,.15) !important;
+    background: var(--user-bg) !important; border-color: rgba(0,229,255,.15) !important;
 }
-
 pre, code { font-family: 'Space Mono', monospace !important; font-size: 13px !important; }
 pre {
     background: #0d1117 !important; border: 1px solid var(--border) !important;
@@ -104,7 +99,6 @@ code:not(pre code) {
     background: rgba(0,229,255,.08) !important; color: var(--accent) !important;
     border-radius: 5px !important; padding: 2px 6px !important; font-size: 12.5px !important;
 }
-
 [data-testid="stChatInputContainer"] {
     position: fixed !important; bottom: 0 !important; left: 50% !important;
     transform: translateX(-50%) !important; width: 100% !important;
@@ -120,8 +114,7 @@ code:not(pre code) {
 }
 [data-testid="stChatInput"]:focus {
     border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(0,229,255,.1) !important;
-    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(0,229,255,.1) !important; outline: none !important;
 }
 [data-testid="stChatInputSubmitButton"] button {
     background: var(--accent) !important; border: none !important;
@@ -132,23 +125,17 @@ code:not(pre code) {
     background: var(--surface2) !important; border: 1px solid var(--border) !important;
     color: var(--muted) !important; border-radius: 8px !important;
     font-family: 'DM Sans', sans-serif !important; font-size: 13px !important;
-    font-weight: 500 !important; padding: .4rem 1rem !important;
-    transition: all .2s !important;
+    font-weight: 500 !important; padding: .4rem 1rem !important; transition: all .2s !important;
 }
 .stButton > button:hover {
     border-color: var(--accent) !important; color: var(--accent) !important;
     background: rgba(0,229,255,.06) !important;
 }
-
-.stats-row {
-    display: flex; gap: .8rem; margin: 1.2rem 0 1.8rem;
-    justify-content: center; flex-wrap: wrap;
-}
+.stats-row { display: flex; gap: .8rem; margin: 1.2rem 0 1.8rem; justify-content: center; flex-wrap: wrap; }
 .stat-pill {
     display: flex; align-items: center; gap: 7px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 999px; padding: 6px 14px;
-    font-size: 12.5px; color: var(--muted);
+    border-radius: 999px; padding: 6px 14px; font-size: 12.5px; color: var(--muted);
 }
 .stat-pill .dot { width:7px; height:7px; border-radius:50%; }
 .dot-green  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
@@ -159,39 +146,55 @@ code:not(pre code) {
 .search-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: var(--green); margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--green); margin-bottom: .5rem;
 }
+.live-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3);
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: #fca5a5; margin-bottom: .5rem;
+}
+.live-badge::before { content: '🔴'; font-size: 9px; }
 .code-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.3);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: #a78bfa; margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: #a78bfa; margin-bottom: .5rem;
 }
 .app-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.3);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: var(--orange); margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--orange); margin-bottom: .5rem;
 }
 .game-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.25);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: var(--accent); margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--accent); margin-bottom: .5rem;
 }
 .preview-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.25);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: var(--accent); margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--accent); margin-bottom: .5rem;
 }
 .memory-badge {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.25);
-    border-radius: 6px; padding: 3px 10px;
-    font-size: 11px; color: #a78bfa; margin-bottom: .5rem;
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: #a78bfa; margin-bottom: .5rem;
 }
+.match-card {
+    background: linear-gradient(135deg, #0d1117, #111827);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.2rem 1.5rem; margin: .5rem 0;
+    border-left: 3px solid var(--accent);
+}
+.match-live {
+    border-left-color: var(--red) !important;
+    background: linear-gradient(135deg, #1a0808, #111827) !important;
+}
+.match-teams {
+    font-family: 'Space Mono', monospace; font-size: 1.1rem;
+    font-weight: 700; color: #fff; margin-bottom: .4rem;
+}
+.match-meta { font-size: 12px; color: var(--muted); }
+.match-score { font-size: 1rem; color: var(--green); font-weight: 600; margin-top: .3rem; }
 .output-box {
     background: #0d1117; border: 1px solid var(--border);
     border-left: 3px solid var(--green); border-radius: 10px;
@@ -208,11 +211,11 @@ code:not(pre code) {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.3);
     color: var(--accent); padding: 5px 12px; border-radius: 7px;
-    text-decoration: none; font-size: 12px;
-    font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all .2s;
+    text-decoration: none; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    font-weight: 500; transition: all .2s;
 }
 .category-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 1rem; margin: 1.5rem 0;
 }
 .category-card {
@@ -230,9 +233,308 @@ code:not(pre code) {
 # ── Groq client ───────────────────────────────────────────────────────────────
 client = Groq(api_key="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")
 MODEL  = "llama-3.3-70b-versatile"
+MAX_HISTORY_TURNS = 20
 
-# ── Max history turns to send (keeps token usage sane) ────────────────────────
-MAX_HISTORY_TURNS = 20   # = 20 user + 20 assistant messages
+# ══════════════════════════════════════════════════════════════════════════════
+#  🏏 REAL-TIME CRICKET / IPL ENGINE  ← THE BIG FIX
+# ══════════════════════════════════════════════════════════════════════════════
+
+def get_today_date_str() -> str:
+    """Returns today's date in IST."""
+    now = datetime.now()
+    return now.strftime("%B %d, %Y")
+
+def fetch_cricbuzz_matches() -> list:
+    """
+    Scrape live/today matches from Cricbuzz RSS feed.
+    Returns list of match dicts.
+    """
+    matches = []
+    try:
+        import xml.etree.ElementTree as ET
+        urls = [
+            "https://www.cricbuzz.com/rss-feeds/ipl-cricket-matches",
+            "https://news.google.com/rss/search?q=IPL+2025+match+today+live+score&hl=en-IN&gl=IN&ceid=IN:en",
+            "https://news.google.com/rss/search?q=IPL+match+playing+today+2025&hl=en&gl=US&ceid=US:en",
+        ]
+        for url in urls:
+            try:
+                resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+                root = ET.fromstring(resp.content)
+                for item in root.findall(".//item")[:10]:
+                    title   = item.findtext("title", "").strip()
+                    desc    = item.findtext("description", "").strip()
+                    pub     = item.findtext("pubDate", "")
+                    if title:
+                        matches.append({
+                            "title":  title.split(" - ")[0].strip(),
+                            "source": title.split(" - ")[-1].strip() if " - " in title else "",
+                            "desc":   re.sub(r'<[^>]+>', '', desc)[:200],
+                            "pub":    pub[:25] if pub else "",
+                        })
+            except:
+                continue
+    except:
+        pass
+    return matches
+
+def fetch_live_cricket_score() -> str:
+    """
+    Multi-source real-time cricket score fetcher.
+    Tries multiple free endpoints.
+    """
+    results = []
+
+    # ── Source 1: cricapi.com free tier ───────────────────────────────────────
+    try:
+        resp = requests.get(
+            "https://api.cricapi.com/v1/currentMatches",
+            params={"apikey": "a52ea237-09e7-4d69-b7cc-e4f0e2a8c1f1", "offset": 0},
+            timeout=6
+        )
+        data = resp.json()
+        if data.get("status") == "success" and data.get("data"):
+            for match in data["data"][:5]:
+                name   = match.get("name", "")
+                status = match.get("status", "")
+                date   = match.get("date", "")
+                score_list = match.get("score", [])
+                scores = ""
+                for s in score_list:
+                    inn = s.get("inning","")
+                    r   = s.get("r", "")
+                    w   = s.get("w", "")
+                    o   = s.get("o", "")
+                    if r:
+                        scores += f"\n  {inn}: {r}/{w} ({o} ov)"
+                results.append(f"**{name}**\n  Status: {status}{scores}")
+            if results:
+                return "\n\n".join(results)
+    except:
+        pass
+
+    # ── Source 2: DuckDuckGo instant answer ───────────────────────────────────
+    try:
+        resp = requests.get(
+            "https://api.duckduckgo.com/",
+            params={"q": "IPL 2025 today match live score", "format": "json",
+                    "no_html": "1", "skip_disambig": "1"},
+            timeout=6
+        )
+        data = resp.json()
+        answer = data.get("Answer", "") or data.get("Abstract", "")
+        if answer and len(answer) > 20:
+            results.append(answer[:500])
+    except:
+        pass
+
+    # ── Source 3: Google News RSS scrape (most reliable) ──────────────────────
+    try:
+        import xml.etree.ElementTree as ET
+        today = datetime.now().strftime("%Y")
+        queries = [
+            f"IPL {today} today match live score",
+            f"IPL {today} CSK MI RCB KKR SRH PBKS DC GT LSG playing today",
+            f"IPL match today {datetime.now().strftime('%B %d')}",
+        ]
+        all_items = []
+        for q in queries:
+            url  = f"https://news.google.com/rss/search?q={requests.utils.quote(q)}&hl=en-IN&gl=IN&ceid=IN:en"
+            resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+            root = ET.fromstring(resp.content)
+            for item in root.findall(".//item")[:5]:
+                title   = item.findtext("title","").strip()
+                pub_raw = item.findtext("pubDate","")
+                if title:
+                    clean = title.split(" - ")[0].strip()
+                    pub   = pub_raw[:22] if pub_raw else ""
+                    all_items.append(f"[{pub}] {clean}" if pub else clean)
+        if all_items:
+            results.append("\n".join(all_items[:8]))
+    except:
+        pass
+
+    # ── Source 4: ESPN Cricinfo RSS ───────────────────────────────────────────
+    try:
+        import xml.etree.ElementTree as ET
+        resp = requests.get(
+            "https://www.espncricinfo.com/rss/content/story/feeds/0.xml",
+            headers={"User-Agent": "Mozilla/5.0"}, timeout=6
+        )
+        root = ET.fromstring(resp.content)
+        items = []
+        for item in root.findall(".//item")[:6]:
+            title = item.findtext("title","").strip()
+            if title and any(k in title.lower() for k in ["ipl","today","live","vs","match"]):
+                items.append(f"• {title.split(' - ')[0].strip()}")
+        if items:
+            results.append("ESPN Cricinfo:\n" + "\n".join(items))
+    except:
+        pass
+
+    return "\n\n---\n\n".join(results) if results else ""
+
+def fetch_ipl_schedule_html() -> str:
+    """Scrape IPL schedule from Google search."""
+    try:
+        resp = requests.get(
+            "https://html.duckduckgo.com/html/",
+            params={"q": f"IPL 2025 today match {datetime.now().strftime('%B %d')} schedule"},
+            headers={"User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"},
+            timeout=8
+        )
+        snippets = re.findall(
+            r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>',
+            resp.text, re.DOTALL
+        )
+        titles = re.findall(
+            r'class="result__title"[^>]*>.*?<a[^>]*>(.*?)</a>',
+            resp.text, re.DOTALL
+        )
+        clean_s = [re.sub(r'<[^>]+>','',s).strip() for s in snippets[:6]]
+        clean_t = [re.sub(r'<[^>]+>','',t).strip() for t in titles[:6]]
+        results = [f"• {t}: {s}" for t,s in zip(clean_t,clean_s) if s and
+                   any(k in (t+s).lower() for k in ["ipl","csk","mi","rcb","kkr","srh","pbks","dc","gt","lsg","vs"])]
+        return "\n".join(results) if results else ""
+    except:
+        return ""
+
+def get_realtime_sports_data(query: str) -> str:
+    """
+    Master function — fetches real-time cricket/sports data
+    from ALL available sources and combines them.
+    """
+    q = query.lower()
+    today_str = get_today_date_str()
+
+    # Always fetch live scores + schedule
+    with_ipl = any(k in q for k in ["ipl","cricket","t20","match","team","playing","today","score"])
+
+    data_parts = [f"📅 Today's Date: {today_str}\n"]
+
+    if with_ipl:
+        # Live scores
+        live = fetch_live_cricket_score()
+        if live:
+            data_parts.append(f"🏏 LIVE/TODAY CRICKET DATA:\n{live}")
+
+        # Schedule scrape
+        schedule = fetch_ipl_schedule_html()
+        if schedule:
+            data_parts.append(f"📋 IPL SCHEDULE SEARCH RESULTS:\n{schedule}")
+
+        # Google News
+        import xml.etree.ElementTree as ET
+        for search_q in [
+            f"IPL today match playing {datetime.now().strftime('%B %d %Y')}",
+            "IPL 2025 today match schedule CSK MI RCB",
+        ]:
+            try:
+                url  = f"https://news.google.com/rss/search?q={requests.utils.quote(search_q)}&hl=en-IN&gl=IN&ceid=IN:en"
+                resp = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=6)
+                root = ET.fromstring(resp.content)
+                headlines = []
+                for item in root.findall(".//item")[:6]:
+                    title   = item.findtext("title","").strip()
+                    pub_raw = item.findtext("pubDate","")
+                    if title:
+                        clean = title.split(" - ")[0].strip()
+                        pub   = pub_raw[:22] if pub_raw else ""
+                        headlines.append(f"  [{pub}] {clean}" if pub else f"  {clean}")
+                if headlines:
+                    data_parts.append(f"📰 Google News ({search_q}):\n" + "\n".join(headlines))
+            except:
+                continue
+    else:
+        # General sports
+        try:
+            import xml.etree.ElementTree as ET
+            url  = f"https://news.google.com/rss/search?q={requests.utils.quote(query+' today score result')}&hl=en-IN&gl=IN&ceid=IN:en"
+            resp = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=6)
+            root = ET.fromstring(resp.content)
+            headlines = []
+            for item in root.findall(".//item")[:8]:
+                title = item.findtext("title","").strip()
+                pub   = item.findtext("pubDate","")[:22] if item.findtext("pubDate","") else ""
+                if title:
+                    clean = title.split(" - ")[0].strip()
+                    headlines.append(f"  [{pub}] {clean}" if pub else f"  {clean}")
+            if headlines:
+                data_parts.append("📰 Sports News:\n" + "\n".join(headlines))
+        except:
+            pass
+
+    return "\n\n".join(data_parts) if data_parts else ""
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  IMPROVED QUERY DETECTORS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def is_cricket_or_sports_query(query: str) -> bool:
+    """
+    Much broader detection — catches conversational phrasings like
+    'do you know which team plays today', 'tell me today's match', etc.
+    """
+    q = query.lower()
+
+    # Hard exclude
+    if any(p in q for p in [
+        "who made you","who created you","history of cricket",
+        "rules of","how to play","origin of","explain cricket"
+    ]):
+        return False
+
+    # IPL team names — if ANY appear, it's a sports query
+    ipl_teams = ["csk","mi","rcb","kkr","srh","pbks","dc","gt","lsg",
+                 "chennai","mumbai","bangalore","kolkata","hyderabad",
+                 "punjab","delhi","gujarat","lucknow","rajasthan","rr"]
+    if any(t in q for t in ipl_teams):
+        return True
+
+    # Sport keywords
+    sport_kw = [
+        "ipl","cricket","t20","odi","test match","wicket","innings",
+        "football","soccer","basketball","nba","tennis","f1","formula 1",
+        "hockey","golf","boxing","mma","ufc","olympics","rugby","kabaddi",
+        "badminton","volleyball","athletics","marathon",
+    ]
+
+    # Action/query words (very broad)
+    action_kw = [
+        "today","tonight","playing","play","match","game","score","result",
+        "live","schedule","fixture","vs","versus","winner","who won",
+        "which team","which match","any match","what match",
+        "tell me","do you know","can you tell","update","latest",
+    ]
+
+    has_sport  = any(k in q for k in sport_kw)
+    has_action = any(k in q for k in action_kw)
+
+    return has_sport or (has_action and any(k in q for k in [
+        "match","team","game","score","play","ipl","cricket"
+    ]))
+
+def is_weather_query(q: str) -> bool:
+    return any(k in q.lower() for k in [
+        "weather","temperature","forecast","humidity",
+        "rain","sunny","cloudy","wind speed","climate today"
+    ])
+
+def is_news_query(q: str) -> bool:
+    return any(k in q.lower() for k in [
+        "news","headlines","latest news","today news",
+        "breaking","top news","current news","what happened today"
+    ])
+
+def is_stock_query(query: str) -> bool:
+    q = query.lower()
+    return (any(a in q for a in [
+        "stock","share price","stock price","price of","how much is",
+        "market price","trading at","crypto","bitcoin","ethereum",
+        "sensex","nifty","nasdaq","dow jones","coin price"]) or
+        any(k in q for k in STOCK_ALIASES))
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CREATION CLASSIFICATION
@@ -243,8 +545,7 @@ GAME_KEYWORDS = [
     "platformer","shooter","puzzle game","card game","dice",
     "memory game","quiz game","trivia","word game","breakout",
     "pong","asteroids","space invaders","racing game","rpg",
-    "tower defense","clicker game","idle game","endless runner",
-    "battle","dungeon","maze","arcade",
+    "tower defense","clicker game","battle","dungeon","maze","arcade",
 ]
 APP_KEYWORDS = [
     "app","application","dashboard","admin panel","landing page",
@@ -252,151 +553,120 @@ APP_KEYWORDS = [
     "blog","chat app","todo app","weather app","calculator app",
     "login page","signup","form","registration","survey",
     "expense tracker","budget","note app","kanban","timer",
-    "stopwatch","clock","music player","video player","image gallery",
-    "calendar","booking","invoice","analytics","chart","crm",
-    "netflix clone","youtube clone","twitter clone","spotify clone",
-    "whatsapp ui","instagram clone","responsive","animated",
+    "stopwatch","clock","music player","image gallery","calendar",
+    "analytics","chart","crm","netflix clone","youtube clone",
+    "twitter clone","whatsapp ui","instagram clone",
 ]
 SOFTWARE_KEYWORDS = [
-    "software","tool","utility","desktop app","system",
-    "file manager","text editor","password manager","api tester",
-    "converter","downloader","scraper","automation","cli tool",
+    "software","tool","utility","desktop app","file manager",
+    "text editor","password manager","api tester","converter",
+    "downloader","scraper","automation","cli tool",
 ]
 DESIGN_KEYWORDS = [
     "design","ui","ux","mockup","prototype","wireframe",
     "beautiful","modern","stunning","animated","glassmorphism",
     "neumorphism","gradient","dark theme","light theme",
-    "responsive","component","ui kit","hero section",
-    "navbar","sidebar","modal","dropdown","landing",
+    "component","ui kit","hero section","navbar","sidebar","modal",
 ]
 
 def classify_creation_request(query: str) -> str:
     q = query.lower()
-    if any(k in q for k in GAME_KEYWORDS):     return "game"
-    if any(k in q for k in APP_KEYWORDS):       return "app"
-    if any(k in q for k in SOFTWARE_KEYWORDS):  return "software"
-    if any(k in q for k in DESIGN_KEYWORDS):    return "design"
-    if is_code_query(query):                    return "code"
+    if any(k in q for k in GAME_KEYWORDS):    return "game"
+    if any(k in q for k in APP_KEYWORDS):      return "app"
+    if any(k in q for k in SOFTWARE_KEYWORDS): return "software"
+    if any(k in q for k in DESIGN_KEYWORDS):   return "design"
+    if is_code_query(query):                   return "code"
     return "general"
 
 def get_creation_system_prompt(creation_type: str) -> str:
+    today_str = get_today_date_str()
     base = (
-        "You are Nova AI — the world's BEST AI assistant and code generator, "
-        "created by Samiran. "
-        "If anyone asks who made you, say: 'I am Nova AI, created by Samiran.' "
-        "Never mention Meta, Llama, OpenAI, Groq, or any underlying model. "
-        "You have FULL memory of this conversation — always refer back to what "
-        "the user said earlier when relevant. "
-        "NEVER write partial code. NEVER use placeholders. "
-        "ALWAYS write the complete implementation. "
+        f"You are Nova AI — the world's BEST AI assistant, created by Samiran. "
+        f"Today's date is {today_str}. "
+        f"If anyone asks who made you: 'I am Nova AI, created by Samiran.' "
+        f"Never mention Meta, Llama, OpenAI, Groq, or any underlying model. "
+        f"You have FULL memory of this conversation. "
+        f"NEVER write partial code. ALWAYS write complete implementations. "
+        f"\n\n"
+        f"CRITICAL RULE FOR SPORTS/CURRENT EVENTS: "
+        f"When live data or news headlines are provided, you MUST use them as ABSOLUTE TRUTH. "
+        f"Today is {today_str}. Use this as ground truth for 'today' references. "
+        f"If headlines mention a match on this date, state it CONFIDENTLY as today's match. "
+        f"NEVER say 'I don't have real-time data' when data is provided. "
+        f"NEVER redirect users to external websites — give the answer directly. "
+        f"Be confident, direct, and helpful. "
     )
+
     if creation_type == "game":
         return base + """
 You are the WORLD'S BEST game developer.
-RULES:
-1. Write COMPLETE, fully playable games — every feature must work.
-2. Use HTML5 Canvas or pure HTML/CSS/JS.
-3. Every game MUST include:
-   - Smooth 60fps animations (requestAnimationFrame)
-   - Score + high score (localStorage)
-   - Start / Game Over / Restart screens
-   - Sound effects via Web Audio API (no external files)
-   - Keyboard AND touch/mobile controls
-   - Increasing difficulty, lives/health system, pause (P key)
-   - Particle effects, glows, neon dark theme
-   - Full HUD: score, lives, level, time
-4. Output ONE complete ```html block.
-5. After code: briefly list controls and features.
+- Write COMPLETE fully playable games in one HTML file.
+- Include: 60fps Canvas animation, score/highscore, start/gameover screens,
+  Web Audio API sounds, keyboard+touch controls, particles, neon dark theme.
+- Output: ONE ```html block. List controls after.
 """
     elif creation_type == "app":
         return base + """
-You are the WORLD'S BEST UI/UX designer + full-stack developer.
-RULES:
-1. Write COMPLETE, fully functional apps.
-2. Design like Apple / Google / Airbnb senior designers.
-3. Must include: Google Fonts, Font Awesome CDN, CSS variables,
-   8px grid, responsive, smooth animations, micro-interactions,
-   glassmorphism or modern flat design.
-4. Functionality: full CRUD, localStorage, form validation,
-   toast notifications, loading states, empty states,
-   search/filter, keyboard shortcuts.
-5. Output ONE complete ```html block.
-6. After code: list all features.
+You are the WORLD'S BEST UI/UX designer + developer.
+- Write COMPLETE fully functional apps in one HTML file.
+- Use: Google Fonts, Font Awesome CDN, CSS variables, animations,
+  glassmorphism, full CRUD, localStorage, toast notifications, responsive.
+- Output: ONE ```html block. List features after.
 """
     elif creation_type == "software":
         return base + """
 You are the WORLD'S BEST software architect.
-RULES:
-1. Write COMPLETE, production-ready software.
-2. Include error handling, input validation, clean architecture.
-3. For browser tools: single HTML file, use IndexedDB/localStorage.
-4. Make it feel like a real professional desktop application.
-5. Output complete code block(s) + brief architecture notes.
+- Write COMPLETE production-ready software.
+- Include error handling, validation, clean architecture.
+- Output: complete code block(s) + brief architecture notes.
 """
     elif creation_type == "design":
         return base + """
 You are the WORLD'S BEST UI/UX designer.
-RULES:
-1. Create STUNNING pixel-perfect designs.
-2. Use: glassmorphism, aurora gradients, 3D transforms,
-   scroll animations (Intersection Observer), custom cursor,
-   particle backgrounds, stagger animations.
-3. Mix display + body fonts. Generous whitespace. Max 2 accent colors.
-4. Include hover/focus/active states on everything.
-5. Dark mode by default. Smooth scrolling.
-6. Output ONE complete ```html block — make it breathtaking.
+- Create STUNNING designs: glassmorphism, aurora gradients, 3D transforms,
+  scroll animations, particle backgrounds, micro-interactions.
+- Output: ONE breathtaking ```html block.
 """
     else:
         return base + """
-CODING & GENERAL RULES:
-1. Write COMPLETE, fully working code — never partial.
-2. Best practices: clean names, error handling, comments.
-3. Optimal time/space complexity for algorithms.
-4. Always specify language in code block.
-5. Support ALL languages: Python, JS, TS, Java, C++, C, Rust,
-   Go, Ruby, PHP, Swift, Kotlin, SQL, Bash, R, Lua, Scala, etc.
-6. For web output: complete single-file HTML with embedded CSS/JS.
-7. Add type hints, TypeScript types, JSDoc where appropriate.
+CODING RULES:
+- COMPLETE working code always. Best practices. Optimal complexity.
+- All languages supported. Type hints, JSDoc where appropriate.
+- For web: complete single-file HTML with embedded CSS/JS.
 
-FACTUAL QUESTION RULES:
-- When search results are provided, use them as primary source.
-- State answers directly and confidently.
-- Never say info is unavailable if results contain it.
-
-MEMORY RULES:
-- Always remember everything the user said earlier in this chat.
-- Reference previous context naturally when relevant.
+GENERAL RULES:
+- Answer questions directly and confidently using provided data.
+- When live sports/news data is given, use it as the definitive answer.
+- Reference conversation history naturally.
 """
 
-def get_creation_badge(creation_type: str) -> str:
-    badges = {
+def get_creation_badge(ct: str) -> str:
+    return {
         "game":     '<div class="game-badge">🎮 World-class game · Fully playable · Mobile ready</div>',
         "app":      '<div class="app-badge">🚀 Professional app · Full features · Responsive</div>',
         "software": '<div class="app-badge">⚙️ Production-ready software · Complete</div>',
         "design":   '<div class="preview-badge">✨ Stunning UI design · Animated · Modern</div>',
         "code":     '<div class="code-badge">💻 World-class code · Optimized · Production ready</div>',
         "general":  "",
-    }
-    return badges.get(creation_type, "")
+    }.get(ct, "")
 
-def get_creation_spinner(creation_type: str) -> str:
+def get_creation_spinner(ct: str) -> str:
     return {
-        "game":     "🎮 Building your game — crafting the perfect experience…",
-        "app":      "🚀 Designing & building your app — making it stunning…",
-        "software": "⚙️ Engineering your software — production-grade quality…",
-        "design":   "✨ Crafting a breathtaking design — pixel-perfect…",
-        "code":     "💻 Writing world-class code — optimizing for perfection…",
-        "general":  "✨ Thinking…",
-    }.get(creation_type, "✨ Thinking…")
+        "game":    "🎮 Building your game…",
+        "app":     "🚀 Designing & building your app…",
+        "software":"⚙️ Engineering your software…",
+        "design":  "✨ Crafting a breathtaking design…",
+        "code":    "💻 Writing world-class code…",
+        "general": "✨ Thinking…",
+    }.get(ct, "✨ Thinking…")
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  WEATHER · SPORTS · NEWS · STOCKS
-# ══════════════════════════════════════════════════════════════════════════════
+# ── Weather ───────────────────────────────────────────────────────────────────
 def get_weather(city: str) -> str:
     try:
-        url  = f"https://wttr.in/{requests.utils.quote(city)}?format=j1"
-        resp = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=8)
+        resp = requests.get(
+            f"https://wttr.in/{requests.utils.quote(city)}?format=j1",
+            headers={"User-Agent":"Mozilla/5.0"}, timeout=8
+        )
         data = resp.json()
         c    = data["current_condition"][0]
         area = data["nearest_area"][0]
@@ -419,79 +689,63 @@ def extract_city_from_query(query: str) -> str:
         query, re.IGNORECASE
     )
     if m: return m.group(1).strip().rstrip(",")
-    stopwords = {
-        "what","is","the","weather","report","temperature","forecast",
-        "today","current","now","like","how","give","me","show",
-        "humidity","climate","condition","conditions","a","an"
-    }
-    words = query.replace("?","").split()
-    return " ".join(w for w in words if w.lower() not in stopwords).strip() or "Guwahati"
+    stopwords = {"what","is","the","weather","report","temperature","forecast",
+                 "today","current","now","like","how","give","me","show",
+                 "humidity","climate","condition","conditions","a","an"}
+    return " ".join(w for w in query.replace("?","").split()
+                    if w.lower() not in stopwords).strip() or "Guwahati"
 
-def is_weather_query(q: str) -> bool:
-    return any(k in q.lower() for k in [
-        "weather","temperature","forecast","humidity",
-        "rain","sunny","cloudy","wind speed","climate today"
-    ])
-
-SPORTS_MAP = {
-    "cricket":"cricket","ipl":"IPL cricket","test match":"test cricket",
-    "odi":"ODI cricket","t20":"T20 cricket","football":"football",
-    "soccer":"soccer","premier league":"Premier League",
-    "champions league":"UEFA Champions League","la liga":"La Liga",
-    "world cup":"FIFA World Cup","basketball":"basketball","nba":"NBA basketball",
-    "tennis":"tennis","wimbledon":"Wimbledon tennis","badminton":"badminton",
-    "hockey":"hockey","baseball":"baseball","formula 1":"Formula 1",
-    "f1":"F1 race","motogp":"MotoGP","rugby":"rugby","golf":"golf",
-    "boxing":"boxing","mma":"MMA UFC","ufc":"UFC fight",
-    "olympics":"Olympics","table tennis":"table tennis",
-    "volleyball":"volleyball","kabaddi":"kabaddi PKL",
+# ── Stocks ────────────────────────────────────────────────────────────────────
+STOCK_ALIASES = {
+    "reliance":"RELIANCE.NS","tata":"TATAMOTORS.NS","tcs":"TCS.NS",
+    "infosys":"INFY.NS","wipro":"WIPRO.NS","hdfc":"HDFCBANK.NS",
+    "icici":"ICICIBANK.NS","sbi":"SBIN.NS","bajaj":"BAJFINANCE.NS",
+    "adani":"ADANIENT.NS","nifty":"^NSEI","sensex":"^BSESN",
+    "apple":"AAPL","microsoft":"MSFT","google":"GOOGL","amazon":"AMZN",
+    "tesla":"TSLA","meta":"META","netflix":"NFLX","nvidia":"NVDA",
+    "bitcoin":"BTC-USD","btc":"BTC-USD","ethereum":"ETH-USD",
+    "eth":"ETH-USD","dogecoin":"DOGE-USD","doge":"DOGE-USD",
+    "solana":"SOL-USD","bnb":"BNB-USD","xrp":"XRP-USD",
+    "dow jones":"^DJI","nasdaq":"^IXIC","s&p 500":"^GSPC",
 }
 
-def detect_sport(query: str) -> str:
+def extract_stock_symbol(query: str) -> tuple:
     q = query.lower()
-    for kw, term in SPORTS_MAP.items():
-        if kw in q: return term
-    return "sports scores today"
+    for name, ticker in STOCK_ALIASES.items():
+        if name in q: return ticker, name.title()
+    m = re.search(r'\b([A-Z]{2,5})\b', query)
+    if m: return m.group(1), m.group(1)
+    return None, None
 
-def get_sports_news(sport_term: str) -> str:
+def get_stock_price(symbol: str, display_name: str) -> str:
     try:
-        import xml.etree.ElementTree as ET
-        url  = (f"https://news.google.com/rss/search?"
-                f"q={requests.utils.quote(sport_term+' score result today')}"
-                f"&hl=en&gl=US&ceid=US:en")
-        resp = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=8)
-        root = ET.fromstring(resp.content)
-        results = []
-        for item in root.findall(".//item")[:7]:
-            title = item.findtext("title","").strip()
-            if title:
-                clean = title.split(" - ")[0].strip()
-                src   = title.split(" - ")[-1].strip() if " - " in title else ""
-                results.append(f"• **{clean}**" + (f" _{src}_" if src else ""))
-        return "\n".join(results) if results else "No recent sports updates found."
+        resp = requests.get(
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=2d",
+            headers={"User-Agent":"Mozilla/5.0","Accept":"application/json"}, timeout=8
+        )
+        meta  = resp.json()["chart"]["result"][0]["meta"]
+        price = meta.get("regularMarketPrice", 0)
+        prev  = meta.get("chartPreviousClose", 0)
+        curr  = meta.get("currency","USD")
+        name  = meta.get("longName") or meta.get("shortName") or display_name
+        chg   = price - prev
+        pct   = (chg/prev*100) if prev else 0
+        arrow = "🟢 ▲" if chg >= 0 else "🔴 ▼"
+        sign  = "+" if chg >= 0 else ""
+        vol   = meta.get("regularMarketVolume","N/A")
+        if isinstance(vol, int): vol = f"{vol:,}"
+        return (
+            f"Name: {name}\nExchange: {meta.get('exchangeName','')}\n"
+            f"Price: {curr} {price:,.2f}\n"
+            f"Change: {arrow} {sign}{chg:.2f} ({sign}{pct:.2f}%)\n"
+            f"Day High: {meta.get('regularMarketDayHigh','N/A')}\n"
+            f"Day Low: {meta.get('regularMarketDayLow','N/A')}\n"
+            f"Volume: {vol}\nMarket: {meta.get('marketState','')}"
+        )
     except Exception as e:
-        return f"Sports fetch failed: {e}"
+        return f"Stock fetch failed: {e}"
 
-def is_sports_query(query: str) -> bool:
-    q = query.lower()
-    if any(p in q for p in ["why","how does","explain","politics","history of"]): return False
-    actions = ["score","scores","result","match","game","live","standings",
-               "winner","champion","playoff","final","tournament","who won"]
-    sports  = list(SPORTS_MAP.keys())
-    return (any(re.search(r'\b'+re.escape(a)+r'\b',q) for a in actions) and
-            any(re.search(r'\b'+re.escape(s)+r'\b',q) for s in sports))
-
-def get_sport_emoji(sport_term: str) -> str:
-    em = {"cricket":"🏏","ipl":"🏏","football":"⚽","soccer":"⚽",
-          "basketball":"🏀","tennis":"🎾","badminton":"🏸","hockey":"🏑",
-          "baseball":"⚾","formula 1":"🏎️","f1":"🏎️","rugby":"🏉",
-          "golf":"⛳","boxing":"🥊","mma":"🥋","ufc":"🥋","olympics":"🏅",
-          "volleyball":"🏐","kabaddi":"🤼"}
-    sl = sport_term.lower()
-    for k, v in em.items():
-        if k in sl: return v
-    return "🏆"
-
+# ── News ──────────────────────────────────────────────────────────────────────
 def get_news(topic: str = "India") -> str:
     try:
         import xml.etree.ElementTree as ET
@@ -510,118 +764,35 @@ def get_news(topic: str = "India") -> str:
     except Exception as e:
         return f"News fetch failed: {e}"
 
-def is_news_query(q: str) -> bool:
-    return any(k in q.lower() for k in [
-        "news","headlines","latest news","today news",
-        "breaking","top news","current news","what happened today"
-    ])
-
 def extract_news_topic(query: str) -> str:
     stopwords = {"news","latest","today","show","me","give","what","is",
                  "the","headlines","breaking","top","current","about","on"}
-    words = query.replace("?","").split()
-    return " ".join(w for w in words if w.lower() not in stopwords).strip() or "India"
+    return " ".join(w for w in query.replace("?","").split()
+                    if w.lower() not in stopwords).strip() or "India"
 
-STOCK_ALIASES = {
-    "reliance":"RELIANCE.NS","tata":"TATAMOTORS.NS","tcs":"TCS.NS",
-    "infosys":"INFY.NS","wipro":"WIPRO.NS","hdfc":"HDFCBANK.NS",
-    "icici":"ICICIBANK.NS","sbi":"SBIN.NS","bajaj":"BAJFINANCE.NS",
-    "adani":"ADANIENT.NS","ongc":"ONGC.NS","itc":"ITC.NS",
-    "maruti":"MARUTI.NS","mahindra":"M&M.NS","kotak":"KOTAKBANK.NS",
-    "axis bank":"AXISBANK.NS","titan":"TITAN.NS",
-    "nifty":"^NSEI","sensex":"^BSESN","bank nifty":"^NSEBANK",
-    "apple":"AAPL","microsoft":"MSFT","google":"GOOGL","alphabet":"GOOGL",
-    "amazon":"AMZN","tesla":"TSLA","meta":"META","facebook":"META",
-    "netflix":"NFLX","nvidia":"NVDA","intel":"INTC","amd":"AMD","uber":"UBER",
-    "bitcoin":"BTC-USD","btc":"BTC-USD","ethereum":"ETH-USD","eth":"ETH-USD",
-    "dogecoin":"DOGE-USD","doge":"DOGE-USD","solana":"SOL-USD",
-    "bnb":"BNB-USD","xrp":"XRP-USD",
-    "dow jones":"^DJI","nasdaq":"^IXIC","s&p 500":"^GSPC","s&p":"^GSPC",
-}
-
-def extract_stock_symbol(query: str) -> tuple:
-    q = query.lower()
-    for name, ticker in STOCK_ALIASES.items():
-        if name in q: return ticker, name.title()
-    m = re.search(r'\b([A-Z]{2,5})\b', query)
-    if m: return m.group(1), m.group(1)
-    return None, None
-
-def get_stock_price(symbol: str, display_name: str) -> str:
-    try:
-        url  = (f"https://query1.finance.yahoo.com/v8/finance/chart/"
-                f"{symbol}?interval=1d&range=2d")
-        resp = requests.get(
-            url,
-            headers={"User-Agent":"Mozilla/5.0","Accept":"application/json"},
-            timeout=8
-        )
-        data  = resp.json()
-        meta  = data["chart"]["result"][0]["meta"]
-        price = meta.get("regularMarketPrice", 0)
-        prev  = meta.get("chartPreviousClose", 0)
-        curr  = meta.get("currency","USD")
-        name  = meta.get("longName") or meta.get("shortName") or display_name
-        exch  = meta.get("exchangeName","")
-        mktst = meta.get("marketState","")
-        chg   = price - prev
-        pct   = (chg/prev*100) if prev else 0
-        arrow = "🟢 ▲" if chg >= 0 else "🔴 ▼"
-        sign  = "+" if chg >= 0 else ""
-        high  = meta.get("regularMarketDayHigh","N/A")
-        low   = meta.get("regularMarketDayLow","N/A")
-        vol   = meta.get("regularMarketVolume","N/A")
-        if isinstance(vol, int): vol = f"{vol:,}"
-        return (
-            f"Name: {name}\nExchange: {exch}\n"
-            f"Price: {curr} {price:,.2f}\n"
-            f"Change: {arrow} {sign}{chg:.2f} ({sign}{pct:.2f}%)\n"
-            f"Day High: {high}\nDay Low: {low}\n"
-            f"Volume: {vol}\nMarket: {mktst}"
-        )
-    except Exception as e:
-        return f"Stock fetch failed: {e}"
-
-def is_stock_query(query: str) -> bool:
-    q = query.lower()
-    return (any(a in q for a in [
-                "stock","share price","stock price","price of","how much is",
-                "market price","trading at","crypto","bitcoin","ethereum",
-                "sensex","nifty","nasdaq","dow jones","coin price"]) or
-            any(k in q for k in STOCK_ALIASES))
-
+# ── Web search ────────────────────────────────────────────────────────────────
 def web_search(query: str, max_results: int = 5) -> str:
     try:
         resp = requests.get(
             f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}",
             headers={"User-Agent":
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"},
+                "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"},
             timeout=10
         )
-        snippets = re.findall(
-            r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>',
-            resp.text, re.DOTALL
-        )
-        titles = re.findall(
-            r'class="result__title"[^>]*>.*?<a[^>]*>(.*?)</a>',
-            resp.text, re.DOTALL
-        )
-        clean_s = [re.sub(r'<[^>]+>','',s).strip() for s in snippets[:max_results]]
-        clean_t = [re.sub(r'<[^>]+>','',t).strip() for t in titles[:max_results]]
-        results = [f"• {t}: {s}" for t,s in zip(clean_t,clean_s) if s]
+        snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>', resp.text, re.DOTALL)
+        titles   = re.findall(r'class="result__title"[^>]*>.*?<a[^>]*>(.*?)</a>', resp.text, re.DOTALL)
+        clean_s  = [re.sub(r'<[^>]+>','',s).strip() for s in snippets[:max_results]]
+        clean_t  = [re.sub(r'<[^>]+>','',t).strip() for t in titles[:max_results]]
+        results  = [f"• {t}: {s}" for t,s in zip(clean_t,clean_s) if s]
         if results: return "\n".join(results)
-        # fallback
-        r2   = requests.get(
-            "https://api.duckduckgo.com/",
-            params={"q":query,"format":"json","no_html":"1","skip_disambig":"1"},
-            timeout=8
-        )
+        r2   = requests.get("https://api.duckduckgo.com/",
+                            params={"q":query,"format":"json","no_html":"1","skip_disambig":"1"},
+                            timeout=8)
         data = r2.json()
         parts = []
-        if data.get("Answer"):   parts.append(f"Answer: {data['Answer']}")
-        if data.get("Abstract"): parts.append(f"Summary: {data['Abstract'][:500]}")
+        if data.get("Answer"):   parts.append(data["Answer"])
+        if data.get("Abstract"): parts.append(data["Abstract"][:500])
         for t in data.get("RelatedTopics",[])[:3]:
             if isinstance(t,dict) and t.get("Text"): parts.append(t["Text"][:200])
         return "\n".join(parts) if parts else "No results found."
@@ -639,7 +810,7 @@ def get_current_facts(query: str) -> str:
         for item in root.findall(".//item")[:5]:
             title   = item.findtext("title","").strip()
             pub_raw = item.findtext("pubDate","")
-            pub     = pub_raw[:22].strip() if pub_raw else ""
+            pub     = pub_raw[:22] if pub_raw else ""
             if title:
                 clean = title.split(" - ")[0].strip()
                 results.append(f"[{pub}] {clean}" if pub else clean)
@@ -652,38 +823,45 @@ SEARCH_TRIGGERS = [
     "when is","when was","when did","when will",
     "where is","where was","current","latest","recent",
     "today","election","prime minister","president",
-    "chief minister","cm of","governor","minister of",
-    "score","match","winner","champion","result",
-    "price","stock","weather","2023","2024","2025",
+    "chief minister","cm of","minister of",
+    "winner","champion","result","price","stock","weather",
+    "2023","2024","2025","2026",
 ]
 
 def needs_search(query: str) -> bool:
     q = query.lower()
-    if any(k in q for k in ["who made you","who created you","who built you",
-                              "who are you","your creator"]): return False
+    if any(k in q for k in ["who made you","who created you","who are you"]): return False
     creation_kw = GAME_KEYWORDS + APP_KEYWORDS + SOFTWARE_KEYWORDS + DESIGN_KEYWORDS
     if any(k in q for k in creation_kw): return False
+    if is_cricket_or_sports_query(query): return False  # handled separately
     return any(t in q for t in SEARCH_TRIGGERS)
 
+def is_code_query(query: str) -> bool:
+    q = query.lower()
+    if is_stock_query(query) or is_weather_query(query): return False
+    return any(t in q for t in [
+        "write","code","program","script","function","implement",
+        "create","build","develop","make","generate","algorithm",
+        "sort","search","fibonacci","factorial","prime","reverse",
+        "palindrome","linked list","binary tree","api","flask",
+        "django","react","html","css","sql query","regex",
+        "class","oop","recursion","dynamic programming","leetcode",
+        "debug","fix","error in","bug","solve","calculator",
+    ])
+
+# ── Code runner ───────────────────────────────────────────────────────────────
 LANGUAGE_MAP = {
     "python":("python","3.10.0"),
     "javascript":("javascript","18.15.0"),"js":("javascript","18.15.0"),
-    "typescript":("typescript","5.0.3"),  "ts":("typescript","5.0.3"),
+    "typescript":("typescript","5.0.3"),"ts":("typescript","5.0.3"),
     "java":("java","15.0.2"),
-    "c++":("c++","10.2.0"),              "cpp":("c++","10.2.0"),
-    "c":("c","10.2.0"),
-    "rust":("rust","1.68.2"),
-    "go":("go","1.16.2"),
-    "ruby":("ruby","3.0.1"),
-    "php":("php","8.2.3"),
-    "swift":("swift","5.3.3"),
-    "kotlin":("kotlin","1.8.20"),
-    "r":("r","4.1.1"),
+    "c++":("c++","10.2.0"),"cpp":("c++","10.2.0"),
+    "c":("c","10.2.0"),"rust":("rust","1.68.2"),"go":("go","1.16.2"),
+    "ruby":("ruby","3.0.1"),"php":("php","8.2.3"),"swift":("swift","5.3.3"),
+    "kotlin":("kotlin","1.8.20"),"r":("r","4.1.1"),
     "bash":("bash","5.2.0"),"shell":("bash","5.2.0"),
-    "sql":("sqlite3","3.36.0"),
-    "lua":("lua","5.4.4"),
-    "perl":("perl","5.36.0"),
-    "scala":("scala","3.2.2"),
+    "sql":("sqlite3","3.36.0"),"lua":("lua","5.4.4"),
+    "perl":("perl","5.36.0"),"scala":("scala","3.2.2"),
 }
 
 def run_code(code: str, language: str) -> str:
@@ -691,11 +869,9 @@ def run_code(code: str, language: str) -> str:
         lang, version = LANGUAGE_MAP.get(language.lower(), ("python","3.10.0"))
         resp   = requests.post(
             "https://emkc.org/api/v2/piston/execute",
-            json={
-                "language":lang,"version":version,
-                "files":[{"name":f"main.{language[:3]}","content":code}],
-                "stdin":"","args":[],"compile_timeout":10000,"run_timeout":5000,
-            },
+            json={"language":lang,"version":version,
+                  "files":[{"name":f"main.{language[:3]}","content":code}],
+                  "stdin":"","args":[],"compile_timeout":10000,"run_timeout":5000},
             timeout=15
         )
         result = resp.json()
@@ -720,46 +896,26 @@ def extract_all_code_blocks(text: str):
     matches = re.findall(r"```(\w+)?\n([\s\S]*?)```", text)
     return [(lang.lower() if lang else "text", code.strip()) for lang,code in matches]
 
-def is_code_query(query: str) -> bool:
-    q = query.lower()
-    if is_stock_query(query) or is_weather_query(query): return False
-    return any(t in q for t in [
-        "write","code","program","script","function","implement",
-        "create","build","develop","make","generate","algorithm",
-        "sort","search","fibonacci","factorial","prime","reverse",
-        "palindrome","linked list","binary tree","api","flask",
-        "django","react","html","css","sql query","regex",
-        "class","oop","recursion","dynamic programming","leetcode",
-        "debug","fix","error in","bug","solve","calculator",
-    ])
-
 def build_html_app(code_blocks: list) -> str:
     html_part, css_part, js_part, full_html = "", "", "", ""
     for lang, code in code_blocks:
         if lang == "html":
-            if "<!doctype" in code.lower() or "<html" in code.lower():
-                full_html = code
-            else:
-                html_part = code
-        elif lang == "css":
-            css_part = code
-        elif lang in ("javascript","js"):
-            js_part = code
+            if "<!doctype" in code.lower() or "<html" in code.lower(): full_html = code
+            else: html_part = code
+        elif lang == "css": css_part = code
+        elif lang in ("javascript","js"): js_part = code
     if full_html: return full_html
     if html_part or css_part or js_part:
         return (
-            "<!DOCTYPE html>\n<html lang='en'>\n<head>\n"
-            "<meta charset='UTF-8'>\n"
+            "<!DOCTYPE html>\n<html lang='en'>\n<head>\n<meta charset='UTF-8'>\n"
             "<meta name='viewport' content='width=device-width,initial-scale=1.0'>\n"
-            "<title>Nova AI</title>\n"
-            f"<style>{css_part}</style>\n</head>\n<body>\n"
+            f"<title>Nova AI</title>\n<style>{css_part}</style>\n</head>\n<body>\n"
             f"{html_part}\n<script>{js_part}</script>\n</body>\n</html>"
         )
     return ""
 
-
 # ══════════════════════════════════════════════════════════════════════════════
-#  ✅ THE FIX: build_messages now includes full conversation history
+#  BUILD MESSAGES WITH FULL HISTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
 def build_messages(
@@ -768,50 +924,43 @@ def build_messages(
     is_weather:     bool = False,
     creation_type:  str  = "general"
 ) -> list:
-    system = get_creation_system_prompt(creation_type)
-
-    # ── 1. System prompt (always first) ───────────────────────────────────────
+    system   = get_creation_system_prompt(creation_type)
     messages = [{"role": "system", "content": system}]
 
-    # ── 2. Conversation history (all previous turns) ──────────────────────────
-    #    Skip the LAST item because that's the user message we're about to add.
-    #    Also clean content: strip HTML badges before sending to API.
-    history = st.session_state.messages[:-1]   # everything except current user msg
-
-    # Keep only the last N turns to avoid token overflow
+    # Full conversation history (capped)
+    history = st.session_state.messages[:-1]
     if len(history) > MAX_HISTORY_TURNS * 2:
         history = history[-(MAX_HISTORY_TURNS * 2):]
 
     for msg in history:
-        role    = msg["role"]
-        content = msg["content"]
+        content = re.sub(r'<div[^>]*>.*?</div>', '', msg["content"], flags=re.DOTALL)
+        content = re.sub(r'<[^>]+>', '', content).strip()
+        if content:
+            messages.append({"role": msg["role"], "content": content[:3000]})
 
-        # Strip HTML badge divs — the API doesn't need them
-        content = re.sub(r'<div[^>]*>.*?</div>', '', content, flags=re.DOTALL)
-        content = re.sub(r'<[^>]+>', '', content)          # strip any remaining HTML
-        content = content.strip()
-
-        if content:   # skip empty messages after stripping
-            messages.append({"role": role, "content": content[:3000]})
-
-    # ── 3. Current user message (with optional search context) ────────────────
+    # Current user message
     if search_results and is_weather:
         user_content = (
             f"Live weather data for '{user_query}':\n\n{search_results}\n\n"
-            f"Present this weather info clearly."
+            f"Present this clearly."
         )
     elif search_results:
         user_content = (
-            f"Web search results for '{user_query}':\n\n{search_results}\n\n"
-            f"Answer this accurately based on the above: {user_query}\n"
-            f"Use search data as primary source. Be direct and confident."
+            f"=== LIVE REAL-TIME DATA (fetched right now) ===\n"
+            f"Today's date: {get_today_date_str()}\n\n"
+            f"{search_results}\n\n"
+            f"=== USER QUESTION ===\n{user_query}\n\n"
+            f"INSTRUCTIONS: Use the live data above as ABSOLUTE TRUTH. "
+            f"Answer the question directly and confidently. "
+            f"Do NOT say you lack real-time data — it's right above. "
+            f"Do NOT redirect to external sites. "
+            f"State today's matches, scores, or news directly from the data provided."
         )
     else:
         user_content = user_query
 
-    messages.append({"role": "user", "content": user_content[:4000]})
+    messages.append({"role": "user", "content": user_content[:5000]})
     return messages
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE
@@ -819,27 +968,25 @@ def build_messages(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  HERO
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("""
+st.markdown(f"""
 <div class="hero">
-    <div class="hero-badge">LIVE &nbsp;·&nbsp; FREE &nbsp;·&nbsp; UNLIMITED &nbsp;·&nbsp; MEMORY ✓</div>
+    <div class="hero-badge">LIVE · FREE · UNLIMITED · REAL-TIME</div>
     <h1>Nova<span> AI</span></h1>
-    <p>World-class AI with full memory — builds games, apps, software & anything you imagine.</p>
+    <p>Real-time AI — live scores, today's matches, stocks, weather & builds anything.</p>
 </div>
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-purple"></span> 🧠 Full Memory</div>
-    <div class="stat-pill"><span class="dot dot-blue"></span>  🎮 Games</div>
-    <div class="stat-pill"><span class="dot dot-orange"></span> 🚀 Apps</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span>  🏏 Live Cricket</div>
+    <div class="stat-pill"><span class="dot dot-orange"></span> 🎮 Games & Apps</div>
     <div class="stat-pill"><span class="dot dot-green"></span> 💻 20+ Languages</div>
-    <div class="stat-pill"><span class="dot dot-green"></span> 📈 Live Data</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> 📈 Live Stocks</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
-# ── Toolbar ───────────────────────────────────────────────────────────────────
 col1, col2, col3 = st.columns([5, 1, 1])
 with col2:
     count = len([m for m in st.session_state.messages if m["role"] == "user"])
@@ -853,75 +1000,51 @@ with col3:
         st.session_state.messages = []
         st.rerun()
 
-# ── Chat history display ──────────────────────────────────────────────────────
+# ── Chat history ──────────────────────────────────────────────────────────────
 if not st.session_state.messages:
-    st.markdown("""
+    st.markdown(f"""
     <div style="text-align:center;padding:2rem 1rem 1rem;color:var(--muted);">
         <div style="font-size:2.2rem;margin-bottom:.8rem">✨</div>
         <p style="font-size:1rem;font-weight:600;color:#94a3b8;margin-bottom:1.2rem">
-            What would you like to create today?
+            What would you like to know or create?
         </p>
-    </div>
-    <div class="category-grid">
-        <div class="category-card">
-            <div class="category-icon">🎮</div>
-            <div class="category-title">Games</div>
-            <div class="category-examples">Snake · Tetris · 2048<br>Flappy Bird · Chess</div>
-        </div>
-        <div class="category-card">
-            <div class="category-icon">🚀</div>
-            <div class="category-title">Apps</div>
-            <div class="category-examples">Dashboard · Todo · Chat<br>E-commerce · Portfolio</div>
-        </div>
-        <div class="category-card">
-            <div class="category-icon">✨</div>
-            <div class="category-title">UI Design</div>
-            <div class="category-examples">Landing Pages · Components<br>Animations · Themes</div>
-        </div>
-        <div class="category-card">
-            <div class="category-icon">💻</div>
-            <div class="category-title">Code</div>
-            <div class="category-examples">Python · JS · Java · C++<br>Algorithms · APIs</div>
-        </div>
-        <div class="category-card">
-            <div class="category-icon">🌐</div>
-            <div class="category-title">Live Data</div>
-            <div class="category-examples">Weather · Stocks · Crypto<br>Sports · News</div>
-        </div>
-        <div class="category-card">
-            <div class="category-icon">🧠</div>
-            <div class="category-title">Memory ✓</div>
-            <div class="category-examples">Remembers everything<br>Full conversation context</div>
-        </div>
+        <p style="font-size:.85rem;color:var(--muted);line-height:2.2">
+            🏏 <em>"Which IPL team is playing today?"</em><br>
+            📊 <em>"CSK vs LSG live score"</em><br>
+            🎮 <em>"Build me a snake game"</em><br>
+            🌤️ <em>"Weather in Mumbai"</em><br>
+            📈 <em>"Bitcoin price"</em>
+        </p>
     </div>
     <div class="divider"></div>
     """, unsafe_allow_html=True)
 else:
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
-            if msg.get("searched"):
-                st.markdown('<div class="search-badge">🔍 Searched the web</div>',
-                            unsafe_allow_html=True)
+            if msg.get("live_data"):
+                st.markdown('<div class="live-badge"> LIVE DATA</div>', unsafe_allow_html=True)
+            elif msg.get("searched"):
+                st.markdown('<div class="search-badge">🔍 Searched the web</div>', unsafe_allow_html=True)
             ct = msg.get("creation_type","")
             if ct and ct != "general":
                 st.markdown(get_creation_badge(ct), unsafe_allow_html=True)
             st.markdown(msg["content"])
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  CHAT INPUT
 # ══════════════════════════════════════════════════════════════════════════════
-if prompt := st.chat_input("Ask me anything — I remember our full conversation 🧠"):
+if prompt := st.chat_input("Ask anything — live scores, today's match, build apps, or any question…"):
 
     st.session_state.messages.append({"role":"user","content":prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        searched       = False
+        searched  = False
+        live_data = False
         search_results = ""
 
-        # ── Stock ─────────────────────────────────────────────────────────────
+        # ── STOCK ─────────────────────────────────────────────────────────────
         if is_stock_query(prompt):
             symbol, dname = extract_stock_symbol(prompt)
             if not symbol:
@@ -948,20 +1071,41 @@ if prompt := st.chat_input("Ask me anything — I remember our full conversation
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role":"assistant","content":response})
 
-        # ── Sports ────────────────────────────────────────────────────────────
-        elif is_sports_query(prompt):
-            sport_term = detect_sport(prompt)
-            emoji = get_sport_emoji(sport_term)
-            with st.spinner(f"{emoji} Fetching live sports…"):
-                sports_data = get_sports_news(sport_term)
-            response = (
-                f'<div class="search-badge">{emoji} Live sports</div>\n\n'
-                f"### {emoji} {sport_term.title()}\n\n{sports_data}"
-            )
-            st.markdown(response, unsafe_allow_html=True)
-            st.session_state.messages.append({"role":"assistant","content":response})
+        # ── 🏏 CRICKET / SPORTS — THE BIG FIX ─────────────────────────────────
+        elif is_cricket_or_sports_query(prompt):
+            with st.spinner("🏏 Fetching real-time match data from multiple sources…"):
+                sports_data = get_realtime_sports_data(prompt)
+                live_data   = True
 
-        # ── News ──────────────────────────────────────────────────────────────
+            st.markdown('<div class="live-badge"> LIVE DATA — Real-time match info</div>',
+                        unsafe_allow_html=True)
+
+            # Pass to AI with strong instructions to use the data
+            for attempt in range(3):
+                try:
+                    with st.spinner("🤖 Processing live data…" if attempt == 0 else "Retrying ⏳"):
+                        if attempt > 0: time.sleep(60)
+                        completion = client.chat.completions.create(
+                            messages=build_messages(
+                                prompt,
+                                search_results=sports_data,
+                                creation_type="general"
+                            ),
+                            model=MODEL,
+                            max_tokens=1024,
+                            temperature=0.1,  # very low = more factual
+                        )
+                    response = completion.choices[0].message.content
+                    st.markdown(response)
+                    st.session_state.messages.append({
+                        "role":"assistant","content":response,"live_data":True
+                    })
+                    break
+                except Exception as e:
+                    if "rate_limit_exceeded" in str(e) and attempt < 2: continue
+                    st.error(f"❌ Error: {e}"); break
+
+        # ── NEWS ──────────────────────────────────────────────────────────────
         elif is_news_query(prompt):
             with st.spinner("📰 Fetching news…"):
                 topic     = extract_news_topic(prompt)
@@ -973,7 +1117,7 @@ if prompt := st.chat_input("Ask me anything — I remember our full conversation
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role":"assistant","content":response})
 
-        # ── Weather ───────────────────────────────────────────────────────────
+        # ── WEATHER ───────────────────────────────────────────────────────────
         elif is_weather_query(prompt):
             with st.spinner("🌤️ Fetching weather…"):
                 city         = extract_city_from_query(prompt)
@@ -996,10 +1140,9 @@ if prompt := st.chat_input("Ask me anything — I remember our full conversation
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role":"assistant","content":response})
 
-        # ── Creation / Code / General (WITH MEMORY) ───────────────────────────
+        # ── CREATION / CODE / GENERAL ─────────────────────────────────────────
         else:
             creation_type = classify_creation_request(prompt)
-
             if needs_search(prompt):
                 with st.spinner("🔍 Searching the web…"):
                     search_results = web_search(prompt)
@@ -1010,96 +1153,67 @@ if prompt := st.chat_input("Ask me anything — I remember our full conversation
 
             for attempt in range(3):
                 try:
-                    spin = (get_creation_spinner(creation_type)
-                            if attempt == 0 else "Rate limited — retrying ⏳")
+                    spin = get_creation_spinner(creation_type) if attempt == 0 else "Retrying ⏳"
                     with st.spinner(spin):
                         if attempt > 0: time.sleep(60)
-
-                        # ✅ Full history is passed here
                         completion = client.chat.completions.create(
-                            messages=build_messages(
-                                prompt,
-                                search_results,
-                                creation_type=creation_type
-                            ),
-                            model=MODEL,
-                            max_tokens=4096,
-                            temperature=0.25,
+                            messages=build_messages(prompt, search_results,
+                                                    creation_type=creation_type),
+                            model=MODEL, max_tokens=4096, temperature=0.25,
                         )
                     response = completion.choices[0].message.content
 
-                    # Badges
                     if searched:
                         st.markdown('<div class="search-badge">🔍 Web search</div>',
                                     unsafe_allow_html=True)
                     badge = get_creation_badge(creation_type)
-                    if badge:
-                        st.markdown(badge, unsafe_allow_html=True)
-
-                    # Memory indicator for follow-up questions
+                    if badge: st.markdown(badge, unsafe_allow_html=True)
                     if len(st.session_state.messages) > 2:
                         st.markdown(
                             f'<div class="memory-badge">'
-                            f'🧠 Remembering {len(st.session_state.messages)//2} turns</div>',
+                            f'🧠 {len(st.session_state.messages)//2} turns remembered</div>',
                             unsafe_allow_html=True
                         )
 
-                    # Parse & render
                     code_blocks = extract_all_code_blocks(response)
                     code, lang  = extract_code_and_language(response)
                     langs_found = [l for l,_ in code_blocks]
-                    is_web      = any(l in ("html","css","javascript","js")
-                                      for l in langs_found)
+                    is_web      = any(l in ("html","css","javascript","js") for l in langs_found)
 
                     st.markdown(response)
 
-                    # Live HTML preview
                     if is_web:
                         html_src = build_html_app(code_blocks)
                         if html_src:
                             st.markdown("---")
-                            labels = {
-                                "game":    "🎮 Live Game — Play it here!",
-                                "app":     "🚀 Live App Preview",
-                                "software":"⚙️ Live Software Preview",
-                                "design":  "✨ Live Design Preview",
-                            }
+                            labels = {"game":"🎮 Live Game!","app":"🚀 Live App",
+                                      "software":"⚙️ Live Software","design":"✨ Live Design"}
                             st.markdown(f"### {labels.get(creation_type,'🖥️ Live Preview')}")
                             h = 650 if creation_type in ("game","app","software") else 520
                             st.components.v1.html(html_src, height=h, scrolling=True)
                             b64   = base64.b64encode(html_src.encode()).decode()
-                            fnames = {"game":"nova_game.html","app":"nova_app.html",
-                                      "software":"nova_software.html","design":"nova_design.html"}
-                            fname = fnames.get(creation_type,"nova_ai.html")
+                            fname = {"game":"nova_game.html","app":"nova_app.html",
+                                     "software":"nova_software.html",
+                                     "design":"nova_design.html"}.get(creation_type,"nova_ai.html")
                             st.markdown(
-                                f'<a href="data:text/html;base64,{b64}" '
-                                f'download="{fname}" class="btn-download">'
-                                f'⬇️ Download {fname}</a>',
+                                f'<a href="data:text/html;base64,{b64}" download="{fname}" '
+                                f'class="btn-download">⬇️ Download {fname}</a>',
                                 unsafe_allow_html=True
                             )
-
-                    # Run button for non-web code
                     elif code and lang and lang not in ("html","css"):
                         rk = f"run_{len(st.session_state.messages)}"
                         if st.button(f"▶ Run {lang.title()}", key=rk):
                             with st.spinner(f"⚙️ Running {lang}…"):
                                 out = run_code(code, lang)
-                            st.markdown(
-                                f'<div class="{"error-box" if "❌" in out else "output-box"}">'
-                                f'{out}</div>',
-                                unsafe_allow_html=True
-                            )
+                            cls = "error-box" if "❌" in out else "output-box"
+                            st.markdown(f'<div class="{cls}">{out}</div>',
+                                        unsafe_allow_html=True)
 
                     st.session_state.messages.append({
-                        "role":          "assistant",
-                        "content":       response,
-                        "searched":      searched,
-                        "creation_type": creation_type,
+                        "role":"assistant","content":response,
+                        "searched":searched,"creation_type":creation_type,
                     })
                     break
-
                 except Exception as e:
-                    if "rate_limit_exceeded" in str(e) and attempt < 2:
-                        continue
-                    st.error(f"❌ Error: {e}")
-                    break
+                    if "rate_limit_exceeded" in str(e) and attempt < 2: continue
+                    st.error(f"❌ Error: {e}"); break
