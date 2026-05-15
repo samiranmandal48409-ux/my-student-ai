@@ -305,14 +305,34 @@ def get_sports_news(sport_term: str) -> str:
 
 
 def is_sports_query(query: str) -> bool:
+    """Strict sports detection — only trigger on clear sports intent."""
+    import re
     q = query.lower()
-    sport_keywords = list(SPORTS_MAP.keys()) + [
-        "score", "match", "game", "tournament", "league", "championship",
-        "result", "winner", "live score", "standings", "fixture", "squad",
-        "player", "team", "coach", "transfer", "draft", "playoff", "final",
-        "semifinal", "quarterfinal", "grand prix", "bout", "fight night"
+
+    # Hard exclude — these are never sports questions even if they contain sport words
+    non_sport_phrases = [
+        "why", "how does", "explain", "what does", "politics", "economy",
+        "government", "policy", "modi", "minister", "election", "vote",
+        "buy", "sell", "market", "gold", "holiday", "travel", "foreign",
+        "history of", "origin of", "definition", "meaning of", "what is the",
+        "tell me about", "who invented", "science", "health", "study",
     ]
-    return any(k in q for k in sport_keywords)
+    if any(phrase in q for phrase in non_sport_phrases):
+        return False
+
+    # Must contain a clear sports action word AND a sport name
+    action_words = [
+        "score", "scores", "result", "results", "match", "game", "live",
+        "fixture", "standings", "winner", "champion", "playoff", "final",
+        "semifinal", "quarterfinal", "tournament", "league table", "points table",
+        "who won", "who is playing", "today's match", "latest score",
+    ]
+    sport_names = list(SPORTS_MAP.keys())
+
+    has_action = any(re.search(r'\b' + re.escape(a) + r'\b', q) for a in action_words)
+    has_sport  = any(re.search(r'\b' + re.escape(s) + r'\b', q) for s in sport_names)
+
+    return has_action and has_sport
 
 
 def get_sport_emoji(sport_term: str) -> str:
