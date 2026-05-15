@@ -210,24 +210,126 @@ def extract_city_from_query(query: str) -> str:
     return " ".join(city_words).strip() or "Guwahati"
 
 
-# ── Cricket scores via RSS (free, no API key) ─────────────────────────────────
-def get_cricket_scores() -> str:
-    """Fetch live cricket scores from CricBuzz RSS feed."""
+# ── Universal Sports via Google News RSS (free, no API key, all sports) ───────
+SPORTS_MAP = {
+    # Cricket
+    "cricket": "cricket", "ipl": "IPL cricket", "test match": "test cricket",
+    "odi": "ODI cricket", "t20": "T20 cricket", "wicket": "cricket",
+    "innings": "cricket innings", "batting": "cricket batting",
+
+    # Football / Soccer
+    "football": "football", "soccer": "soccer", "premier league": "Premier League",
+    "fifa": "FIFA football", "champions league": "UEFA Champions League",
+    "la liga": "La Liga", "bundesliga": "Bundesliga", "serie a": "Serie A",
+    "world cup": "FIFA World Cup", "euro": "UEFA Euro football",
+
+    # Basketball
+    "basketball": "basketball", "nba": "NBA basketball", "nbl": "NBL basketball",
+
+    # Tennis
+    "tennis": "tennis", "wimbledon": "Wimbledon tennis", "us open tennis": "US Open tennis",
+    "french open": "French Open tennis", "australian open": "Australian Open tennis",
+    "atp": "ATP tennis", "wta": "WTA tennis",
+
+    # Badminton
+    "badminton": "badminton", "bwf": "BWF badminton",
+
+    # Hockey
+    "hockey": "hockey", "field hockey": "field hockey", "ice hockey": "ice hockey",
+    "nhl": "NHL ice hockey",
+
+    # Baseball
+    "baseball": "baseball", "mlb": "MLB baseball",
+
+    # Formula 1 / motorsport
+    "formula 1": "Formula 1", "f1": "F1 race", "motorsport": "motorsport",
+    "motogp": "MotoGP", "nascar": "NASCAR racing",
+
+    # Rugby
+    "rugby": "rugby", "rugby world cup": "Rugby World Cup",
+
+    # Golf
+    "golf": "golf", "masters": "Masters golf", "pga": "PGA golf",
+
+    # Boxing / MMA
+    "boxing": "boxing", "mma": "MMA UFC", "ufc": "UFC fight",
+    "wrestling": "wrestling WWE",
+
+    # Olympics
+    "olympics": "Olympics", "asian games": "Asian Games",
+    "commonwealth games": "Commonwealth Games",
+
+    # Table Tennis
+    "table tennis": "table tennis", "ping pong": "ping pong",
+
+    # Volleyball
+    "volleyball": "volleyball",
+
+    # Kabaddi
+    "kabaddi": "kabaddi PKL",
+
+    # Athletics
+    "athletics": "athletics sprint", "marathon": "marathon running",
+    "swimming": "swimming sport", "cycling": "cycling sport",
+}
+
+def detect_sport(query: str) -> str:
+    """Detect which sport the user is asking about and return a search term."""
+    q = query.lower()
+    for keyword, search_term in SPORTS_MAP.items():
+        if keyword in q:
+            return search_term
+    return "sports scores today"   # generic fallback
+
+
+def get_sports_news(sport_term: str) -> str:
+    """Fetch live sports news/scores from Google News RSS — no API key needed."""
     try:
         import xml.etree.ElementTree as ET
-        url = "https://www.cricbuzz.com/rss-feeds/cricket-news"
+        query = requests.utils.quote(f"{sport_term} score result today")
+        url = f"https://news.google.com/rss/search?q={query}&hl=en&gl=US&ceid=US:en"
         resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
         root = ET.fromstring(resp.content)
-        items = root.findall(".//item")[:6]
-        scores = []
+        items = root.findall(".//item")[:7]
+        results = []
         for item in items:
             title = item.findtext("title", "").strip()
-            link  = item.findtext("link", "").strip()
+            pub   = item.findtext("pubDate", "")[:22].strip()
             if title:
-                scores.append(f"• {title}")
-        return "\n".join(scores) if scores else "No live scores available right now."
+                clean = title.split(" - ")[0].strip()
+                src   = title.split(" - ")[-1].strip() if " - " in title else ""
+                results.append(f"• **{clean}**" + (f" _{src}_" if src else ""))
+        return "\n".join(results) if results else "No recent sports updates found."
     except Exception as e:
-        return f"Cricket fetch failed: {e}"
+        return f"Sports fetch failed: {e}"
+
+
+def is_sports_query(query: str) -> bool:
+    q = query.lower()
+    sport_keywords = list(SPORTS_MAP.keys()) + [
+        "score", "match", "game", "tournament", "league", "championship",
+        "result", "winner", "live score", "standings", "fixture", "squad",
+        "player", "team", "coach", "transfer", "draft", "playoff", "final",
+        "semifinal", "quarterfinal", "grand prix", "bout", "fight night"
+    ]
+    return any(k in q for k in sport_keywords)
+
+
+def get_sport_emoji(sport_term: str) -> str:
+    """Return an emoji for the detected sport."""
+    emoji_map = {
+        "cricket": "🏏", "ipl": "🏏", "football": "⚽", "soccer": "⚽",
+        "basketball": "🏀", "nba": "🏀", "tennis": "🎾", "badminton": "🏸",
+        "hockey": "🏑", "baseball": "⚾", "formula 1": "🏎️", "f1": "🏎️",
+        "rugby": "🏉", "golf": "⛳", "boxing": "🥊", "mma": "🥋", "ufc": "🥋",
+        "olympics": "🏅", "volleyball": "🏐", "kabaddi": "🤼", "swimming": "🏊",
+        "cycling": "🚴", "athletics": "🏃", "wrestling": "🤼", "motorsport": "🏎️",
+    }
+    sport_lower = sport_term.lower()
+    for key, emoji in emoji_map.items():
+        if key in sport_lower:
+            return emoji
+    return "🏆"
 
 
 # ── News via Google News RSS (free, no API key, unlimited) ────────────────────
@@ -253,14 +355,6 @@ def get_news(topic: str = "India") -> str:
         return "\n".join(news_list) if news_list else "No news found for this topic."
     except Exception as e:
         return f"News fetch failed: {e}"
-
-
-def is_cricket_query(query: str) -> bool:
-    q = query.lower()
-    keywords = ["cricket", "ipl", "score", "match score", "cricket score",
-                "live score", "test match", "odi", "t20", "who is batting",
-                "wicket", "runs", "over", "innings"]
-    return any(k in q for k in keywords)
 
 
 def is_news_query(query: str) -> bool:
@@ -399,7 +493,7 @@ st.markdown("""
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-blue"></span> Live web search</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> No hallucination</div>
-    <div class="stat-pill"><span class="dot dot-green"></span> Cricket scores</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> All world sports</div>
     <div class="stat-pill"><span class="dot dot-blue"></span> Latest news</div>
 </div>
 <div class="divider"></div>
@@ -427,9 +521,10 @@ if not st.session_state.messages:
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.8rem">How can I help you today?</p>
         <p style="font-size:.875rem;line-height:2.2">
             🌤️ <em>"Weather in Guwahati, Assam"</em><br>
-            🏏 <em>"Show me live cricket scores"</em><br>
-            📰 <em>"Latest news about India"</em><br>
-            💻 <em>"Write a Python web scraper"</em>
+            ⚽ <em>"Latest Premier League scores"</em><br>
+            🏏 <em>"IPL match result today"</em><br>
+            🎾 <em>"Wimbledon latest update"</em><br>
+            📰 <em>"Latest news about India"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -454,14 +549,16 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
-        # ── Cricket: fetch & display directly ────────────────────────────────
-        if is_cricket_query(prompt):
-            with st.spinner("🏏 Fetching live cricket scores…"):
-                cricket_data = get_cricket_scores()
+        # ── Sports: universal handler for ALL world sports ────────────────────
+        if is_sports_query(prompt):
+            sport_term = detect_sport(prompt)
+            emoji = get_sport_emoji(sport_term)
+            with st.spinner(f"{emoji} Fetching live sports updates…"):
+                sports_data = get_sports_news(sport_term)
             response = (
-                f'<div class="search-badge">🏏 Live cricket data</div>\n\n'
-                f"### 🏏 Latest Cricket Updates\n\n"
-                f"{cricket_data}"
+                f'<div class="search-badge">{emoji} Live sports data</div>\n\n'
+                f"### {emoji} Latest — {sport_term.title()}\n\n"
+                f"{sports_data}"
             )
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
