@@ -2,6 +2,7 @@ import streamlit as st
 from groq import Groq
 import time
 import requests
+import re
 
 st.set_page_config(
     page_title="Nova AI",
@@ -188,12 +189,10 @@ MODEL = "llama-3.3-70b-versatile"
 
 # ── Weather via wttr.in (100% free, no API key needed) ───────────────────────
 def get_weather(city: str) -> str:
-    """Fetch real-time weather from wttr.in — no API key required."""
     try:
         url = f"https://wttr.in/{requests.utils.quote(city)}?format=j1"
         resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
         data = resp.json()
-
         current     = data["current_condition"][0]
         area        = data["nearest_area"][0]
         city_name   = area["areaName"][0]["value"]
@@ -205,7 +204,6 @@ def get_weather(city: str) -> str:
         wind_speed  = current["windspeedKmph"]
         visibility  = current["visibility"]
         uv_index    = current["uvIndex"]
-
         return (
             f"City: {city_name}, {country}\n"
             f"Temperature: {temp}°C (Feels like {feels_like}°C)\n"
@@ -220,8 +218,6 @@ def get_weather(city: str) -> str:
 
 
 def extract_city_from_query(query: str) -> str:
-    """Extract city name from a weather query using regex — much more reliable."""
-    import re
     match = re.search(
         r'(?:weather|temperature|forecast|humidity|climate)\s+(?:report\s+)?(?:in|for|of|at)\s+([A-Za-z ,]+?)(?:\?|$)',
         query, re.IGNORECASE
@@ -239,80 +235,46 @@ def extract_city_from_query(query: str) -> str:
     return " ".join(city_words).strip() or "Guwahati"
 
 
-# ── Universal Sports via Google News RSS (free, no API key, all sports) ───────
+# ── Universal Sports via Google News RSS ─────────────────────────────────────
 SPORTS_MAP = {
-    # Cricket
     "cricket": "cricket", "ipl": "IPL cricket", "test match": "test cricket",
     "odi": "ODI cricket", "t20": "T20 cricket", "wicket": "cricket",
     "innings": "cricket innings", "batting": "cricket batting",
-
-    # Football / Soccer
     "football": "football", "soccer": "soccer", "premier league": "Premier League",
     "fifa": "FIFA football", "champions league": "UEFA Champions League",
     "la liga": "La Liga", "bundesliga": "Bundesliga", "serie a": "Serie A",
     "world cup": "FIFA World Cup", "euro": "UEFA Euro football",
-
-    # Basketball
     "basketball": "basketball", "nba": "NBA basketball", "nbl": "NBL basketball",
-
-    # Tennis
     "tennis": "tennis", "wimbledon": "Wimbledon tennis", "us open tennis": "US Open tennis",
     "french open": "French Open tennis", "australian open": "Australian Open tennis",
     "atp": "ATP tennis", "wta": "WTA tennis",
-
-    # Badminton
     "badminton": "badminton", "bwf": "BWF badminton",
-
-    # Hockey
     "hockey": "hockey", "field hockey": "field hockey", "ice hockey": "ice hockey",
     "nhl": "NHL ice hockey",
-
-    # Baseball
     "baseball": "baseball", "mlb": "MLB baseball",
-
-    # Formula 1 / motorsport
     "formula 1": "Formula 1", "f1": "F1 race", "motorsport": "motorsport",
     "motogp": "MotoGP", "nascar": "NASCAR racing",
-
-    # Rugby
     "rugby": "rugby", "rugby world cup": "Rugby World Cup",
-
-    # Golf
     "golf": "golf", "masters": "Masters golf", "pga": "PGA golf",
-
-    # Boxing / MMA
     "boxing": "boxing", "mma": "MMA UFC", "ufc": "UFC fight",
     "wrestling": "wrestling WWE",
-
-    # Olympics
     "olympics": "Olympics", "asian games": "Asian Games",
     "commonwealth games": "Commonwealth Games",
-
-    # Table Tennis
     "table tennis": "table tennis", "ping pong": "ping pong",
-
-    # Volleyball
     "volleyball": "volleyball",
-
-    # Kabaddi
     "kabaddi": "kabaddi PKL",
-
-    # Athletics
     "athletics": "athletics sprint", "marathon": "marathon running",
     "swimming": "swimming sport", "cycling": "cycling sport",
 }
 
 def detect_sport(query: str) -> str:
-    """Detect which sport the user is asking about and return a search term."""
     q = query.lower()
     for keyword, search_term in SPORTS_MAP.items():
         if keyword in q:
             return search_term
-    return "sports scores today"   # generic fallback
-
+    return "sports scores today"
 
 def get_sports_news(sport_term: str) -> str:
-    """Fetch live sports news/scores from Google News RSS — no API key needed."""
     try:
         import xml.etree.ElementTree as ET
         query = requests.utils.quote(f"{sport_term} score result today")
@@ -332,13 +294,8 @@ def get_sports_news(sport_term: str) -> str:
     except Exception as e:
         return f"Sports fetch failed: {e}"
 
-
 def is_sports_query(query: str) -> bool:
-    """Strict sports detection — only trigger on clear sports intent."""
-    import re
     q = query.lower()
-
-    # Hard exclude — these are never sports questions even if they contain sport words
     non_sport_phrases = [
         "why", "how does", "explain", "what does", "politics", "economy",
         "government", "policy", "modi", "minister", "election", "vote",
@@ -348,8 +305,6 @@ def is_sports_query(query: str) -> bool:
     ]
     if any(phrase in q for phrase in non_sport_phrases):
         return False
-
-    # Must contain a clear sports action word AND a sport name
     action_words = [
         "score", "scores", "result", "results", "match", "game", "live",
         "fixture", "standings", "winner", "champion", "playoff", "final",
@@ -357,15 +312,11 @@ def is_sports_query(query: str) -> bool:
         "who won", "who is playing", "today's match", "latest score",
     ]
     sport_names = list(SPORTS_MAP.keys())
-
     has_action = any(re.search(r'\b' + re.escape(a) + r'\b', q) for a in action_words)
     has_sport  = any(re.search(r'\b' + re.escape(s) + r'\b', q) for s in sport_names)
-
     return has_action and has_sport
 
-
 def get_sport_emoji(sport_term: str) -> str:
-    """Return an emoji for the detected sport."""
     emoji_map = {
         "cricket": "🏏", "ipl": "🏏", "football": "⚽", "soccer": "⚽",
         "basketball": "🏀", "nba": "🏀", "tennis": "🎾", "badminton": "🏸",
@@ -381,9 +332,8 @@ def get_sport_emoji(sport_term: str) -> str:
     return "🏆"
 
 
-# ── News via Google News RSS (free, no API key, unlimited) ────────────────────
+# ── News via Google News RSS ──────────────────────────────────────────────────
 def get_news(topic: str = "India") -> str:
-    """Fetch latest news from Google News RSS — no API key needed."""
     try:
         import xml.etree.ElementTree as ET
         query = requests.utils.quote(topic)
@@ -394,10 +344,7 @@ def get_news(topic: str = "India") -> str:
         news_list = []
         for item in items:
             title = item.findtext("title", "").strip()
-            pub   = item.findtext("pubDate", "").strip()
-            source = item.findtext("source", title)
             if title:
-                # Clean up title (Google News adds source at end after " - ")
                 clean_title = title.split(" - ")[0].strip()
                 src = title.split(" - ")[-1].strip() if " - " in title else "News"
                 news_list.append(f"• **{clean_title}** _{src}_")
@@ -405,16 +352,13 @@ def get_news(topic: str = "India") -> str:
     except Exception as e:
         return f"News fetch failed: {e}"
 
-
 def is_news_query(query: str) -> bool:
     q = query.lower()
     keywords = ["news", "headlines", "latest news", "today news", "breaking",
                 "top news", "current news", "what happened today"]
     return any(k in q for k in keywords)
 
-
 def extract_news_topic(query: str) -> str:
-    """Extract news topic from query."""
     stopwords = {"news", "latest", "today", "show", "me", "give", "what", "is",
                  "the", "headlines", "breaking", "top", "current", "about", "on"}
     words = query.replace("?", "").split()
@@ -422,11 +366,8 @@ def extract_news_topic(query: str) -> str:
     return " ".join(topic_words).strip() or "India"
 
 
-# ── Stock prices via Yahoo Finance (free, no API key, unlimited) ──────────────
-
-# Common stock name → ticker symbol map
+# ── Stock prices via Yahoo Finance ────────────────────────────────────────────
 STOCK_ALIASES = {
-    # Indian stocks
     "reliance": "RELIANCE.NS", "tata": "TATAMOTORS.NS", "tcs": "TCS.NS",
     "infosys": "INFY.NS", "wipro": "WIPRO.NS", "hdfc": "HDFCBANK.NS",
     "icici": "ICICIBANK.NS", "sbi": "SBIN.NS", "bajaj": "BAJFINANCE.NS",
@@ -436,50 +377,34 @@ STOCK_ALIASES = {
     "kotak": "KOTAKBANK.NS", "axis bank": "AXISBANK.NS", "titan": "TITAN.NS",
     "sun pharma": "SUNPHARMA.NS", "dr reddy": "DRREDDY.NS",
     "nifty": "^NSEI", "sensex": "^BSESN", "bank nifty": "^NSEBANK",
-
-    # US stocks
     "apple": "AAPL", "microsoft": "MSFT", "google": "GOOGL",
     "alphabet": "GOOGL", "amazon": "AMZN", "tesla": "TSLA",
     "meta": "META", "facebook": "META", "netflix": "NFLX",
     "nvidia": "NVDA", "samsung": "005930.KS", "intel": "INTC",
     "amd": "AMD", "uber": "UBER", "twitter": "X", "x corp": "X",
-
-    # Crypto
     "bitcoin": "BTC-USD", "btc": "BTC-USD", "ethereum": "ETH-USD",
     "eth": "ETH-USD", "dogecoin": "DOGE-USD", "doge": "DOGE-USD",
     "solana": "SOL-USD", "bnb": "BNB-USD", "xrp": "XRP-USD",
-
-    # Indices
     "dow jones": "^DJI", "nasdaq": "^IXIC", "s&p 500": "^GSPC",
     "s&p": "^GSPC", "ftse": "^FTSE", "nikkei": "^N225",
 }
 
 def extract_stock_symbol(query: str) -> tuple:
-    """Extract stock ticker and display name from query."""
     q = query.lower()
-    # Check alias map first
     for name, ticker in STOCK_ALIASES.items():
         if name in q:
             return ticker, name.title()
-    # Try to extract uppercase ticker directly e.g. "AAPL stock"
-    import re
     match = re.search(r'\b([A-Z]{1,5})\b', query)
     if match:
         return match.group(1), match.group(1)
     return None, None
 
-
 def get_stock_price(symbol: str, display_name: str) -> str:
-    """Fetch live stock price from Yahoo Finance — no API key needed."""
     try:
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=2d"
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json",
-        }
+        headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
         resp = requests.get(url, headers=headers, timeout=8)
         data = resp.json()
-
         meta   = data["chart"]["result"][0]["meta"]
         price  = meta.get("regularMarketPrice", 0)
         prev   = meta.get("chartPreviousClose", 0)
@@ -487,18 +412,15 @@ def get_stock_price(symbol: str, display_name: str) -> str:
         name   = meta.get("longName") or meta.get("shortName") or display_name
         exch   = meta.get("exchangeName", "")
         mktst  = meta.get("marketState", "")
-
         change     = price - prev
         change_pct = (change / prev * 100) if prev else 0
         arrow      = "🟢 ▲" if change >= 0 else "🔴 ▼"
         sign       = "+" if change >= 0 else ""
-
         high = meta.get("regularMarketDayHigh", "N/A")
         low  = meta.get("regularMarketDayLow",  "N/A")
         vol  = meta.get("regularMarketVolume",  "N/A")
         if isinstance(vol, int):
             vol = f"{vol:,}"
-
         return (
             f"Name: {name}\n"
             f"Exchange: {exch}\n"
@@ -512,100 +434,130 @@ def get_stock_price(symbol: str, display_name: str) -> str:
     except Exception as e:
         return f"Stock fetch failed: {e}"
 
-
 def is_stock_query(query: str) -> bool:
-    """Detect stock/crypto price queries strictly."""
-    import re
     q = query.lower()
-
-    # Must contain a finance action word
     action_words = [
         "stock", "share price", "stock price", "price of", "how much is",
         "market price", "trading at", "crypto", "bitcoin", "ethereum",
         "sensex", "nifty", "nasdaq", "dow jones", "index", "ticker",
         "coin price", "token price", "market cap",
     ]
-    # OR a known alias
     known = list(STOCK_ALIASES.keys())
-
     has_action = any(a in q for a in action_words)
     has_known  = any(k in q for k in known)
-
     return has_action or has_known
 
-# ── Web search via DuckDuckGo (free, no API key) ──────────────────────────────
-def web_search(query: str, max_results: int = 4) -> str:
-    """Search DuckDuckGo and return a clean text summary of results."""
+
+# ── IMPROVED Web search via DuckDuckGo HTML (much more reliable) ──────────────
+def web_search(query: str, max_results: int = 5) -> str:
+    """Search using DuckDuckGo HTML scrape — far better coverage than JSON API."""
     try:
-        url = "https://api.duckduckgo.com/"
-        params = {
-            "q": query,
-            "format": "json",
-            "no_html": "1",
-            "skip_disambig": "1",
-        }
-        resp = requests.get(url, params=params, timeout=8)
-        data = resp.json()
+        # Primary: DuckDuckGo HTML scrape — real search results with snippets
+        html_resp = requests.get(
+            f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}",
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                              "AppleWebKit/537.36 (KHTML, like Gecko) "
+                              "Chrome/120.0.0.0 Safari/537.36"
+            },
+            timeout=10
+        )
+        snippets = re.findall(
+            r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>',
+            html_resp.text, re.DOTALL
+        )
+        titles = re.findall(
+            r'class="result__title"[^>]*>.*?<a[^>]*>(.*?)</a>',
+            html_resp.text, re.DOTALL
+        )
+        clean_snips  = [re.sub(r'<[^>]+>', '', s).strip() for s in snippets[:max_results]]
+        clean_titles = [re.sub(r'<[^>]+>', '', t).strip() for t in titles[:max_results]]
 
         results = []
-
-        # Instant answer (best for factual questions)
-        if data.get("Answer"):
-            results.append(f"Answer: {data['Answer']}")
-
-        # Abstract (Wikipedia-style summary)
-        if data.get("Abstract"):
-            results.append(f"Summary: {data['Abstract'][:400]}")
-
-        # Related topics
-        for topic in data.get("RelatedTopics", [])[:max_results]:
-            if isinstance(topic, dict) and topic.get("Text"):
-                results.append(topic["Text"][:200])
+        for title, snippet in zip(clean_titles, clean_snips):
+            if snippet:
+                results.append(f"• {title}: {snippet}")
 
         if results:
             return "\n".join(results)
 
-        # Fallback: DuckDuckGo HTML search scrape
-        html_resp = requests.get(
-            f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}",
-            headers={"User-Agent": "Mozilla/5.0"},
+        # Fallback: DuckDuckGo JSON instant-answer API
+        resp = requests.get(
+            "https://api.duckduckgo.com/",
+            params={"q": query, "format": "json", "no_html": "1", "skip_disambig": "1"},
             timeout=8
         )
-        import re
-        snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</a>', html_resp.text)
-        clean = [re.sub(r'<[^>]+>', '', s).strip() for s in snippets[:4]]
-        return "\n".join(clean) if clean else "No results found."
+        data = resp.json()
+        parts = []
+        if data.get("Answer"):
+            parts.append(f"Answer: {data['Answer']}")
+        if data.get("Abstract"):
+            parts.append(f"Summary: {data['Abstract'][:500]}")
+        for topic in data.get("RelatedTopics", [])[:3]:
+            if isinstance(topic, dict) and topic.get("Text"):
+                parts.append(topic["Text"][:200])
+        return "\n".join(parts) if parts else "No results found."
 
     except Exception as e:
         return f"Search failed: {e}"
 
 
-# ── Decide if query needs a web search ───────────────────────────────────────
+# ── NEW: Fetch current facts from Google News RSS for real-time queries ───────
+def get_current_facts(query: str) -> str:
+    """
+    For 'who is X right now / currently' queries, pull live Google News
+    headlines as extra grounding context for the AI.
+    """
+    try:
+        import xml.etree.ElementTree as ET
+        q = requests.utils.quote(query)
+        url = f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        root = ET.fromstring(resp.content)
+        items = root.findall(".//item")[:5]
+        results = []
+        for item in items:
+            title   = item.findtext("title", "").strip()
+            pub_raw = item.findtext("pubDate", "")
+            pub     = pub_raw[:22].strip() if pub_raw else ""
+            if title:
+                clean = title.split(" - ")[0].strip()
+                results.append(f"[{pub}] {clean}" if pub else clean)
+        return "\n".join(results) if results else ""
+    except Exception:
+        return ""
+
+
+# ── Decide if a query needs a web search ─────────────────────────────────────
 SEARCH_TRIGGERS = [
     "who is", "who was", "who won", "who are", "who did",
     "what is", "what was", "what are", "what happened",
     "when is", "when was", "when did", "when will",
     "where is", "where was", "current", "latest", "recent",
     "today", "news", "ipl", "election", "prime minister", "president",
+    "chief minister", "cm of", "governor", "minister of",
     "score", "match", "winner", "champion", "result",
     "price", "stock", "weather", "2023", "2024", "2025",
 ]
 
 def is_weather_query(query: str) -> bool:
-    """Check if the query is asking about weather."""
     q = query.lower()
-    weather_keywords = ["weather", "temperature", "forecast", "humidity", "rain", "sunny", "cloudy", "wind speed", "climate today"]
+    weather_keywords = ["weather", "temperature", "forecast", "humidity",
+                        "rain", "sunny", "cloudy", "wind speed", "climate today"]
     return any(k in q for k in weather_keywords)
 
 def needs_search(query: str) -> bool:
     q = query.lower()
-    identity_keywords = ["who made you", "who created you", "who built you", "who are you", "your creator", "your developer"]
+    identity_keywords = [
+        "who made you", "who created you", "who built you",
+        "who are you", "your creator", "your developer"
+    ]
     if any(k in q for k in identity_keywords):
         return False
     return any(trigger in q for trigger in SEARCH_TRIGGERS)
 
 
-# ── Piston API: free, unlimited, 50+ languages code runner ───────────────────
+# ── Piston API: free code runner ──────────────────────────────────────────────
 LANGUAGE_MAP = {
     "python": ("python", "3.10.0"),
     "javascript": ("javascript", "18.15.0"), "js": ("javascript", "18.15.0"),
@@ -628,25 +580,21 @@ LANGUAGE_MAP = {
 }
 
 def run_code(code: str, language: str) -> str:
-    """Run code using Piston API — free, unlimited, no API key."""
     try:
         lang, version = LANGUAGE_MAP.get(language.lower(), ("python", "3.10.0"))
         payload = {
-            "language": lang,
-            "version": version,
+            "language": lang, "version": version,
             "files": [{"name": f"main.{language[:2]}", "content": code}],
             "stdin": "", "args": [], "compile_timeout": 10000, "run_timeout": 5000,
         }
         resp = requests.post(
-            "https://emkc.org/api/v2/piston/execute",
-            json=payload, timeout=15
+            "https://emkc.org/api/v2/piston/execute", json=payload, timeout=15
         )
-        result = resp.json()
-        run = result.get("run", {})
+        result  = resp.json()
+        run     = result.get("run", {})
         output  = run.get("stdout", "").strip()
         stderr  = run.get("stderr", "").strip()
         compile_out = result.get("compile", {}).get("stderr", "").strip()
-
         if compile_out:
             return f"❌ Compile Error:\n{compile_out}"
         if stderr:
@@ -655,10 +603,7 @@ def run_code(code: str, language: str) -> str:
     except Exception as e:
         return f"❌ Runner failed: {e}"
 
-
 def extract_code_and_language(text: str):
-    """Extract code blocks and language from markdown response."""
-    import re
     pattern = r"```(\w+)?\n([\s\S]*?)```"
     matches = re.findall(pattern, text)
     if matches:
@@ -666,10 +611,7 @@ def extract_code_and_language(text: str):
         return code.strip(), (lang.lower() if lang else "python")
     return None, None
 
-
 def is_code_query(query: str) -> bool:
-    """Detect if user wants code written."""
-    import re
     q = query.lower()
     if is_stock_query(query) or is_weather_query(query):
         return False
@@ -685,9 +627,7 @@ def is_code_query(query: str) -> bool:
     ]
     return any(t in q for t in code_triggers)
 
-
 def is_app_query(query: str) -> bool:
-    """Detect if user wants a full app, UI, website, or software."""
     q = query.lower()
     app_triggers = [
         "app", "application", "website", "web app", "software", "ui", "design",
@@ -702,30 +642,24 @@ def is_app_query(query: str) -> bool:
     ]
     return any(t in q for t in app_triggers)
 
-
 def extract_all_code_blocks(text: str):
-    """Extract ALL code blocks from response."""
-    import re
     pattern = r"```(\w+)?\n([\s\S]*?)```"
     matches = re.findall(pattern, text)
     return [(lang.lower() if lang else "text", code.strip()) for lang, code in matches]
 
-
 def build_html_app(code_blocks: list) -> str:
-    """Merge html/css/js blocks into one complete HTML file."""
     html_part, css_part, js_part = "", "", ""
     full_html = ""
     for lang, code in code_blocks:
         if lang in ("html",):
             if "<!doctype" in code.lower() or "<html" in code.lower():
-                full_html = code   # already complete
+                full_html = code
             else:
                 html_part = code
         elif lang == "css":
             css_part = code
         elif lang in ("javascript", "js"):
             js_part = code
-
     if full_html:
         return full_html
     if html_part or css_part or js_part:
@@ -752,7 +686,6 @@ def build_messages(user_query: str, search_results: str = "", is_weather: bool =
         "If anyone asks who made you, always say: 'I am Nova AI, created by Samiran.' "
         "Never mention Meta, Llama, OpenAI, Groq, Anthropic, or any underlying model. "
 
-        # ── Coding excellence ──
         "When writing code, you produce WORLD-CLASS, production-ready code. Follow these rules: "
         "1. Always write complete, fully working code — never write partial or placeholder code. "
         "2. Use best practices: clean variable names, proper error handling, comments, and structure. "
@@ -769,11 +702,17 @@ def build_messages(user_query: str, search_results: str = "", is_weather: bool =
         "   Create stunning, professional designs that look like real products. "
         "10. Never truncate code — always write the full implementation. "
 
-        # ── General ──
-        "Answer clearly and directly. Never hallucinate. "
-        "If web search results are provided, use ONLY those for factual questions. "
+        "CRITICAL INSTRUCTION FOR FACTUAL / CURRENT-EVENTS QUESTIONS: "
+        "When web search results or news headlines are provided, you MUST use them as your primary source. "
+        "State the answer directly and confidently based on the search data. "
+        "Do NOT say the information is incomplete or unavailable if the search results contain the answer. "
+        "If search results mention a person's current role or recent event, treat it as current fact. "
+        "Be direct: 'According to current information, X is the Y of Z.' "
+
+        "Answer clearly and directly. Never hallucinate facts not in the search results. "
         "Be concise but complete."
     )
+
     if search_results and is_weather:
         user_content = (
             f"Here is the live weather data fetched for '{user_query}':\n\n"
@@ -781,8 +720,10 @@ def build_messages(user_query: str, search_results: str = "", is_weather: bool =
         )
     elif search_results:
         user_content = (
-            f"Web search results for '{user_query}':\n{search_results}\n\n"
-            f"Based on the above, answer accurately: {user_query}"
+            f"Web search results and recent news for '{user_query}':\n\n"
+            f"{search_results}\n\n"
+            f"Based on the above search results, answer this question accurately and directly: {user_query}\n"
+            f"Use the search data as your primary source. State facts confidently."
         )
     else:
         user_content = user_query
@@ -840,7 +781,8 @@ if not st.session_state.messages:
             🌤️ <em>"Weather in Guwahati, Assam"</em><br>
             📈 <em>"Apple stock price"</em> · <em>"Bitcoin price"</em><br>
             ⚽ <em>"Premier League scores"</em> · <em>"IPL result"</em><br>
-            📰 <em>"Latest news about India"</em>
+            📰 <em>"Latest news about India"</em><br>
+            🏛️ <em>"Who is the CM of West Bengal right now?"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -865,7 +807,7 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
-        # ── Stock prices: Yahoo Finance, no API key ───────────────────────────
+        # ── Stock prices ──────────────────────────────────────────────────────
         if is_stock_query(prompt):
             symbol, display_name = extract_stock_symbol(prompt)
             if not symbol:
@@ -878,7 +820,6 @@ if prompt := st.chat_input("Ask me anything…"):
                 else:
                     lines = dict(line.split(": ", 1) for line in stock_data.strip().splitlines() if ": " in line)
                     chg   = lines.get('Change', '')
-                    color = "#10b981" if "▲" in chg else "#ef4444"
                     response = (
                         f'<div class="search-badge">📈 Live market data · Yahoo Finance</div>\n\n'
                         f"### 📈 {lines.get('Name', display_name)}\n"
@@ -895,7 +836,7 @@ if prompt := st.chat_input("Ask me anything…"):
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # ── Sports: universal handler for ALL world sports ────────────────────
+        # ── Sports ────────────────────────────────────────────────────────────
         elif is_sports_query(prompt):
             sport_term = detect_sport(prompt)
             emoji = get_sport_emoji(sport_term)
@@ -909,7 +850,7 @@ if prompt := st.chat_input("Ask me anything…"):
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # ── News: fetch & display directly ────────────────────────────────────
+        # ── News ──────────────────────────────────────────────────────────────
         elif is_news_query(prompt):
             with st.spinner("📰 Fetching latest news…"):
                 topic = extract_news_topic(prompt)
@@ -922,16 +863,14 @@ if prompt := st.chat_input("Ask me anything…"):
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # ── Weather: fetch & display directly, NO AI involved ────────────────
+        # ── Weather ───────────────────────────────────────────────────────────
         elif is_weather_query(prompt):
             with st.spinner("🌤️ Fetching live weather…"):
                 city = extract_city_from_query(prompt)
                 weather_data = get_weather(city)
-
             if "failed" in weather_data.lower() or "error" in weather_data.lower():
                 response = f"❌ Sorry, I couldn't fetch weather for **{city}**. Please try again."
             else:
-                # Parse the weather string into a nice formatted response
                 lines = dict(line.split(": ", 1) for line in weather_data.strip().splitlines() if ": " in line)
                 response = (
                     f'<div class="search-badge">🌤️ Live weather data</div>\n\n'
@@ -945,15 +884,23 @@ if prompt := st.chat_input("Ask me anything…"):
                     f"| 👁️ Visibility | {lines.get('Visibility', 'N/A')} |\n"
                     f"| ☀️ UV Index | {lines.get('UV Index', 'N/A')} |\n"
                 )
-
             st.markdown(response, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # ── Web search → AI (with world-class coding) ────────────────────────
+        # ── General / Coding — with improved search + current facts ──────────
         else:
             if needs_search(prompt):
                 with st.spinner("🔍 Searching the web…"):
                     search_results = web_search(prompt)
+                    # Pull live Google News headlines for current-facts queries
+                    # (catches things like CM/PM changes, recent appointments, etc.)
+                    news_context = get_current_facts(prompt)
+                    if news_context:
+                        search_results = (
+                            search_results
+                            + "\n\nRecent news headlines (use these for current facts):\n"
+                            + news_context
+                        )
                     searched = True
 
             for attempt in range(3):
@@ -965,19 +912,16 @@ if prompt := st.chat_input("Ask me anything…"):
                         completion = client.chat.completions.create(
                             messages=build_messages(prompt, search_results),
                             model=MODEL,
-                            max_tokens=2048,   # more tokens for complete code
-                            temperature=0.2,   # lower = more precise code
+                            max_tokens=2048,
+                            temperature=0.2,
                         )
                     response = completion.choices[0].message.content
 
                     if searched:
                         st.markdown('<div class="search-badge">🔍 Searched the web</div>', unsafe_allow_html=True)
 
-                    # Extract all code blocks
                     code_blocks = extract_all_code_blocks(response)
-                    code, lang = extract_code_and_language(response)
-
-                    # Check if it's a web app (has html/css/js)
+                    code, lang  = extract_code_and_language(response)
                     langs_found = [l for l, _ in code_blocks]
                     is_web_app  = any(l in ("html", "css", "javascript", "js") for l in langs_found)
 
@@ -989,21 +933,26 @@ if prompt := st.chat_input("Ask me anything…"):
 
                     st.markdown(response)
 
-                    # ── Live HTML preview for web apps ────────────────────────
+                    # Live HTML preview for web apps
                     if is_web_app:
                         html_src = build_html_app(code_blocks)
                         if html_src:
                             st.markdown("---")
                             st.markdown("### 🖥️ Live Preview")
                             st.components.v1.html(html_src, height=520, scrolling=True)
-
-                            # Download button
                             import base64
                             b64 = base64.b64encode(html_src.encode()).decode()
-                            dl_link = f'<a href="data:text/html;base64,{b64}" download="nova_app.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:#00e5ff;padding:6px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-family:DM Sans,sans-serif;margin-top:.5rem">⬇️ Download App</a>'
+                            dl_link = (
+                                f'<a href="data:text/html;base64,{b64}" download="nova_app.html" '
+                                f'style="display:inline-flex;align-items:center;gap:6px;'
+                                f'background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);'
+                                f'color:#00e5ff;padding:6px 16px;border-radius:8px;text-decoration:none;'
+                                f'font-size:13px;font-family:DM Sans,sans-serif;margin-top:.5rem">'
+                                f'⬇️ Download App</a>'
+                            )
                             st.markdown(dl_link, unsafe_allow_html=True)
 
-                    # ── Run button for non-web code ───────────────────────────
+                    # Run button for non-web code
                     elif code and lang and lang not in ("html", "css"):
                         run_key = f"run_{len(st.session_state.messages)}"
                         if st.button(f"▶ Run {lang.title()} Code", key=run_key):
