@@ -153,22 +153,25 @@ code:not(pre code) {
 client = Groq(api_key="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")
 MODEL = "compound-beta"
 
+# Use llama-3.3-70b-versatile — accurate, fast, and handles current knowledge well
+MODEL = "llama-3.3-70b-versatile"
+
 SYSTEM_PROMPT = (
-    "You are Nova AI — a smart, accurate, and friendly AI assistant with access to the internet. "
-    "Always search the web for recent events, sports results, news, and current information. "
-    "Help with anything: coding, writing, math, science, general knowledge, creative tasks, advice, and more. "
-    "Be clear and thorough. Format code with proper markdown code blocks."
+    "You are Nova AI — a smart, accurate, and friendly AI assistant. "
+    "You have strong knowledge of world events, sports, science, coding, and general topics up to early 2025. "
+    "For IPL 2023: Chennai Super Kings won, beating Gujarat Titans in the final. "
+    "For IPL 2024: Kolkata Knight Riders won, beating Sunrisers Hyderabad in the final. "
+    "Help with anything: coding, writing, math, science, news, advice, and more. "
+    "Be clear, accurate, and thorough. Format code with proper markdown code blocks."
 )
-MAX_HISTORY = 4        # keep last 4 messages only
-MAX_CHARS   = 1000    # truncate any single message beyond this
+MAX_HISTORY = 3       # only last 3 messages
+MAX_CHARS   = 500     # hard cap per message
 
 def get_trimmed_messages():
     recent = st.session_state.messages[-MAX_HISTORY:]
     trimmed = []
     for m in recent:
-        content = m.get("content", "") or ""
-        if len(content) > MAX_CHARS:
-            content = content[:MAX_CHARS] + "… [truncated]"
+        content = (m.get("content") or "")[:MAX_CHARS]
         trimmed.append({"role": m["role"], "content": content})
     return trimmed
 
@@ -244,7 +247,7 @@ if prompt := st.chat_input("Ask me anything…"):
                             *get_trimmed_messages()
                         ],
                         model=MODEL,
-                        max_tokens=1024,
+                        max_tokens=512,
                     )
                 response = completion.choices[0].message.content
                 st.markdown(response)
