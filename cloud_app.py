@@ -157,40 +157,34 @@ code:not(pre code) {
 client = Groq(api_key="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")
 MODEL = "llama-3.3-70b-versatile"
 
-# ── OpenWeatherMap API (free tier — sign up at openweathermap.org) ────────────
-WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"   # 👈 Replace with your free key
-
+# ── Weather via wttr.in (100% free, no API key needed) ───────────────────────
 def get_weather(city: str) -> str:
-    """Fetch real-time weather from OpenWeatherMap for a given city."""
+    """Fetch real-time weather from wttr.in — no API key required."""
     try:
-        url = "https://api.openweathermap.org/data/2.5/weather"
-        params = {
-            "q": city,
-            "appid": WEATHER_API_KEY,
-            "units": "metric",  # Celsius
-        }
-        resp = requests.get(url, params=params, timeout=8)
+        url = f"https://wttr.in/{requests.utils.quote(city)}?format=j1"
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
         data = resp.json()
 
-        if data.get("cod") != 200:
-            return f"Could not fetch weather for '{city}': {data.get('message', 'Unknown error')}"
-
-        name        = data["name"]
-        country     = data["sys"]["country"]
-        temp        = data["main"]["temp"]
-        feels_like  = data["main"]["feels_like"]
-        humidity    = data["main"]["humidity"]
-        description = data["weather"][0]["description"].capitalize()
-        wind_speed  = data["wind"]["speed"]
-        visibility  = data.get("visibility", 0) // 1000  # convert m → km
+        current     = data["current_condition"][0]
+        area        = data["nearest_area"][0]
+        city_name   = area["areaName"][0]["value"]
+        country     = area["country"][0]["value"]
+        temp        = current["temp_C"]
+        feels_like  = current["FeelsLikeC"]
+        humidity    = current["humidity"]
+        description = current["weatherDesc"][0]["value"]
+        wind_speed  = current["windspeedKmph"]
+        visibility  = current["visibility"]
+        uv_index    = current["uvIndex"]
 
         return (
-            f"City: {name}, {country}\n"
+            f"City: {city_name}, {country}\n"
             f"Temperature: {temp}°C (Feels like {feels_like}°C)\n"
             f"Condition: {description}\n"
             f"Humidity: {humidity}%\n"
-            f"Wind Speed: {wind_speed} m/s\n"
-            f"Visibility: {visibility} km"
+            f"Wind Speed: {wind_speed} km/h\n"
+            f"Visibility: {visibility} km\n"
+            f"UV Index: {uv_index}"
         )
     except Exception as e:
         return f"Weather fetch failed: {e}"
