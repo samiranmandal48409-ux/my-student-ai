@@ -159,14 +159,18 @@ SYSTEM_PROMPT = (
     "Help with anything: coding, writing, math, science, general knowledge, creative tasks, advice, and more. "
     "Be clear and thorough. Format code with proper markdown code blocks."
 )
-MAX_HISTORY = 6
+MAX_HISTORY = 4        # keep last 4 messages only
+MAX_CHARS   = 1000    # truncate any single message beyond this
 
 def get_trimmed_messages():
-    return [
-        {"role": m["role"], "content": m["content"]}
-        for m in st.session_state.messages[-MAX_HISTORY:]
-        if m.get("content")
-    ]
+    recent = st.session_state.messages[-MAX_HISTORY:]
+    trimmed = []
+    for m in recent:
+        content = m.get("content", "") or ""
+        if len(content) > MAX_CHARS:
+            content = content[:MAX_CHARS] + "… [truncated]"
+        trimmed.append({"role": m["role"], "content": content})
+    return trimmed
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
