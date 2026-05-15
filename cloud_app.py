@@ -3,8 +3,8 @@ from groq import Groq
 import time
 
 st.set_page_config(
-    page_title="CodeMentor AI",
-    page_icon="⚡",
+    page_title="Nova AI",
+    page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -269,9 +269,10 @@ code:not(pre code) {
 client = Groq(api_key="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")
 
 SYSTEM_PROMPT = (
-    "You are CodeMentor AI — an expert coding partner for students. "
-    "Help them learn and build real projects. Provide full, working code when asked "
-    "and explain concepts simply and clearly. Format code with proper markdown code blocks."
+    "You are Nova AI — a smart, helpful, and friendly AI assistant. "
+    "You can help with anything: coding, writing, math, science, general knowledge, creative tasks, "
+    "answering questions, giving advice, summarizing, translating, brainstorming, and more. "
+    "Be clear, concise, and thorough. Format code with proper markdown code blocks when needed."
 )
 MAX_HISTORY = 4
 
@@ -286,13 +287,14 @@ if "messages" not in st.session_state:
 st.markdown("""
 <div class="hero">
     <div class="hero-badge">LIVE &nbsp;·&nbsp; FREE TO USE</div>
-    <h1>Code<span>Mentor</span> AI</h1>
-    <p>Your personal AI coding partner — ask anything, build anything, learn everything.</p>
+    <h1>Nova<span> AI</span></h1>
+    <p>Your personal AI assistant — ask anything, get answers instantly.</p>
 </div>
 
 <div class="stats-row">
     <div class="stat-pill"><span class="dot dot-blue"></span> Instant responses</div>
     <div class="stat-pill"><span class="dot dot-purple"></span> Auto-retry on limits</div>
+    <div class="stat-pill"><span class="dot dot-green"></span> All topics</div>
 </div>
 
 <div class="divider"></div>
@@ -316,12 +318,12 @@ with col3:
 if not st.session_state.messages:
     st.markdown("""
     <div style="text-align:center;padding:3rem 1rem;color:var(--muted);">
-        <div style="font-size:2.5rem;margin-bottom:1rem">⚡</div>
+        <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
         <p style="font-size:1rem;font-weight:500;color:#94a3b8;margin-bottom:.5rem">
-            Ready to help you code
+            How can I help you today?
         </p>
         <p style="font-size:.875rem">
-            Try: <em>"Build a REST API in Python"</em> or <em>"Explain recursion with an example"</em>
+            Try: <em>"Write a poem about the ocean"</em> · <em>"Explain quantum physics simply"</em> · <em>"Build a Python web scraper"</em>
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -331,7 +333,7 @@ else:
             st.markdown(message["content"])
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-if prompt := st.chat_input("Ask me to write code, explain concepts, debug…"):
+if prompt := st.chat_input("Ask me anything — code, write, explain, create…"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
