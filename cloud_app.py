@@ -157,6 +157,60 @@ code:not(pre code) {
 client = Groq(api_key="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")
 MODEL = "llama-3.3-70b-versatile"
 
+# ── OpenWeatherMap API (free tier — sign up at openweathermap.org) ────────────
+WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"   # 👈 Replace with your free key
+
+def get_weather(city: str) -> str:
+    """Fetch real-time weather from OpenWeatherMap for a given city."""
+    try:
+        url = "https://api.openweathermap.org/data/2.5/weather"
+        params = {
+            "q": city,
+            "appid": WEATHER_API_KEY,
+            "units": "metric",  # Celsius
+        }
+        resp = requests.get(url, params=params, timeout=8)
+        data = resp.json()
+
+        if data.get("cod") != 200:
+            return f"Could not fetch weather for '{city}': {data.get('message', 'Unknown error')}"
+
+        name        = data["name"]
+        country     = data["sys"]["country"]
+        temp        = data["main"]["temp"]
+        feels_like  = data["main"]["feels_like"]
+        humidity    = data["main"]["humidity"]
+        description = data["weather"][0]["description"].capitalize()
+        wind_speed  = data["wind"]["speed"]
+        visibility  = data.get("visibility", 0) // 1000  # convert m → km
+
+        return (
+            f"City: {name}, {country}\n"
+            f"Temperature: {temp}°C (Feels like {feels_like}°C)\n"
+            f"Condition: {description}\n"
+            f"Humidity: {humidity}%\n"
+            f"Wind Speed: {wind_speed} m/s\n"
+            f"Visibility: {visibility} km"
+        )
+    except Exception as e:
+        return f"Weather fetch failed: {e}"
+
+
+def extract_city_from_query(query: str) -> str:
+    """Extract city name from a weather query."""
+    import re
+    q = query.lower()
+    # Remove common weather phrases to isolate city name
+    for phrase in [
+        "what is the weather", "weather report", "weather in",
+        "weather of", "weather for", "what's the weather",
+        "current weather", "today's weather", "temperature in",
+        "temperature of", "how is the weather", "in", "at", "?"
+    ]:
+        q = q.replace(phrase, " ")
+    city = re.sub(r'\s+', ' ', q).strip().title()
+    return city if city else "Guwahati"
+
 # ── Web search via DuckDuckGo (free, no API key) ──────────────────────────────
 def web_search(query: str, max_results: int = 4) -> str:
     """Search DuckDuckGo and return a clean text summary of results."""
@@ -214,6 +268,12 @@ SEARCH_TRIGGERS = [
     "score", "match", "winner", "champion", "result",
     "price", "stock", "weather", "2023", "2024", "2025",
 ]
+
+def is_weather_query(query: str) -> bool:
+    """Check if the query is asking about weather."""
+    q = query.lower()
+    weather_keywords = ["weather", "temperature", "forecast", "humidity", "rain", "sunny", "cloudy", "wind speed", "climate today"]
+    return any(k in q for k in weather_keywords)
 
 def needs_search(query: str) -> bool:
     q = query.lower()
@@ -319,8 +379,15 @@ if prompt := st.chat_input("Ask me anything…"):
         searched = False
         search_results = ""
 
-        # Step 1: Search the web if needed
-        if needs_search(prompt):
+        # Step 1: Handle weather queries with real API
+        if is_weather_query(prompt):
+            with st.spinner("🌤️ Fetching live weather…"):
+                city = extract_city_from_query(prompt)
+                search_results = get_weather(city)
+                searched = True
+
+        # Step 2: Search the web if needed (non-weather)
+        elif needs_search(prompt):
             with st.spinner("🔍 Searching the web…"):
                 search_results = web_search(prompt)
                 searched = True
@@ -341,7 +408,8 @@ if prompt := st.chat_input("Ask me anything…"):
                 response = completion.choices[0].message.content
 
                 if searched:
-                    st.markdown('<div class="search-badge">🔍 Searched the web</div>', unsafe_allow_html=True)
+                    badge_label = "🌤️ Live weather data" if is_weather_query(prompt) else "🔍 Searched the web"
+                    st.markdown(f'<div class="search-badge">{badge_label}</div>', unsafe_allow_html=True)
                 st.markdown(response)
 
                 st.session_state.messages.append({
