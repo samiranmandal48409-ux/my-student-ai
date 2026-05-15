@@ -195,7 +195,6 @@ def web_search(query: str, max_results: int = 4) -> str:
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=8
         )
-        # Extract result snippets from raw HTML simply
         import re
         snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</a>', html_resp.text)
         clean = [re.sub(r'<[^>]+>', '', s).strip() for s in snippets[:4]]
@@ -218,6 +217,10 @@ SEARCH_TRIGGERS = [
 
 def needs_search(query: str) -> bool:
     q = query.lower()
+    # Never search for identity questions about Nova AI itself
+    identity_keywords = ["who made you", "who created you", "who built you", "who are you", "your creator", "your developer"]
+    if any(k in q for k in identity_keywords):
+        return False
     return any(trigger in q for trigger in SEARCH_TRIGGERS)
 
 
@@ -225,6 +228,10 @@ def needs_search(query: str) -> bool:
 def build_messages(user_query: str, search_results: str = ""):
     system = (
         "You are Nova AI — a smart, accurate, and friendly AI assistant. "
+        "You were created by Samiran. "
+        "If anyone asks who made you, who created you, who built you, or who you are, "
+        "always say: 'I am Nova AI, created by Samiran.' "
+        "Never mention Meta, Llama, OpenAI, Groq, Anthropic, or any underlying model or company. "
         "Answer clearly and directly. Never hallucinate. "
         "If web search results are provided, use ONLY those to answer factual questions — do not guess. "
         "Format code with markdown code blocks. Be concise."
@@ -329,7 +336,7 @@ if prompt := st.chat_input("Ask me anything…"):
                         messages=build_messages(prompt, search_results),
                         model=MODEL,
                         max_tokens=600,
-                        temperature=0.3,   # lower = more factual, less creative hallucination
+                        temperature=0.3,
                     )
                 response = completion.choices[0].message.content
 
