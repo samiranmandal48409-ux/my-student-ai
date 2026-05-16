@@ -6,9 +6,15 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from PIL import Image
 import io
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.figure_factory as ff
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  LANGUAGE SYSTEM — Full translations
+#  LANGUAGE SYSTEM
 # ══════════════════════════════════════════════════════════════════════════════
 LANGUAGES = {
     "🌐 English": "en",
@@ -27,1337 +33,335 @@ LANGUAGES = {
 
 UI_TEXT = {
     "en": {
-        "title":           "Nova AI",
-        "subtitle":        "The world's smartest AI — sees images, builds apps, knows everything live.",
-        "badge":           "LIVE · FREE · UNLIMITED · VISION AI",
-        "chat_placeholder":"Ask anything — type here or click 🖼️ Image / 📄 File above…",
-        "clear":           "🗑️ Clear",
-        "msgs":            "msg",
-        "msgp":            "msgs",
-        "hero_q":          "What would you like to do today?",
-        "cat_vision":      "Vision AI",
-        "cat_vision_ex":   "Upload any image\nAI reads & analyzes",
-        "cat_games":       "Games",
-        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps":        "Apps",
-        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
-        "cat_code":        "Code",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL & more",
-        "cat_files":       "Files",
-        "cat_files_ex":    "CSV · JSON · Code\nAI analyzes it",
-        "cat_live":        "Live Data",
-        "cat_live_ex":     "Cricket · Stocks\nWeather · News\nAny URL",
-        "img_btn":         "🖼️ Image",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 File",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Help",
-        "settings":        "⚙️ Model Settings",
-        "temperature":     "Temperature",
-        "max_length":      "Max Length",
-        "ai_mode":         "🎭 AI Mode",
-        "quick_tools":     "🛠️ Quick Tools",
-        "currency":        "💱 Currency",
-        "units":           "📐 Units",
-        "calculator":      "🔢 Calculator",
-        "qr_code":         "📱 QR Code",
-        "export":          "💾 Export",
-        "no_msgs":         "No messages yet.",
-        "convert_btn":     "Convert 💱",
-        "calc_btn":        "Calculate 🔢",
-        "unit_btn":        "Convert 📐",
-        "qr_btn":          "Generate QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Upload Image for Vision AI",
-        "img_upload_hint": "Supports: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Upload File for Analysis",
-        "file_upload_hint": "Supports: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Ready · Type your question below ↓",
-        "file_ready":      "Ask me anything about this file",
-        "analyzing":       "👁️ Analyzing image…",
-        "searching":       "🔍 Searching…",
-        "fetching_weather":"🌤️ Fetching weather…",
-        "fetching_stock":  "📈 Fetching",
-        "fetching_sports": "🏏 Fetching live sports data…",
-        "fetching_news":   "📰 Fetching news…",
-        "fetching_rate":   "💱 Fetching rates…",
-        "reading_url":     "🌐 Reading",
-        "running_code":    "⚙️ Running",
-        "run_btn":         "▶ Run",
-        "live_preview":    "🖥️ Preview",
-        "live_game":       "🎮 Live Game!",
-        "live_app":        "🚀 Live App",
-        "live_software":   "⚙️ Live Software",
-        "live_design":     "✨ Live Design",
-        "download":        "⬇️ Download",
-        "example_q":       "💡 Example questions:",
-        "ex1": "What is in this image?",
-        "ex2": "Read the text",
-        "ex3": "Solve this math",
-        "ex4": "Explain this code",
-        "ex5": "Analyze this chart",
-        "unit_placeholder":"e.g. 100 km to miles",
-        "calc_placeholder":"e.g. sqrt(144)",
-        "qr_placeholder":  "Text or URL",
-        "amount":          "Amount",
-        "from_curr":       "From",
-        "to_curr":         "To",
-        "no_results":      "No results.",
-        "stat_memory":     "🧠 Memory",
-        "stat_vision":     "👁️ Vision AI",
-        "stat_sports":     "🏏 Live Sports",
-        "stat_games":      "🎮 Games & Apps",
-        "stat_files":      "📁 Files & URLs",
-        "stat_live":       "💱 Live Data",
-        "language_label":  "🌍 Language",
-        "sys_prompt_lang": "Respond in English.",
+        "title":"Nova AI","subtitle":"The world's smartest AI — sees images, builds apps, visualizes data, knows everything live.",
+        "badge":"LIVE · FREE · UNLIMITED · VISION AI","chat_placeholder":"Ask anything — type here or click 🖼️ Image / 📄 File / 📊 CSV above…",
+        "clear":"🗑️ Clear","msgs":"msg","msgp":"msgs","hero_q":"What would you like to do today?",
+        "cat_vision":"Vision AI","cat_vision_ex":"Upload any image\nAI reads & analyzes",
+        "cat_games":"Games","cat_games_ex":"Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps":"Apps","cat_apps_ex":"Dashboard · Todo\nE-commerce\nPortfolio",
+        "cat_code":"Code","cat_code_ex":"Python · JS · Java\nC++ · Go · Rust\nSQL & more",
+        "cat_files":"Files","cat_files_ex":"CSV · JSON · Code\nAI analyzes it",
+        "cat_charts":"Charts & Data","cat_charts_ex":"Upload CSV\nAuto-generate charts\nAI insights",
+        "cat_live":"Live Data","cat_live_ex":"Cricket · Stocks\nWeather · News\nAny URL",
+        "img_btn":"🖼️ Image","img_btn_done":"🖼️ ✓",
+        "file_btn":"📄 File","file_btn_done":"📄 ✓",
+        "csv_btn":"📊 CSV","csv_btn_done":"📊 ✓",
+        "help_btn":"❓ Help",
+        "settings":"⚙️ Model Settings","temperature":"Temperature","max_length":"Max Length",
+        "ai_mode":"🎭 AI Mode","quick_tools":"🛠️ Quick Tools",
+        "currency":"💱 Currency","units":"📐 Units","calculator":"🔢 Calculator","qr_code":"📱 QR Code",
+        "export":"💾 Export","no_msgs":"No messages yet.",
+        "convert_btn":"Convert 💱","calc_btn":"Calculate 🔢","unit_btn":"Convert 📐","qr_btn":"Generate QR",
+        "download_md":"📝 MD","download_json":"📊 JSON",
+        "img_upload_title":"👁️ Upload Image for Vision AI","img_upload_hint":"Supports: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Upload File for Analysis","file_upload_hint":"Supports: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "csv_upload_title":"📊 Upload CSV for Data Visualization","csv_upload_hint":"Upload any CSV file — Nova AI auto-generates charts & insights",
+        "img_ready":"Ready · Type your question below ↓","file_ready":"Ask me anything about this file",
+        "csv_ready":"CSV loaded · Charts auto-generated below!",
+        "analyzing":"👁️ Analyzing image…","searching":"🔍 Searching…",
+        "fetching_weather":"🌤️ Fetching weather…","fetching_stock":"📈 Fetching",
+        "fetching_sports":"🏏 Fetching live sports data…","fetching_news":"📰 Fetching news…",
+        "fetching_rate":"💱 Fetching rates…","reading_url":"🌐 Reading",
+        "running_code":"⚙️ Running","run_btn":"▶ Run",
+        "live_preview":"🖥️ Preview","live_game":"🎮 Live Game!","live_app":"🚀 Live App",
+        "live_software":"⚙️ Live Software","live_design":"✨ Live Design",
+        "download":"⬇️ Download","example_q":"💡 Example questions:",
+        "ex1":"What is in this image?","ex2":"Read the text","ex3":"Solve this math",
+        "ex4":"Explain this code","ex5":"Analyze this chart",
+        "unit_placeholder":"e.g. 100 km to miles","calc_placeholder":"e.g. sqrt(144)",
+        "qr_placeholder":"Text or URL","amount":"Amount","from_curr":"From","to_curr":"To",
+        "no_results":"No results.","stat_memory":"🧠 Memory","stat_vision":"👁️ Vision AI",
+        "stat_sports":"🏏 Live Sports","stat_games":"🎮 Games & Apps",
+        "stat_files":"📁 Files & URLs","stat_live":"💱 Live Data","stat_charts":"📊 Data Viz",
+        "language_label":"🌍 Language","sys_prompt_lang":"Respond in English.",
+        "chart_title":"📊 Auto-Generated Charts","chart_overview":"📋 Dataset Overview",
+        "chart_ai_insights":"🤖 AI Data Insights","chart_rows":"rows","chart_cols":"columns",
+        "chart_numeric":"Numeric columns","chart_categorical":"Categorical columns",
+        "chart_missing":"Missing values","chart_ask":"Ask AI about this data…",
+        "chart_generating":"📊 Generating charts…","chart_analyzing":"🤖 Analyzing data with AI…",
+        "chart_types":"Chart Types","chart_select_x":"X-axis","chart_select_y":"Y-axis",
+        "chart_select_color":"Color by","chart_custom":"🎨 Custom Chart Builder",
+        "chart_bar":"Bar","chart_line":"Line","chart_scatter":"Scatter","chart_pie":"Pie",
+        "chart_histogram":"Histogram","chart_box":"Box","chart_heatmap":"Heatmap",
+        "chart_area":"Area","chart_violin":"Violin","chart_sunburst":"Sunburst",
+        "chart_generate":"Generate Chart","chart_correlation":"Correlation Matrix",
+        "chart_distribution":"Distribution Analysis","chart_summary":"Statistical Summary",
+        "chart_top_insights":"Top Insights","chart_download_csv":"⬇️ Download Processed CSV",
     },
     "hi": {
-        "title":           "Nova AI",
-        "subtitle":        "दुनिया का सबसे स्मार्ट AI — छवियां देखता है, ऐप्स बनाता है, सब कुछ लाइव जानता है।",
-        "badge":           "लाइव · मुफ़्त · असीमित · विज़न AI",
-        "chat_placeholder":"कुछ भी पूछें — यहाँ टाइप करें या ऊपर 🖼️ Image / 📄 File क्लिक करें…",
-        "clear":           "🗑️ साफ़ करें",
-        "msgs":            "संदेश",
-        "msgp":            "संदेश",
-        "hero_q":          "आज आप क्या करना चाहेंगे?",
-        "cat_vision":      "विज़न AI",
-        "cat_vision_ex":   "कोई भी छवि अपलोड करें\nAI पढ़ता और विश्लेषण करता है",
-        "cat_games":       "गेम्स",
-        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps":        "ऐप्स",
-        "cat_apps_ex":     "Dashboard · Todo\nई-कॉमर्स\nPortfolio",
-        "cat_code":        "कोड",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL और अधिक",
-        "cat_files":       "फ़ाइलें",
-        "cat_files_ex":    "CSV · JSON · कोड\nAI विश्लेषण करता है",
-        "cat_live":        "लाइव डेटा",
-        "cat_live_ex":     "क्रिकेट · शेयर\nमौसम · समाचार\nकोई भी URL",
-        "img_btn":         "🖼️ छवि",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 फ़ाइल",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ सहायता",
-        "settings":        "⚙️ मॉडल सेटिंग",
-        "temperature":     "तापमान",
-        "max_length":      "अधिकतम लंबाई",
-        "ai_mode":         "🎭 AI मोड",
-        "quick_tools":     "🛠️ त्वरित टूल्स",
-        "currency":        "💱 मुद्रा",
-        "units":           "📐 इकाई",
-        "calculator":      "🔢 कैलकुलेटर",
-        "qr_code":         "📱 QR कोड",
-        "export":          "💾 निर्यात",
-        "no_msgs":         "अभी कोई संदेश नहीं।",
-        "convert_btn":     "कन्वर्ट करें 💱",
-        "calc_btn":        "गणना करें 🔢",
-        "unit_btn":        "कन्वर्ट करें 📐",
-        "qr_btn":          "QR बनाएं",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ विज़न AI के लिए छवि अपलोड करें",
-        "img_upload_hint": "समर्थित: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 विश्लेषण के लिए फ़ाइल अपलोड करें",
-        "file_upload_hint": "समर्थित: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "तैयार · नीचे अपना प्रश्न टाइप करें ↓",
-        "file_ready":      "इस फ़ाइल के बारे में कुछ भी पूछें",
-        "analyzing":       "👁️ छवि का विश्लेषण हो रहा है…",
-        "searching":       "🔍 खोज रहे हैं…",
-        "fetching_weather":"🌤️ मौसम जानकारी ला रहे हैं…",
-        "fetching_stock":  "📈 डेटा ला रहे हैं",
-        "fetching_sports": "🏏 लाइव स्पोर्ट्स डेटा ला रहे हैं…",
-        "fetching_news":   "📰 समाचार ला रहे हैं…",
-        "fetching_rate":   "💱 विनिमय दर ला रहे हैं…",
-        "reading_url":     "🌐 पढ़ रहे हैं",
-        "running_code":    "⚙️ चला रहे हैं",
-        "run_btn":         "▶ चलाएं",
-        "live_preview":    "🖥️ प्रीव्यू",
-        "live_game":       "🎮 लाइव गेम!",
-        "live_app":        "🚀 लाइव ऐप",
-        "live_software":   "⚙️ लाइव सॉफ़्टवेयर",
-        "live_design":     "✨ लाइव डिज़ाइन",
-        "download":        "⬇️ डाउनलोड",
-        "example_q":       "💡 उदाहरण प्रश्न:",
-        "ex1": "इस छवि में क्या है?",
-        "ex2": "टेक्स्ट पढ़ें",
-        "ex3": "यह गणित हल करें",
-        "ex4": "यह कोड समझाएं",
-        "ex5": "यह चार्ट विश्लेषण करें",
-        "unit_placeholder":"जैसे: 100 किमी से मील",
-        "calc_placeholder":"जैसे: sqrt(144)",
-        "qr_placeholder":  "टेक्स्ट या URL",
-        "amount":          "राशि",
-        "from_curr":       "से",
-        "to_curr":         "में",
-        "no_results":      "कोई परिणाम नहीं।",
-        "stat_memory":     "🧠 मेमोरी",
-        "stat_vision":     "👁️ विज़न AI",
-        "stat_sports":     "🏏 लाइव स्पोर्ट्स",
-        "stat_games":      "🎮 गेम्स और ऐप्स",
-        "stat_files":      "📁 फ़ाइलें और URLs",
-        "stat_live":       "💱 लाइव डेटा",
-        "language_label":  "🌍 भाषा",
-        "sys_prompt_lang": "हिंदी में उत्तर दें। उपयोगकर्ता हिंदी में बात कर रहा है।",
+        "title":"Nova AI","subtitle":"दुनिया का सबसे स्मार्ट AI — छवियां देखता है, ऐप्स बनाता है, डेटा विज़ुअलाइज़ करता है।",
+        "badge":"लाइव · मुफ़्त · असीमित · विज़न AI","chat_placeholder":"कुछ भी पूछें — यहाँ टाइप करें या ऊपर 🖼️ Image / 📄 File / 📊 CSV क्लिक करें…",
+        "clear":"🗑️ साफ़ करें","msgs":"संदेश","msgp":"संदेश","hero_q":"आज आप क्या करना चाहेंगे?",
+        "cat_vision":"विज़न AI","cat_vision_ex":"कोई भी छवि अपलोड करें\nAI पढ़ता और विश्लेषण करता है",
+        "cat_games":"गेम्स","cat_games_ex":"Snake · Tetris\nChess · 2048",
+        "cat_apps":"ऐप्स","cat_apps_ex":"Dashboard · Todo\nई-कॉमर्स",
+        "cat_code":"कोड","cat_code_ex":"Python · JS · Java\nC++ · Go · Rust",
+        "cat_files":"फ़ाइलें","cat_files_ex":"CSV · JSON · कोड\nAI विश्लेषण करता है",
+        "cat_charts":"चार्ट और डेटा","cat_charts_ex":"CSV अपलोड करें\nचार्ट स्वतः बनाएं\nAI अंतर्दृष्टि",
+        "cat_live":"लाइव डेटा","cat_live_ex":"क्रिकेट · शेयर\nमौसम · समाचार",
+        "img_btn":"🖼️ छवि","img_btn_done":"🖼️ ✓",
+        "file_btn":"📄 फ़ाइल","file_btn_done":"📄 ✓",
+        "csv_btn":"📊 CSV","csv_btn_done":"📊 ✓",
+        "help_btn":"❓ सहायता","settings":"⚙️ मॉडल सेटिंग","temperature":"तापमान","max_length":"अधिकतम लंबाई",
+        "ai_mode":"🎭 AI मोड","quick_tools":"🛠️ त्वरित टूल्स",
+        "currency":"💱 मुद्रा","units":"📐 इकाई","calculator":"🔢 कैलकुलेटर","qr_code":"📱 QR कोड",
+        "export":"💾 निर्यात","no_msgs":"अभी कोई संदेश नहीं।",
+        "convert_btn":"कन्वर्ट करें 💱","calc_btn":"गणना करें 🔢","unit_btn":"कन्वर्ट करें 📐","qr_btn":"QR बनाएं",
+        "download_md":"📝 MD","download_json":"📊 JSON",
+        "img_upload_title":"👁️ विज़न AI के लिए छवि अपलोड करें","img_upload_hint":"समर्थित: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 विश्लेषण के लिए फ़ाइल अपलोड करें","file_upload_hint":"समर्थित: TXT, CSV, JSON, Python, JS",
+        "csv_upload_title":"📊 डेटा विज़ुअलाइज़ेशन के लिए CSV अपलोड करें","csv_upload_hint":"कोई भी CSV फ़ाइल अपलोड करें — Nova AI स्वतः चार्ट बनाएगा",
+        "img_ready":"तैयार · नीचे अपना प्रश्न टाइप करें ↓","file_ready":"इस फ़ाइल के बारे में कुछ भी पूछें",
+        "csv_ready":"CSV लोड हो गया · चार्ट स्वतः बन गए!",
+        "analyzing":"👁️ छवि का विश्लेषण हो रहा है…","searching":"🔍 खोज रहे हैं…",
+        "fetching_weather":"🌤️ मौसम जानकारी ला रहे हैं…","fetching_stock":"📈 डेटा ला रहे हैं",
+        "fetching_sports":"🏏 लाइव स्पोर्ट्स डेटा ला रहे हैं…","fetching_news":"📰 समाचार ला रहे हैं…",
+        "fetching_rate":"💱 विनिमय दर ला रहे हैं…","reading_url":"🌐 पढ़ रहे हैं",
+        "running_code":"⚙️ चला रहे हैं","run_btn":"▶ चलाएं",
+        "live_preview":"🖥️ प्रीव्यू","live_game":"🎮 लाइव गेम!","live_app":"🚀 लाइव ऐप",
+        "live_software":"⚙️ लाइव सॉफ़्टवेयर","live_design":"✨ लाइव डिज़ाइन",
+        "download":"⬇️ डाउनलोड","example_q":"💡 उदाहरण प्रश्न:","ex1":"इस छवि में क्या है?",
+        "ex2":"टेक्स्ट पढ़ें","ex3":"यह गणित हल करें","ex4":"यह कोड समझाएं","ex5":"यह चार्ट विश्लेषण करें",
+        "unit_placeholder":"जैसे: 100 किमी से मील","calc_placeholder":"जैसे: sqrt(144)",
+        "qr_placeholder":"टेक्स्ट या URL","amount":"राशि","from_curr":"से","to_curr":"में",
+        "no_results":"कोई परिणाम नहीं।","stat_memory":"🧠 मेमोरी","stat_vision":"👁️ विज़न AI",
+        "stat_sports":"🏏 लाइव स्पोर्ट्स","stat_games":"🎮 गेम्स और ऐप्स",
+        "stat_files":"📁 फ़ाइलें और URLs","stat_live":"💱 लाइव डेटा","stat_charts":"📊 डेटा विज़",
+        "language_label":"🌍 भाषा","sys_prompt_lang":"हिंदी में उत्तर दें।",
+        "chart_title":"📊 स्वतः बने चार्ट","chart_overview":"📋 डेटासेट अवलोकन","chart_ai_insights":"🤖 AI डेटा अंतर्दृष्टि",
+        "chart_rows":"पंक्तियाँ","chart_cols":"कॉलम","chart_numeric":"संख्यात्मक कॉलम",
+        "chart_categorical":"श्रेणीबद्ध कॉलम","chart_missing":"अनुपस्थित मान",
+        "chart_ask":"इस डेटा के बारे में AI से पूछें…","chart_generating":"📊 चार्ट बन रहे हैं…",
+        "chart_analyzing":"🤖 AI डेटा विश्लेषण कर रहा है…","chart_types":"चार्ट प्रकार",
+        "chart_select_x":"X-अक्ष","chart_select_y":"Y-अक्ष","chart_select_color":"रंग द्वारा",
+        "chart_custom":"🎨 कस्टम चार्ट बिल्डर",
+        "chart_bar":"बार","chart_line":"लाइन","chart_scatter":"स्कैटर","chart_pie":"पाई",
+        "chart_histogram":"हिस्टोग्राम","chart_box":"बॉक्स","chart_heatmap":"हीटमैप",
+        "chart_area":"एरिया","chart_violin":"वायलिन","chart_sunburst":"सनबर्स्ट",
+        "chart_generate":"चार्ट बनाएं","chart_correlation":"सहसंबंध मैट्रिक्स",
+        "chart_distribution":"वितरण विश्लेषण","chart_summary":"सांख्यिकीय सारांश",
+        "chart_top_insights":"शीर्ष अंतर्दृष्टि","chart_download_csv":"⬇️ CSV डाउनलोड करें",
     },
     "bn": {
-        "title":           "Nova AI",
-        "subtitle":        "বিশ্বের সবচেয়ে স্মার্ট AI — ছবি দেখে, অ্যাপ তৈরি করে, সব লাইভ জানে।",
-        "badge":           "লাইভ · বিনামূল্যে · সীমাহীন · ভিশন AI",
-        "chat_placeholder":"যেকোনো কিছু জিজ্ঞাসা করুন — এখানে টাইপ করুন বা উপরে 🖼️ ছবি / 📄 ফাইল ক্লিক করুন…",
-        "clear":           "🗑️ মুছুন",
-        "msgs":            "বার্তা",
-        "msgp":            "বার্তা",
-        "hero_q":          "আজ আপনি কী করতে চান?",
-        "cat_vision":      "ভিশন AI",
-        "cat_vision_ex":   "যেকোনো ছবি আপলোড করুন\nAI পড়ে ও বিশ্লেষণ করে",
-        "cat_games":       "গেমস",
-        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps":        "অ্যাপস",
-        "cat_apps_ex":     "Dashboard · Todo\nই-কমার্স\nPortfolio",
-        "cat_code":        "কোড",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL এবং আরও",
-        "cat_files":       "ফাইলস",
-        "cat_files_ex":    "CSV · JSON · কোড\nAI বিশ্লেষণ করে",
-        "cat_live":        "লাইভ ডেটা",
-        "cat_live_ex":     "ক্রিকেট · শেয়ার\nআবহাওয়া · সংবাদ\nযেকোনো URL",
-        "img_btn":         "🖼️ ছবি",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 ফাইল",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ সাহায্য",
-        "settings":        "⚙️ মডেল সেটিংস",
-        "temperature":     "তাপমাত্রা",
-        "max_length":      "সর্বোচ্চ দৈর্ঘ্য",
-        "ai_mode":         "🎭 AI মোড",
-        "quick_tools":     "🛠️ দ্রুত সরঞ্জাম",
-        "currency":        "💱 মুদ্রা",
-        "units":           "📐 একক",
-        "calculator":      "🔢 ক্যালকুলেটর",
-        "qr_code":         "📱 QR কোড",
-        "export":          "💾 রপ্তানি",
-        "no_msgs":         "এখনো কোনো বার্তা নেই।",
-        "convert_btn":     "রূপান্তর করুন 💱",
-        "calc_btn":        "গণনা করুন 🔢",
-        "unit_btn":        "রূপান্তর করুন 📐",
-        "qr_btn":          "QR তৈরি করুন",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ ভিশন AI-এর জন্য ছবি আপলোড করুন",
-        "img_upload_hint": "সমর্থিত: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 বিশ্লেষণের জন্য ফাইল আপলোড করুন",
-        "file_upload_hint": "সমর্থিত: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "প্রস্তুত · নিচে আপনার প্রশ্ন টাইপ করুন ↓",
-        "file_ready":      "এই ফাইল সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন",
-        "analyzing":       "👁️ ছবি বিশ্লেষণ হচ্ছে…",
-        "searching":       "🔍 অনুসন্ধান হচ্ছে…",
-        "fetching_weather":"🌤️ আবহাওয়া আনা হচ্ছে…",
-        "fetching_stock":  "📈 ডেটা আনা হচ্ছে",
-        "fetching_sports": "🏏 লাইভ স্পোর্টস ডেটা আনা হচ্ছে…",
-        "fetching_news":   "📰 সংবাদ আনা হচ্ছে…",
-        "fetching_rate":   "💱 বিনিময় হার আনা হচ্ছে…",
-        "reading_url":     "🌐 পড়া হচ্ছে",
-        "running_code":    "⚙️ চালানো হচ্ছে",
-        "run_btn":         "▶ চালান",
-        "live_preview":    "🖥️ প্রিভিউ",
-        "live_game":       "🎮 লাইভ গেম!",
-        "live_app":        "🚀 লাইভ অ্যাপ",
-        "live_software":   "⚙️ লাইভ সফটওয়্যার",
-        "live_design":     "✨ লাইভ ডিজাইন",
-        "download":        "⬇️ ডাউনলোড",
-        "example_q":       "💡 উদাহরণ প্রশ্ন:",
-        "ex1": "এই ছবিতে কী আছে?",
-        "ex2": "টেক্সট পড়ুন",
-        "ex3": "এই গণিত সমাধান করুন",
-        "ex4": "এই কোড বুঝিয়ে দিন",
-        "ex5": "এই চার্ট বিশ্লেষণ করুন",
-        "unit_placeholder":"যেমন: ১০০ কিমি থেকে মাইল",
-        "calc_placeholder":"যেমন: sqrt(144)",
-        "qr_placeholder":  "টেক্সট বা URL",
-        "amount":          "পরিমাণ",
-        "from_curr":       "থেকে",
-        "to_curr":         "তে",
-        "no_results":      "কোনো ফলাফল নেই।",
-        "stat_memory":     "🧠 মেমোরি",
-        "stat_vision":     "👁️ ভিশন AI",
-        "stat_sports":     "🏏 লাইভ স্পোর্টস",
-        "stat_games":      "🎮 গেমস ও অ্যাপস",
-        "stat_files":      "📁 ফাইলস ও URLs",
-        "stat_live":       "💱 লাইভ ডেটা",
-        "language_label":  "🌍 ভাষা",
-        "sys_prompt_lang": "বাংলায় উত্তর দিন। ব্যবহারকারী বাংলায় কথা বলছেন।",
+        "title":"Nova AI","subtitle":"বিশ্বের সবচেয়ে স্মার্ট AI — ছবি দেখে, অ্যাপ তৈরি করে, ডেটা ভিজ্যুয়ালাইজ করে।",
+        "badge":"লাইভ · বিনামূল্যে · সীমাহীন · ভিশন AI","chat_placeholder":"যেকোনো কিছু জিজ্ঞাসা করুন — এখানে টাইপ করুন বা 🖼️ ছবি / 📄 ফাইল / 📊 CSV ক্লিক করুন…",
+        "clear":"🗑️ মুছুন","msgs":"বার্তা","msgp":"বার্তা","hero_q":"আজ আপনি কী করতে চান?",
+        "cat_vision":"ভিশন AI","cat_vision_ex":"যেকোনো ছবি আপলোড করুন\nAI পড়ে ও বিশ্লেষণ করে",
+        "cat_games":"গেমস","cat_games_ex":"Snake · Tetris\nChess · 2048",
+        "cat_apps":"অ্যাপস","cat_apps_ex":"Dashboard · Todo\nই-কমার্স",
+        "cat_code":"কোড","cat_code_ex":"Python · JS · Java\nC++ · Go · Rust",
+        "cat_files":"ফাইলস","cat_files_ex":"CSV · JSON · কোড\nAI বিশ্লেষণ করে",
+        "cat_charts":"চার্ট ও ডেটা","cat_charts_ex":"CSV আপলোড করুন\nচার্ট স্বয়ংক্রিয়ভাবে তৈরি\nAI অন্তর্দৃষ্টি",
+        "cat_live":"লাইভ ডেটা","cat_live_ex":"ক্রিকেট · শেয়ার\nআবহাওয়া · সংবাদ",
+        "img_btn":"🖼️ ছবি","img_btn_done":"🖼️ ✓",
+        "file_btn":"📄 ফাইল","file_btn_done":"📄 ✓",
+        "csv_btn":"📊 CSV","csv_btn_done":"📊 ✓",
+        "help_btn":"❓ সাহায্য","settings":"⚙️ মডেল সেটিংস","temperature":"তাপমাত্রা","max_length":"সর্বোচ্চ দৈর্ঘ্য",
+        "ai_mode":"🎭 AI মোড","quick_tools":"🛠️ দ্রুত সরঞ্জাম",
+        "currency":"💱 মুদ্রা","units":"📐 একক","calculator":"🔢 ক্যালকুলেটর","qr_code":"📱 QR কোড",
+        "export":"💾 রপ্তানি","no_msgs":"এখনো কোনো বার্তা নেই।",
+        "convert_btn":"রূপান্তর করুন 💱","calc_btn":"গণনা করুন 🔢","unit_btn":"রূপান্তর করুন 📐","qr_btn":"QR তৈরি করুন",
+        "download_md":"📝 MD","download_json":"📊 JSON",
+        "img_upload_title":"👁️ ভিশন AI-এর জন্য ছবি আপলোড করুন","img_upload_hint":"সমর্থিত: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 বিশ্লেষণের জন্য ফাইল আপলোড করুন","file_upload_hint":"সমর্থিত: TXT, CSV, JSON, Python, JS",
+        "csv_upload_title":"📊 ডেটা ভিজ্যুয়ালাইজেশনের জন্য CSV আপলোড করুন","csv_upload_hint":"যেকোনো CSV ফাইল আপলোড করুন — Nova AI স্বয়ংক্রিয়ভাবে চার্ট তৈরি করবে",
+        "img_ready":"প্রস্তুত · নিচে আপনার প্রশ্ন টাইপ করুন ↓","file_ready":"এই ফাইল সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন",
+        "csv_ready":"CSV লোড হয়েছে · চার্ট স্বয়ংক্রিয়ভাবে তৈরি!",
+        "analyzing":"👁️ ছবি বিশ্লেষণ হচ্ছে…","searching":"🔍 অনুসন্ধান হচ্ছে…",
+        "fetching_weather":"🌤️ আবহাওয়া আনা হচ্ছে…","fetching_stock":"📈 ডেটা আনা হচ্ছে",
+        "fetching_sports":"🏏 লাইভ স্পোর্টস ডেটা আনা হচ্ছে…","fetching_news":"📰 সংবাদ আনা হচ্ছে…",
+        "fetching_rate":"💱 বিনিময় হার আনা হচ্ছে…","reading_url":"🌐 পড়া হচ্ছে",
+        "running_code":"⚙️ চালানো হচ্ছে","run_btn":"▶ চালান",
+        "live_preview":"🖥️ প্রিভিউ","live_game":"🎮 লাইভ গেম!","live_app":"🚀 লাইভ অ্যাপ",
+        "live_software":"⚙️ লাইভ সফটওয়্যার","live_design":"✨ লাইভ ডিজাইন",
+        "download":"⬇️ ডাউনলোড","example_q":"💡 উদাহরণ প্রশ্ন:","ex1":"এই ছবিতে কী আছে?",
+        "ex2":"টেক্সট পড়ুন","ex3":"এই গণিত সমাধান করুন","ex4":"এই কোড বুঝিয়ে দিন","ex5":"এই চার্ট বিশ্লেষণ করুন",
+        "unit_placeholder":"যেমন: ১০০ কিমি থেকে মাইল","calc_placeholder":"যেমন: sqrt(144)",
+        "qr_placeholder":"টেক্সট বা URL","amount":"পরিমাণ","from_curr":"থেকে","to_curr":"তে",
+        "no_results":"কোনো ফলাফল নেই।","stat_memory":"🧠 মেমোরি","stat_vision":"👁️ ভিশন AI",
+        "stat_sports":"🏏 লাইভ স্পোর্টস","stat_games":"🎮 গেমস ও অ্যাপস",
+        "stat_files":"📁 ফাইলস ও URLs","stat_live":"💱 লাইভ ডেটা","stat_charts":"📊 ডেটা ভিজ",
+        "language_label":"🌍 ভাষা","sys_prompt_lang":"বাংলায় উত্তর দিন।",
+        "chart_title":"📊 স্বয়ংক্রিয় চার্ট","chart_overview":"📋 ডেটাসেট ওভারভিউ","chart_ai_insights":"🤖 AI ডেটা অন্তর্দৃষ্টি",
+        "chart_rows":"সারি","chart_cols":"কলাম","chart_numeric":"সংখ্যাসূচক কলাম",
+        "chart_categorical":"শ্রেণীবদ্ধ কলাম","chart_missing":"অনুপস্থিত মান",
+        "chart_ask":"এই ডেটা সম্পর্কে AI-কে জিজ্ঞাসা করুন…","chart_generating":"📊 চার্ট তৈরি হচ্ছে…",
+        "chart_analyzing":"🤖 AI ডেটা বিশ্লেষণ করছে…","chart_types":"চার্ট ধরন",
+        "chart_select_x":"X-অক্ষ","chart_select_y":"Y-অক্ষ","chart_select_color":"রঙ দ্বারা",
+        "chart_custom":"🎨 কাস্টম চার্ট বিল্ডার",
+        "chart_bar":"বার","chart_line":"লাইন","chart_scatter":"স্ক্যাটার","chart_pie":"পাই",
+        "chart_histogram":"হিস্টোগ্রাম","chart_box":"বক্স","chart_heatmap":"হিটম্যাপ",
+        "chart_area":"এরিয়া","chart_violin":"ভায়োলিন","chart_sunburst":"সানবার্স্ট",
+        "chart_generate":"চার্ট তৈরি করুন","chart_correlation":"পারস্পরিক সম্পর্ক ম্যাট্রিক্স",
+        "chart_distribution":"বিতরণ বিশ্লেষণ","chart_summary":"পরিসংখ্যান সারসংক্ষেপ",
+        "chart_top_insights":"শীর্ষ অন্তর্দৃষ্টি","chart_download_csv":"⬇️ CSV ডাউনলোড করুন",
     },
     "es": {
-        "title":           "Nova AI",
-        "subtitle":        "La IA más inteligente del mundo — ve imágenes, crea apps, sabe todo en vivo.",
-        "badge":           "EN VIVO · GRATIS · ILIMITADO · IA DE VISIÓN",
-        "chat_placeholder":"Pregunta lo que quieras — escribe aquí o haz clic en 🖼️ Imagen / 📄 Archivo…",
-        "clear":           "🗑️ Borrar",
-        "msgs":            "mensaje",
-        "msgp":            "mensajes",
-        "hero_q":          "¿Qué quieres hacer hoy?",
-        "cat_vision":      "IA de Visión",
-        "cat_vision_ex":   "Sube cualquier imagen\nIA lee y analiza",
-        "cat_games":       "Juegos",
-        "cat_games_ex":    "Snake · Tetris\nAjedrez · 2048\nPacman · RPG",
-        "cat_apps":        "Aplicaciones",
-        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
-        "cat_code":        "Código",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL y más",
-        "cat_files":       "Archivos",
-        "cat_files_ex":    "CSV · JSON · Código\nIA lo analiza",
-        "cat_live":        "Datos en Vivo",
-        "cat_live_ex":     "Cricket · Bolsa\nClima · Noticias\nCualquier URL",
-        "img_btn":         "🖼️ Imagen",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 Archivo",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Ayuda",
-        "settings":        "⚙️ Ajustes",
-        "temperature":     "Temperatura",
-        "max_length":      "Longitud máx.",
-        "ai_mode":         "🎭 Modo IA",
-        "quick_tools":     "🛠️ Herramientas",
-        "currency":        "💱 Divisa",
-        "units":           "📐 Unidades",
-        "calculator":      "🔢 Calculadora",
-        "qr_code":         "📱 Código QR",
-        "export":          "💾 Exportar",
-        "no_msgs":         "Aún no hay mensajes.",
-        "convert_btn":     "Convertir 💱",
-        "calc_btn":        "Calcular 🔢",
-        "unit_btn":        "Convertir 📐",
-        "qr_btn":          "Generar QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Subir imagen para IA de Visión",
-        "img_upload_hint": "Soporta: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Subir archivo para análisis",
-        "file_upload_hint": "Soporta: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Listo · Escribe tu pregunta abajo ↓",
-        "file_ready":      "Pregúntame sobre este archivo",
-        "analyzing":       "👁️ Analizando imagen…",
-        "searching":       "🔍 Buscando…",
-        "fetching_weather":"🌤️ Obteniendo clima…",
-        "fetching_stock":  "📈 Obteniendo",
-        "fetching_sports": "🏏 Obteniendo datos deportivos…",
-        "fetching_news":   "📰 Obteniendo noticias…",
-        "fetching_rate":   "💱 Obteniendo tasas…",
-        "reading_url":     "🌐 Leyendo",
-        "running_code":    "⚙️ Ejecutando",
-        "run_btn":         "▶ Ejecutar",
-        "live_preview":    "🖥️ Vista previa",
-        "live_game":       "🎮 ¡Juego en Vivo!",
-        "live_app":        "🚀 App en Vivo",
-        "live_software":   "⚙️ Software en Vivo",
-        "live_design":     "✨ Diseño en Vivo",
-        "download":        "⬇️ Descargar",
-        "example_q":       "💡 Ejemplos:",
-        "ex1": "¿Qué hay en esta imagen?",
-        "ex2": "Lee el texto",
-        "ex3": "Resuelve esta matemática",
-        "ex4": "Explica este código",
-        "ex5": "Analiza este gráfico",
-        "unit_placeholder":"ej. 100 km a millas",
-        "calc_placeholder":"ej. sqrt(144)",
-        "qr_placeholder":  "Texto o URL",
-        "amount":          "Cantidad",
-        "from_curr":       "De",
-        "to_curr":         "A",
-        "no_results":      "Sin resultados.",
-        "stat_memory":     "🧠 Memoria",
-        "stat_vision":     "👁️ Visión IA",
-        "stat_sports":     "🏏 Deportes",
-        "stat_games":      "🎮 Juegos y Apps",
-        "stat_files":      "📁 Archivos y URLs",
-        "stat_live":       "💱 Datos en Vivo",
-        "language_label":  "🌍 Idioma",
-        "sys_prompt_lang": "Responde en español.",
-    },
-    "fr": {
-        "title":           "Nova AI",
-        "subtitle":        "L'IA la plus intelligente au monde — voit des images, crée des apps, sait tout en direct.",
-        "badge":           "EN DIRECT · GRATUIT · ILLIMITÉ · IA VISION",
-        "chat_placeholder":"Demandez n'importe quoi — tapez ici ou cliquez sur 🖼️ Image / 📄 Fichier…",
-        "clear":           "🗑️ Effacer",
-        "msgs":            "message",
-        "msgp":            "messages",
-        "hero_q":          "Que souhaitez-vous faire aujourd'hui ?",
-        "cat_vision":      "IA Vision",
-        "cat_vision_ex":   "Téléchargez une image\nL'IA lit et analyse",
-        "cat_games":       "Jeux",
-        "cat_games_ex":    "Snake · Tetris\nÉchecs · 2048\nPacman · RPG",
-        "cat_apps":        "Applications",
-        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
-        "cat_code":        "Code",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL et plus",
-        "cat_files":       "Fichiers",
-        "cat_files_ex":    "CSV · JSON · Code\nL'IA analyse",
-        "cat_live":        "Données Live",
-        "cat_live_ex":     "Cricket · Bourse\nMétéo · Actualités\nn'importe quel URL",
-        "img_btn":         "🖼️ Image",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 Fichier",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Aide",
-        "settings":        "⚙️ Paramètres",
-        "temperature":     "Température",
-        "max_length":      "Longueur max.",
-        "ai_mode":         "🎭 Mode IA",
-        "quick_tools":     "🛠️ Outils rapides",
-        "currency":        "💱 Devise",
-        "units":           "📐 Unités",
-        "calculator":      "🔢 Calculatrice",
-        "qr_code":         "📱 Code QR",
-        "export":          "💾 Exporter",
-        "no_msgs":         "Pas encore de messages.",
-        "convert_btn":     "Convertir 💱",
-        "calc_btn":        "Calculer 🔢",
-        "unit_btn":        "Convertir 📐",
-        "qr_btn":          "Générer QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Télécharger une image pour l'IA Vision",
-        "img_upload_hint": "Supporté: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Télécharger un fichier pour analyse",
-        "file_upload_hint": "Supporté: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Prêt · Tapez votre question ci-dessous ↓",
-        "file_ready":      "Posez-moi n'importe quelle question sur ce fichier",
-        "analyzing":       "👁️ Analyse de l'image…",
-        "searching":       "🔍 Recherche…",
-        "fetching_weather":"🌤️ Récupération météo…",
-        "fetching_stock":  "📈 Récupération",
-        "fetching_sports": "🏏 Récupération des données sportives…",
-        "fetching_news":   "📰 Récupération des actualités…",
-        "fetching_rate":   "💱 Récupération des taux…",
-        "reading_url":     "🌐 Lecture de",
-        "running_code":    "⚙️ Exécution",
-        "run_btn":         "▶ Exécuter",
-        "live_preview":    "🖥️ Aperçu",
-        "live_game":       "🎮 Jeu en Direct!",
-        "live_app":        "🚀 App en Direct",
-        "live_software":   "⚙️ Logiciel en Direct",
-        "live_design":     "✨ Design en Direct",
-        "download":        "⬇️ Télécharger",
-        "example_q":       "💡 Exemples de questions:",
-        "ex1": "Qu'y a-t-il dans cette image ?",
-        "ex2": "Lire le texte",
-        "ex3": "Résoudre ce problème",
-        "ex4": "Expliquer ce code",
-        "ex5": "Analyser ce graphique",
-        "unit_placeholder":"ex. 100 km en miles",
-        "calc_placeholder":"ex. sqrt(144)",
-        "qr_placeholder":  "Texte ou URL",
-        "amount":          "Montant",
-        "from_curr":       "De",
-        "to_curr":         "Vers",
-        "no_results":      "Aucun résultat.",
-        "stat_memory":     "🧠 Mémoire",
-        "stat_vision":     "👁️ Vision IA",
-        "stat_sports":     "🏏 Sports Live",
-        "stat_games":      "🎮 Jeux et Apps",
-        "stat_files":      "📁 Fichiers et URLs",
-        "stat_live":       "💱 Données Live",
-        "language_label":  "🌍 Langue",
-        "sys_prompt_lang": "Répondez en français.",
-    },
-    "de": {
-        "title":           "Nova AI",
-        "subtitle":        "Die klügste KI der Welt — sieht Bilder, baut Apps, weiß alles live.",
-        "badge":           "LIVE · KOSTENLOS · UNBEGRENZT · VISION KI",
-        "chat_placeholder":"Frag alles — hier tippen oder oben auf 🖼️ Bild / 📄 Datei klicken…",
-        "clear":           "🗑️ Löschen",
-        "msgs":            "Nachricht",
-        "msgp":            "Nachrichten",
-        "hero_q":          "Was möchten Sie heute tun?",
-        "cat_vision":      "Vision KI",
-        "cat_vision_ex":   "Bild hochladen\nKI liest und analysiert",
-        "cat_games":       "Spiele",
-        "cat_games_ex":    "Snake · Tetris\nSchach · 2048\nPacman · RPG",
-        "cat_apps":        "Apps",
-        "cat_apps_ex":     "Dashboard · Todo\nE-Commerce\nPortfolio",
-        "cat_code":        "Code",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL und mehr",
-        "cat_files":       "Dateien",
-        "cat_files_ex":    "CSV · JSON · Code\nKI analysiert",
-        "cat_live":        "Live-Daten",
-        "cat_live_ex":     "Cricket · Aktien\nWetter · Nachrichten\nJede URL",
-        "img_btn":         "🖼️ Bild",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 Datei",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Hilfe",
-        "settings":        "⚙️ Modelleinstellungen",
-        "temperature":     "Temperatur",
-        "max_length":      "Max. Länge",
-        "ai_mode":         "🎭 KI-Modus",
-        "quick_tools":     "🛠️ Schnellwerkzeuge",
-        "currency":        "💱 Währung",
-        "units":           "📐 Einheiten",
-        "calculator":      "🔢 Rechner",
-        "qr_code":         "📱 QR-Code",
-        "export":          "💾 Exportieren",
-        "no_msgs":         "Noch keine Nachrichten.",
-        "convert_btn":     "Umrechnen 💱",
-        "calc_btn":        "Berechnen 🔢",
-        "unit_btn":        "Umrechnen 📐",
-        "qr_btn":          "QR erstellen",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Bild für Vision KI hochladen",
-        "img_upload_hint": "Unterstützt: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Datei zur Analyse hochladen",
-        "file_upload_hint": "Unterstützt: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Bereit · Frage unten eingeben ↓",
-        "file_ready":      "Stell mir Fragen zu dieser Datei",
-        "analyzing":       "👁️ Bild wird analysiert…",
-        "searching":       "🔍 Suche läuft…",
-        "fetching_weather":"🌤️ Wetter wird abgerufen…",
-        "fetching_stock":  "📈 Daten werden abgerufen",
-        "fetching_sports": "🏏 Live-Sportdaten werden abgerufen…",
-        "fetching_news":   "📰 Nachrichten werden abgerufen…",
-        "fetching_rate":   "💱 Kurse werden abgerufen…",
-        "reading_url":     "🌐 Lesen von",
-        "running_code":    "⚙️ Ausführen",
-        "run_btn":         "▶ Ausführen",
-        "live_preview":    "🖥️ Vorschau",
-        "live_game":       "🎮 Live-Spiel!",
-        "live_app":        "🚀 Live-App",
-        "live_software":   "⚙️ Live-Software",
-        "live_design":     "✨ Live-Design",
-        "download":        "⬇️ Herunterladen",
-        "example_q":       "💡 Beispielfragen:",
-        "ex1": "Was ist auf diesem Bild?",
-        "ex2": "Text lesen",
-        "ex3": "Diese Mathe lösen",
-        "ex4": "Diesen Code erklären",
-        "ex5": "Dieses Diagramm analysieren",
-        "unit_placeholder":"z.B. 100 km in Meilen",
-        "calc_placeholder":"z.B. sqrt(144)",
-        "qr_placeholder":  "Text oder URL",
-        "amount":          "Betrag",
-        "from_curr":       "Von",
-        "to_curr":         "Nach",
-        "no_results":      "Keine Ergebnisse.",
-        "stat_memory":     "🧠 Gedächtnis",
-        "stat_vision":     "👁️ Vision KI",
-        "stat_sports":     "🏏 Live-Sport",
-        "stat_games":      "🎮 Spiele & Apps",
-        "stat_files":      "📁 Dateien & URLs",
-        "stat_live":       "💱 Live-Daten",
-        "language_label":  "🌍 Sprache",
-        "sys_prompt_lang": "Antworten Sie auf Deutsch.",
-    },
-    "ja": {
-        "title":           "Nova AI",
-        "subtitle":        "世界最高のAI — 画像を見て、アプリを作り、すべてをリアルタイムで知っています。",
-        "badge":           "ライブ · 無料 · 無制限 · ビジョンAI",
-        "chat_placeholder":"何でも聞いてください — ここに入力するか🖼️画像/📄ファイルをクリック…",
-        "clear":           "🗑️ クリア",
-        "msgs":            "メッセージ",
-        "msgp":            "メッセージ",
-        "hero_q":          "今日は何をしたいですか？",
-        "cat_vision":      "ビジョンAI",
-        "cat_vision_ex":   "画像をアップロード\nAIが読み取り分析",
-        "cat_games":       "ゲーム",
-        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps":        "アプリ",
-        "cat_apps_ex":     "Dashboard · Todo\nEコマース\nPortfolio",
-        "cat_code":        "コード",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQLなど",
-        "cat_files":       "ファイル",
-        "cat_files_ex":    "CSV · JSON · コード\nAIが分析",
-        "cat_live":        "ライブデータ",
-        "cat_live_ex":     "クリケット · 株価\n天気 · ニュース\nどんなURL",
-        "img_btn":         "🖼️ 画像",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 ファイル",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ ヘルプ",
-        "settings":        "⚙️ モデル設定",
-        "temperature":     "温度",
-        "max_length":      "最大長",
-        "ai_mode":         "🎭 AIモード",
-        "quick_tools":     "🛠️ クイックツール",
-        "currency":        "💱 通貨",
-        "units":           "📐 単位",
-        "calculator":      "🔢 計算機",
-        "qr_code":         "📱 QRコード",
-        "export":          "💾 エクスポート",
-        "no_msgs":         "まだメッセージはありません。",
-        "convert_btn":     "変換 💱",
-        "calc_btn":        "計算 🔢",
-        "unit_btn":        "変換 📐",
-        "qr_btn":          "QR生成",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ ビジョンAI用に画像をアップロード",
-        "img_upload_hint": "対応: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 分析用ファイルをアップロード",
-        "file_upload_hint": "対応: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "準備完了 · 下に質問を入力 ↓",
-        "file_ready":      "このファイルについて何でも聞いてください",
-        "analyzing":       "👁️ 画像を分析中…",
-        "searching":       "🔍 検索中…",
-        "fetching_weather":"🌤️ 天気を取得中…",
-        "fetching_stock":  "📈 データを取得中",
-        "fetching_sports": "🏏 スポーツデータを取得中…",
-        "fetching_news":   "📰 ニュースを取得中…",
-        "fetching_rate":   "💱 レートを取得中…",
-        "reading_url":     "🌐 読み込み中",
-        "running_code":    "⚙️ 実行中",
-        "run_btn":         "▶ 実行",
-        "live_preview":    "🖥️ プレビュー",
-        "live_game":       "🎮 ライブゲーム!",
-        "live_app":        "🚀 ライブアプリ",
-        "live_software":   "⚙️ ライブソフトウェア",
-        "live_design":     "✨ ライブデザイン",
-        "download":        "⬇️ ダウンロード",
-        "example_q":       "💡 例の質問:",
-        "ex1": "この画像には何がありますか？",
-        "ex2": "テキストを読む",
-        "ex3": "この数学を解く",
-        "ex4": "このコードを説明する",
-        "ex5": "このグラフを分析する",
-        "unit_placeholder":"例: 100 km to miles",
-        "calc_placeholder":"例: sqrt(144)",
-        "qr_placeholder":  "テキストまたはURL",
-        "amount":          "金額",
-        "from_curr":       "から",
-        "to_curr":         "へ",
-        "no_results":      "結果なし。",
-        "stat_memory":     "🧠 メモリ",
-        "stat_vision":     "👁️ ビジョンAI",
-        "stat_sports":     "🏏 ライブスポーツ",
-        "stat_games":      "🎮 ゲームとアプリ",
-        "stat_files":      "📁 ファイルとURL",
-        "stat_live":       "💱 ライブデータ",
-        "language_label":  "🌍 言語",
-        "sys_prompt_lang": "日本語で答えてください。",
-    },
-    "zh": {
-        "title":           "Nova AI",
-        "subtitle":        "世界上最聪明的AI — 看图像、构建应用、实时了解一切。",
-        "badge":           "实时 · 免费 · 无限 · 视觉AI",
-        "chat_placeholder":"问任何问题 — 在此输入或点击上方 🖼️ 图像 / 📄 文件…",
-        "clear":           "🗑️ 清除",
-        "msgs":            "条消息",
-        "msgp":            "条消息",
-        "hero_q":          "您今天想做什么？",
-        "cat_vision":      "视觉AI",
-        "cat_vision_ex":   "上传任何图像\nAI读取并分析",
-        "cat_games":       "游戏",
-        "cat_games_ex":    "贪吃蛇 · 俄罗斯方块\n国际象棋 · 2048\nPacman · RPG",
-        "cat_apps":        "应用",
-        "cat_apps_ex":     "仪表板 · 待办\n电子商务\n作品集",
-        "cat_code":        "代码",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL等",
-        "cat_files":       "文件",
-        "cat_files_ex":    "CSV · JSON · 代码\nAI分析",
-        "cat_live":        "实时数据",
-        "cat_live_ex":     "板球 · 股票\n天气 · 新闻\n任何URL",
-        "img_btn":         "🖼️ 图像",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 文件",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ 帮助",
-        "settings":        "⚙️ 模型设置",
-        "temperature":     "温度",
-        "max_length":      "最大长度",
-        "ai_mode":         "🎭 AI模式",
-        "quick_tools":     "🛠️ 快速工具",
-        "currency":        "💱 货币",
-        "units":           "📐 单位",
-        "calculator":      "🔢 计算器",
-        "qr_code":         "📱 二维码",
-        "export":          "💾 导出",
-        "no_msgs":         "暂无消息。",
-        "convert_btn":     "转换 💱",
-        "calc_btn":        "计算 🔢",
-        "unit_btn":        "转换 📐",
-        "qr_btn":          "生成二维码",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ 上传图像以供视觉AI分析",
-        "img_upload_hint": "支持: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 上传文件进行分析",
-        "file_upload_hint": "支持: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "准备就绪 · 在下方输入问题 ↓",
-        "file_ready":      "请询问关于此文件的任何问题",
-        "analyzing":       "👁️ 正在分析图像…",
-        "searching":       "🔍 正在搜索…",
-        "fetching_weather":"🌤️ 正在获取天气…",
-        "fetching_stock":  "📈 正在获取",
-        "fetching_sports": "🏏 正在获取实时体育数据…",
-        "fetching_news":   "📰 正在获取新闻…",
-        "fetching_rate":   "💱 正在获取汇率…",
-        "reading_url":     "🌐 正在读取",
-        "running_code":    "⚙️ 正在运行",
-        "run_btn":         "▶ 运行",
-        "live_preview":    "🖥️ 预览",
-        "live_game":       "🎮 实时游戏!",
-        "live_app":        "🚀 实时应用",
-        "live_software":   "⚙️ 实时软件",
-        "live_design":     "✨ 实时设计",
-        "download":        "⬇️ 下载",
-        "example_q":       "💡 示例问题：",
-        "ex1": "这张图片里有什么？",
-        "ex2": "读取文字",
-        "ex3": "解这道数学题",
-        "ex4": "解释这段代码",
-        "ex5": "分析这个图表",
-        "unit_placeholder":"例：100公里转英里",
-        "calc_placeholder":"例：sqrt(144)",
-        "qr_placeholder":  "文本或URL",
-        "amount":          "金额",
-        "from_curr":       "从",
-        "to_curr":         "到",
-        "no_results":      "无结果。",
-        "stat_memory":     "🧠 记忆",
-        "stat_vision":     "👁️ 视觉AI",
-        "stat_sports":     "🏏 实时体育",
-        "stat_games":      "🎮 游戏和应用",
-        "stat_files":      "📁 文件和URL",
-        "stat_live":       "💱 实时数据",
-        "language_label":  "🌍 语言",
-        "sys_prompt_lang": "请用中文回答。",
-    },
-    "ar": {
-        "title":           "Nova AI",
-        "subtitle":        "أذكى ذكاء اصطناعي في العالم — يرى الصور، يبني التطبيقات، يعرف كل شيء مباشرة.",
-        "badge":           "مباشر · مجاني · غير محدود · رؤية AI",
-        "chat_placeholder":"اسأل أي شيء — اكتب هنا أو انقر على 🖼️ صورة / 📄 ملف…",
-        "clear":           "🗑️ مسح",
-        "msgs":            "رسالة",
-        "msgp":            "رسائل",
-        "hero_q":          "ماذا تريد أن تفعل اليوم؟",
-        "cat_vision":      "رؤية AI",
-        "cat_vision_ex":   "ارفع أي صورة\nالذكاء الاصطناعي يقرأ ويحلل",
-        "cat_games":       "ألعاب",
-        "cat_games_ex":    "Snake · Tetris\nشطرنج · 2048\nPacman · RPG",
-        "cat_apps":        "تطبيقات",
-        "cat_apps_ex":     "لوحة تحكم · مهام\nتجارة إلكترونية\nمحفظة",
-        "cat_code":        "كود",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL وأكثر",
-        "cat_files":       "ملفات",
-        "cat_files_ex":    "CSV · JSON · كود\nالذكاء الاصطناعي يحللها",
-        "cat_live":        "بيانات مباشرة",
-        "cat_live_ex":     "كريكيت · أسهم\nطقس · أخبار\nأي URL",
-        "img_btn":         "🖼️ صورة",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 ملف",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ مساعدة",
-        "settings":        "⚙️ إعدادات النموذج",
-        "temperature":     "الحرارة",
-        "max_length":      "الطول الأقصى",
-        "ai_mode":         "🎭 وضع AI",
-        "quick_tools":     "🛠️ أدوات سريعة",
-        "currency":        "💱 عملة",
-        "units":           "📐 وحدات",
-        "calculator":      "🔢 حاسبة",
-        "qr_code":         "📱 رمز QR",
-        "export":          "💾 تصدير",
-        "no_msgs":         "لا توجد رسائل بعد.",
-        "convert_btn":     "تحويل 💱",
-        "calc_btn":        "احسب 🔢",
-        "unit_btn":        "تحويل 📐",
-        "qr_btn":          "إنشاء QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ ارفع صورة لرؤية AI",
-        "img_upload_hint": "مدعوم: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 ارفع ملف للتحليل",
-        "file_upload_hint": "مدعوم: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "جاهز · اكتب سؤالك أدناه ↓",
-        "file_ready":      "اسألني أي شيء عن هذا الملف",
-        "analyzing":       "👁️ جاري تحليل الصورة…",
-        "searching":       "🔍 جاري البحث…",
-        "fetching_weather":"🌤️ جاري جلب الطقس…",
-        "fetching_stock":  "📈 جاري جلب",
-        "fetching_sports": "🏏 جاري جلب بيانات الرياضة…",
-        "fetching_news":   "📰 جاري جلب الأخبار…",
-        "fetching_rate":   "💱 جاري جلب أسعار الصرف…",
-        "reading_url":     "🌐 جاري قراءة",
-        "running_code":    "⚙️ جاري تشغيل",
-        "run_btn":         "▶ تشغيل",
-        "live_preview":    "🖥️ معاينة",
-        "live_game":       "🎮 لعبة مباشرة!",
-        "live_app":        "🚀 تطبيق مباشر",
-        "live_software":   "⚙️ برنامج مباشر",
-        "live_design":     "✨ تصميم مباشر",
-        "download":        "⬇️ تحميل",
-        "example_q":       "💡 أسئلة مثالية:",
-        "ex1": "ماذا يوجد في هذه الصورة؟",
-        "ex2": "اقرأ النص",
-        "ex3": "حل هذه الرياضيات",
-        "ex4": "اشرح هذا الكود",
-        "ex5": "حلل هذا الرسم البياني",
-        "unit_placeholder":"مثال: 100 كم إلى ميل",
-        "calc_placeholder":"مثال: sqrt(144)",
-        "qr_placeholder":  "نص أو URL",
-        "amount":          "المبلغ",
-        "from_curr":       "من",
-        "to_curr":         "إلى",
-        "no_results":      "لا توجد نتائج.",
-        "stat_memory":     "🧠 ذاكرة",
-        "stat_vision":     "👁️ رؤية AI",
-        "stat_sports":     "🏏 رياضة مباشرة",
-        "stat_games":      "🎮 ألعاب وتطبيقات",
-        "stat_files":      "📁 ملفات وURLs",
-        "stat_live":       "💱 بيانات مباشرة",
-        "language_label":  "🌍 اللغة",
-        "sys_prompt_lang": "أجب باللغة العربية.",
-    },
-    "ru": {
-        "title":           "Nova AI",
-        "subtitle":        "Самый умный ИИ в мире — видит изображения, создаёт приложения, знает всё в реальном времени.",
-        "badge":           "LIVE · БЕСПЛАТНО · БЕЗЛИМИТНО · VISION AI",
-        "chat_placeholder":"Спросите что угодно — введите здесь или нажмите 🖼️ Изображение / 📄 Файл…",
-        "clear":           "🗑️ Очистить",
-        "msgs":            "сообщение",
-        "msgp":            "сообщений",
-        "hero_q":          "Что вы хотите сделать сегодня?",
-        "cat_vision":      "Vision ИИ",
-        "cat_vision_ex":   "Загрузите любое изображение\nИИ читает и анализирует",
-        "cat_games":       "Игры",
-        "cat_games_ex":    "Змейка · Тетрис\nШахматы · 2048\nPacman · RPG",
-        "cat_apps":        "Приложения",
-        "cat_apps_ex":     "Дашборд · Задачи\nИнтернет-магазин\nПортфолио",
-        "cat_code":        "Код",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL и другие",
-        "cat_files":       "Файлы",
-        "cat_files_ex":    "CSV · JSON · Код\nИИ анализирует",
-        "cat_live":        "Живые данные",
-        "cat_live_ex":     "Крикет · Акции\nПогода · Новости\nЛюбой URL",
-        "img_btn":         "🖼️ Фото",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 Файл",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Помощь",
-        "settings":        "⚙️ Настройки модели",
-        "temperature":     "Температура",
-        "max_length":      "Макс. длина",
-        "ai_mode":         "🎭 Режим ИИ",
-        "quick_tools":     "🛠️ Быстрые инструменты",
-        "currency":        "💱 Валюта",
-        "units":           "📐 Единицы",
-        "calculator":      "🔢 Калькулятор",
-        "qr_code":         "📱 QR-код",
-        "export":          "💾 Экспорт",
-        "no_msgs":         "Сообщений пока нет.",
-        "convert_btn":     "Конвертировать 💱",
-        "calc_btn":        "Вычислить 🔢",
-        "unit_btn":        "Конвертировать 📐",
-        "qr_btn":          "Создать QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Загрузить изображение для Vision ИИ",
-        "img_upload_hint": "Поддерживается: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Загрузить файл для анализа",
-        "file_upload_hint": "Поддерживается: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Готово · Введите вопрос ниже ↓",
-        "file_ready":      "Задайте любой вопрос об этом файле",
-        "analyzing":       "👁️ Анализ изображения…",
-        "searching":       "🔍 Поиск…",
-        "fetching_weather":"🌤️ Загрузка погоды…",
-        "fetching_stock":  "📈 Загрузка данных",
-        "fetching_sports": "🏏 Загрузка спортивных данных…",
-        "fetching_news":   "📰 Загрузка новостей…",
-        "fetching_rate":   "💱 Загрузка курсов…",
-        "reading_url":     "🌐 Чтение",
-        "running_code":    "⚙️ Выполнение",
-        "run_btn":         "▶ Запустить",
-        "live_preview":    "🖥️ Предпросмотр",
-        "live_game":       "🎮 Живая игра!",
-        "live_app":        "🚀 Живое приложение",
-        "live_software":   "⚙️ Живой софт",
-        "live_design":     "✨ Живой дизайн",
-        "download":        "⬇️ Скачать",
-        "example_q":       "💡 Примеры вопросов:",
-        "ex1": "Что на этом изображении?",
-        "ex2": "Прочитать текст",
-        "ex3": "Решить эту математику",
-        "ex4": "Объяснить этот код",
-        "ex5": "Проанализировать график",
-        "unit_placeholder":"напр. 100 км в мили",
-        "calc_placeholder":"напр. sqrt(144)",
-        "qr_placeholder":  "Текст или URL",
-        "amount":          "Сумма",
-        "from_curr":       "Из",
-        "to_curr":         "В",
-        "no_results":      "Нет результатов.",
-        "stat_memory":     "🧠 Память",
-        "stat_vision":     "👁️ Vision ИИ",
-        "stat_sports":     "🏏 Live спорт",
-        "stat_games":      "🎮 Игры и приложения",
-        "stat_files":      "📁 Файлы и URLs",
-        "stat_live":       "💱 Живые данные",
-        "language_label":  "🌍 Язык",
-        "sys_prompt_lang": "Отвечайте на русском языке.",
-    },
-    "pt": {
-        "title":           "Nova AI",
-        "subtitle":        "A IA mais inteligente do mundo — vê imagens, cria apps, sabe tudo ao vivo.",
-        "badge":           "AO VIVO · GRÁTIS · ILIMITADO · IA DE VISÃO",
-        "chat_placeholder":"Pergunte qualquer coisa — digite aqui ou clique em 🖼️ Imagem / 📄 Arquivo…",
-        "clear":           "🗑️ Limpar",
-        "msgs":            "mensagem",
-        "msgp":            "mensagens",
-        "hero_q":          "O que você quer fazer hoje?",
-        "cat_vision":      "IA de Visão",
-        "cat_vision_ex":   "Envie qualquer imagem\nIA lê e analisa",
-        "cat_games":       "Jogos",
-        "cat_games_ex":    "Snake · Tetris\nXadrez · 2048\nPacman · RPG",
-        "cat_apps":        "Aplicativos",
-        "cat_apps_ex":     "Dashboard · Tarefas\nE-commerce\nPortfólio",
-        "cat_code":        "Código",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL e mais",
-        "cat_files":       "Arquivos",
-        "cat_files_ex":    "CSV · JSON · Código\nIA analisa",
-        "cat_live":        "Dados ao Vivo",
-        "cat_live_ex":     "Críquete · Ações\nClima · Notícias\nQualquer URL",
-        "img_btn":         "🖼️ Imagem",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 Arquivo",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ Ajuda",
-        "settings":        "⚙️ Configurações",
-        "temperature":     "Temperatura",
-        "max_length":      "Comprimento máx.",
-        "ai_mode":         "🎭 Modo IA",
-        "quick_tools":     "🛠️ Ferramentas rápidas",
-        "currency":        "💱 Moeda",
-        "units":           "📐 Unidades",
-        "calculator":      "🔢 Calculadora",
-        "qr_code":         "📱 Código QR",
-        "export":          "💾 Exportar",
-        "no_msgs":         "Ainda não há mensagens.",
-        "convert_btn":     "Converter 💱",
-        "calc_btn":        "Calcular 🔢",
-        "unit_btn":        "Converter 📐",
-        "qr_btn":          "Gerar QR",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ Enviar imagem para IA de Visão",
-        "img_upload_hint": "Suporta: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 Enviar arquivo para análise",
-        "file_upload_hint": "Suporta: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "Pronto · Digite sua pergunta abaixo ↓",
-        "file_ready":      "Pergunte qualquer coisa sobre este arquivo",
-        "analyzing":       "👁️ Analisando imagem…",
-        "searching":       "🔍 Pesquisando…",
-        "fetching_weather":"🌤️ Obtendo clima…",
-        "fetching_stock":  "📈 Obtendo",
-        "fetching_sports": "🏏 Obtendo dados esportivos…",
-        "fetching_news":   "📰 Obtendo notícias…",
-        "fetching_rate":   "💱 Obtendo taxas…",
-        "reading_url":     "🌐 Lendo",
-        "running_code":    "⚙️ Executando",
-        "run_btn":         "▶ Executar",
-        "live_preview":    "🖥️ Visualização",
-        "live_game":       "🎮 Jogo ao Vivo!",
-        "live_app":        "🚀 App ao Vivo",
-        "live_software":   "⚙️ Software ao Vivo",
-        "live_design":     "✨ Design ao Vivo",
-        "download":        "⬇️ Baixar",
-        "example_q":       "💡 Exemplos de perguntas:",
-        "ex1": "O que há nesta imagem?",
-        "ex2": "Ler o texto",
-        "ex3": "Resolver esta matemática",
-        "ex4": "Explicar este código",
-        "ex5": "Analisar este gráfico",
-        "unit_placeholder":"ex. 100 km para milhas",
-        "calc_placeholder":"ex. sqrt(144)",
-        "qr_placeholder":  "Texto ou URL",
-        "amount":          "Valor",
-        "from_curr":       "De",
-        "to_curr":         "Para",
-        "no_results":      "Sem resultados.",
-        "stat_memory":     "🧠 Memória",
-        "stat_vision":     "👁️ Visão IA",
-        "stat_sports":     "🏏 Esportes ao Vivo",
-        "stat_games":      "🎮 Jogos e Apps",
-        "stat_files":      "📁 Arquivos e URLs",
-        "stat_live":       "💱 Dados ao Vivo",
-        "language_label":  "🌍 Idioma",
-        "sys_prompt_lang": "Responda em português.",
-    },
-    "ko": {
-        "title":           "Nova AI",
-        "subtitle":        "세계 최고의 AI — 이미지를 보고, 앱을 만들고, 실시간으로 모든 것을 알고 있습니다.",
-        "badge":           "실시간 · 무료 · 무제한 · 비전 AI",
-        "chat_placeholder":"무엇이든 물어보세요 — 여기 입력하거나 🖼️ 이미지 / 📄 파일 클릭…",
-        "clear":           "🗑️ 지우기",
-        "msgs":            "메시지",
-        "msgp":            "메시지",
-        "hero_q":          "오늘 무엇을 하시겠습니까?",
-        "cat_vision":      "비전 AI",
-        "cat_vision_ex":   "이미지 업로드\nAI가 읽고 분석",
-        "cat_games":       "게임",
-        "cat_games_ex":    "뱀 · 테트리스\n체스 · 2048\n팩맨 · RPG",
-        "cat_apps":        "앱",
-        "cat_apps_ex":     "대시보드 · 할일\n이커머스\n포트폴리오",
-        "cat_code":        "코드",
-        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL 등",
-        "cat_files":       "파일",
-        "cat_files_ex":    "CSV · JSON · 코드\nAI가 분석",
-        "cat_live":        "실시간 데이터",
-        "cat_live_ex":     "크리켓 · 주식\n날씨 · 뉴스\n모든 URL",
-        "img_btn":         "🖼️ 이미지",
-        "img_btn_done":    "🖼️ ✓",
-        "file_btn":        "📄 파일",
-        "file_btn_done":   "📄 ✓",
-        "help_btn":        "❓ 도움말",
-        "settings":        "⚙️ 모델 설정",
-        "temperature":     "온도",
-        "max_length":      "최대 길이",
-        "ai_mode":         "🎭 AI 모드",
-        "quick_tools":     "🛠️ 빠른 도구",
-        "currency":        "💱 통화",
-        "units":           "📐 단위",
-        "calculator":      "🔢 계산기",
-        "qr_code":         "📱 QR 코드",
-        "export":          "💾 내보내기",
-        "no_msgs":         "아직 메시지가 없습니다.",
-        "convert_btn":     "변환 💱",
-        "calc_btn":        "계산 🔢",
-        "unit_btn":        "변환 📐",
-        "qr_btn":          "QR 생성",
-        "download_md":     "📝 MD",
-        "download_json":   "📊 JSON",
-        "img_upload_title":"👁️ 비전 AI용 이미지 업로드",
-        "img_upload_hint": "지원: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title":"📁 분석용 파일 업로드",
-        "file_upload_hint": "지원: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready":       "준비 완료 · 아래에 질문 입력 ↓",
-        "file_ready":      "이 파일에 대해 무엇이든 물어보세요",
-        "analyzing":       "👁️ 이미지 분석 중…",
-        "searching":       "🔍 검색 중…",
-        "fetching_weather":"🌤️ 날씨 가져오는 중…",
-        "fetching_stock":  "📈 데이터 가져오는 중",
-        "fetching_sports": "🏏 실시간 스포츠 데이터 가져오는 중…",
-        "fetching_news":   "📰 뉴스 가져오는 중…",
-        "fetching_rate":   "💱 환율 가져오는 중…",
-        "reading_url":     "🌐 읽는 중",
-        "running_code":    "⚙️ 실행 중",
-        "run_btn":         "▶ 실행",
-        "live_preview":    "🖥️ 미리보기",
-        "live_game":       "🎮 라이브 게임!",
-        "live_app":        "🚀 라이브 앱",
-        "live_software":   "⚙️ 라이브 소프트웨어",
-        "live_design":     "✨ 라이브 디자인",
-        "download":        "⬇️ 다운로드",
-        "example_q":       "💡 예시 질문:",
-        "ex1": "이 이미지에 무엇이 있나요?",
-        "ex2": "텍스트 읽기",
-        "ex3": "이 수학 풀기",
-        "ex4": "이 코드 설명하기",
-        "ex5": "이 차트 분석하기",
-        "unit_placeholder":"예: 100 km를 miles로",
-        "calc_placeholder":"예: sqrt(144)",
-        "qr_placeholder":  "텍스트 또는 URL",
-        "amount":          "금액",
-        "from_curr":       "에서",
-        "to_curr":         "로",
-        "no_results":      "결과 없음.",
-        "stat_memory":     "🧠 메모리",
-        "stat_vision":     "👁️ 비전 AI",
-        "stat_sports":     "🏏 실시간 스포츠",
-        "stat_games":      "🎮 게임 및 앱",
-        "stat_files":      "📁 파일 및 URL",
-        "stat_live":       "💱 실시간 데이터",
-        "language_label":  "🌍 언어",
-        "sys_prompt_lang": "한국어로 답변해 주세요.",
+        "title":"Nova AI","subtitle":"La IA más inteligente — ve imágenes, crea apps, visualiza datos en vivo.",
+        "badge":"EN VIVO · GRATIS · ILIMITADO · IA DE VISIÓN","chat_placeholder":"Pregunta lo que quieras — escribe aquí o haz clic en 🖼️ Imagen / 📄 Archivo / 📊 CSV…",
+        "clear":"🗑️ Borrar","msgs":"mensaje","msgp":"mensajes","hero_q":"¿Qué quieres hacer hoy?",
+        "cat_vision":"IA de Visión","cat_vision_ex":"Sube cualquier imagen\nIA lee y analiza",
+        "cat_games":"Juegos","cat_games_ex":"Snake · Tetris\nAjedrez · 2048",
+        "cat_apps":"Aplicaciones","cat_apps_ex":"Dashboard · Todo\nE-commerce",
+        "cat_code":"Código","cat_code_ex":"Python · JS · Java\nC++ · Go · Rust",
+        "cat_files":"Archivos","cat_files_ex":"CSV · JSON · Código\nIA lo analiza",
+        "cat_charts":"Gráficos y Datos","cat_charts_ex":"Sube CSV\nGráficos automáticos\nAnálisis IA",
+        "cat_live":"Datos en Vivo","cat_live_ex":"Cricket · Bolsa\nClima · Noticias",
+        "img_btn":"🖼️ Imagen","img_btn_done":"🖼️ ✓",
+        "file_btn":"📄 Archivo","file_btn_done":"📄 ✓",
+        "csv_btn":"📊 CSV","csv_btn_done":"📊 ✓",
+        "help_btn":"❓ Ayuda","settings":"⚙️ Ajustes","temperature":"Temperatura","max_length":"Longitud máx.",
+        "ai_mode":"🎭 Modo IA","quick_tools":"🛠️ Herramientas",
+        "currency":"💱 Divisa","units":"📐 Unidades","calculator":"🔢 Calculadora","qr_code":"📱 Código QR",
+        "export":"💾 Exportar","no_msgs":"Aún no hay mensajes.",
+        "convert_btn":"Convertir 💱","calc_btn":"Calcular 🔢","unit_btn":"Convertir 📐","qr_btn":"Generar QR",
+        "download_md":"📝 MD","download_json":"📊 JSON",
+        "img_upload_title":"👁️ Subir imagen para IA de Visión","img_upload_hint":"Soporta: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Subir archivo para análisis","file_upload_hint":"Soporta: TXT, CSV, JSON, Python, JS",
+        "csv_upload_title":"📊 Subir CSV para Visualización de Datos","csv_upload_hint":"Sube cualquier CSV — Nova AI genera gráficos automáticamente",
+        "img_ready":"Listo · Escribe tu pregunta abajo ↓","file_ready":"Pregúntame sobre este archivo",
+        "csv_ready":"¡CSV cargado · Gráficos generados automáticamente!",
+        "analyzing":"👁️ Analizando imagen…","searching":"🔍 Buscando…",
+        "fetching_weather":"🌤️ Obteniendo clima…","fetching_stock":"📈 Obteniendo",
+        "fetching_sports":"🏏 Obteniendo datos deportivos…","fetching_news":"📰 Obteniendo noticias…",
+        "fetching_rate":"💱 Obteniendo tasas…","reading_url":"🌐 Leyendo",
+        "running_code":"⚙️ Ejecutando","run_btn":"▶ Ejecutar",
+        "live_preview":"🖥️ Vista previa","live_game":"🎮 ¡Juego en Vivo!","live_app":"🚀 App en Vivo",
+        "live_software":"⚙️ Software en Vivo","live_design":"✨ Diseño en Vivo",
+        "download":"⬇️ Descargar","example_q":"💡 Ejemplos:","ex1":"¿Qué hay en esta imagen?",
+        "ex2":"Lee el texto","ex3":"Resuelve esta matemática","ex4":"Explica este código","ex5":"Analiza este gráfico",
+        "unit_placeholder":"ej. 100 km a millas","calc_placeholder":"ej. sqrt(144)",
+        "qr_placeholder":"Texto o URL","amount":"Cantidad","from_curr":"De","to_curr":"A",
+        "no_results":"Sin resultados.","stat_memory":"🧠 Memoria","stat_vision":"👁️ Visión IA",
+        "stat_sports":"🏏 Deportes","stat_games":"🎮 Juegos y Apps",
+        "stat_files":"📁 Archivos y URLs","stat_live":"💱 Datos en Vivo","stat_charts":"📊 Visualización",
+        "language_label":"🌍 Idioma","sys_prompt_lang":"Responde en español.",
+        "chart_title":"📊 Gráficos Automáticos","chart_overview":"📋 Resumen del Dataset","chart_ai_insights":"🤖 Análisis IA",
+        "chart_rows":"filas","chart_cols":"columnas","chart_numeric":"Columnas numéricas",
+        "chart_categorical":"Columnas categóricas","chart_missing":"Valores faltantes",
+        "chart_ask":"Pregunta a la IA sobre estos datos…","chart_generating":"📊 Generando gráficos…",
+        "chart_analyzing":"🤖 IA analizando datos…","chart_types":"Tipos de gráfico",
+        "chart_select_x":"Eje X","chart_select_y":"Eje Y","chart_select_color":"Color por",
+        "chart_custom":"🎨 Constructor de Gráficos",
+        "chart_bar":"Barras","chart_line":"Línea","chart_scatter":"Dispersión","chart_pie":"Tarta",
+        "chart_histogram":"Histograma","chart_box":"Caja","chart_heatmap":"Mapa de calor",
+        "chart_area":"Área","chart_violin":"Violín","chart_sunburst":"Sol",
+        "chart_generate":"Generar Gráfico","chart_correlation":"Matriz de Correlación",
+        "chart_distribution":"Análisis de Distribución","chart_summary":"Resumen Estadístico",
+        "chart_top_insights":"Principales Insights","chart_download_csv":"⬇️ Descargar CSV",
     },
 }
+# Fill remaining languages with English fallback
+for _lc in ["fr","de","ja","zh","ar","ru","pt","ko"]:
+    if _lc not in UI_TEXT:
+        UI_TEXT[_lc] = UI_TEXT["en"].copy()
+UI_TEXT["fr"].update({"sys_prompt_lang":"Répondez en français.","badge":"EN DIRECT · GRATUIT · ILLIMITÉ · IA VISION"})
+UI_TEXT["de"].update({"sys_prompt_lang":"Antworten Sie auf Deutsch.","badge":"LIVE · KOSTENLOS · UNBEGRENZT · VISION KI"})
+UI_TEXT["ja"].update({"sys_prompt_lang":"日本語で答えてください。","badge":"ライブ · 無料 · 無制限 · ビジョンAI"})
+UI_TEXT["zh"].update({"sys_prompt_lang":"请用中文回答。","badge":"实时 · 免费 · 无限 · 视觉AI"})
+UI_TEXT["ar"].update({"sys_prompt_lang":"أجب باللغة العربية.","badge":"مباشر · مجاني · غير محدود · رؤية AI"})
+UI_TEXT["ru"].update({"sys_prompt_lang":"Отвечайте на русском языке.","badge":"LIVE · БЕСПЛАТНО · БЕЗЛИМИТНО · VISION AI"})
+UI_TEXT["pt"].update({"sys_prompt_lang":"Responda em português.","badge":"AO VIVO · GRÁTIS · ILIMITADO · IA DE VISÃO"})
+UI_TEXT["ko"].update({"sys_prompt_lang":"한국어로 답변해 주세요.","badge":"실시간 · 무료 · 무제한 · 비전 AI"})
 
 def T(key: str) -> str:
-    """Get translated string for current language."""
     lang_code = st.session_state.get("lang_code", "en")
     return UI_TEXT.get(lang_code, UI_TEXT["en"]).get(key, UI_TEXT["en"].get(key, key))
 
 def is_rtl() -> bool:
     return st.session_state.get("lang_code", "en") == "ar"
 
-st.set_page_config(
-    page_title="Nova AI",
-    page_icon="✨",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Nova AI", page_icon="✨", layout="wide", initial_sidebar_state="expanded")
 
-# ── RTL support injected dynamically ─────────────────────────────────────────
-rtl_css = """
-body, [data-testid="stAppViewContainer"] {
-    direction: rtl !important;
-    text-align: right !important;
-}
-[data-testid="stChatInput"] { direction: rtl !important; }
-[data-testid="stSidebar"] { direction: rtl !important; }
-""" if is_rtl() else ""
+rtl_css = "body,[data-testid='stAppViewContainer']{direction:rtl!important;text-align:right!important;}[data-testid='stChatInput']{direction:rtl!important;}[data-testid='stSidebar']{direction:rtl!important;}" if is_rtl() else ""
 
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@300;400;500;600&family=Noto+Sans+Arabic:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500&family=Noto+Sans+Bengali:wght@400;500&family=Noto+Sans+Arabic:wght@400;500&display=swap');
+:root{{--bg:#0a0c10;--surface:#111318;--surface2:#1a1d24;--border:#232730;--accent:#00e5ff;--text:#e2e8f0;--muted:#64748b;--user-bg:#131b2e;--green:#10b981;--purple:#7c3aed;--orange:#f59e0b;--red:#ef4444;--pink:#ec4899;--radius:14px;}}
+*,*::before,*::after{{box-sizing:border-box;margin:0;padding:0;}}
+html,body,[data-testid="stAppViewContainer"]{{background:var(--bg)!important;color:var(--text)!important;font-family:'DM Sans','Noto Sans Devanagari','Noto Sans Bengali','Noto Sans Arabic',sans-serif!important;}}
+[data-testid="stHeader"],[data-testid="stToolbar"],.stDeployButton,#MainMenu,footer{{display:none!important;}}
+::-webkit-scrollbar{{width:4px;}}::-webkit-scrollbar-track{{background:var(--bg);}}::-webkit-scrollbar-thumb{{background:var(--border);border-radius:4px;}}
+[data-testid="stAppViewContainer"]>.main>.block-container{{max-width:960px!important;padding:0 1.5rem 10rem!important;margin:0 auto!important;}}
+[data-testid="stSidebar"]{{background:var(--surface)!important;border-right:1px solid var(--border)!important;}}
+[data-testid="stSidebar"] *{{color:var(--text)!important;}}
+[data-testid="stSidebar"] .stSelectbox>div,[data-testid="stSidebar"] .stTextInput>div>div{{background:var(--surface2)!important;border-color:var(--border)!important;}}
+[data-testid="stSidebar"] label{{color:var(--muted)!important;font-size:12px!important;}}
+[data-testid="stSidebar"] h3{{color:var(--accent)!important;font-family:'Space Mono',monospace!important;font-size:13px!important;margin:.8rem 0 .4rem!important;}}
+[data-testid="stSidebar"] hr{{border-color:var(--border)!important;}}
+[data-testid="stSidebar"] .stButton>button{{width:100%!important;background:var(--surface2)!important;border:1px solid var(--border)!important;color:var(--muted)!important;border-radius:8px!important;font-size:12px!important;}}
+[data-testid="stSidebar"] .stButton>button:hover{{border-color:var(--accent)!important;color:var(--accent)!important;}}
+[data-testid="stSidebar"] .stDownloadButton>button{{width:100%!important;background:rgba(0,229,255,.08)!important;border:1px solid rgba(0,229,255,.25)!important;color:var(--accent)!important;border-radius:8px!important;font-size:12px!important;}}
+[data-testid="stSidebar"] .stExpander{{background:var(--surface2)!important;border:1px solid var(--border)!important;border-radius:10px!important;margin-bottom:.4rem!important;}}
+.hero{{text-align:center;padding:2.5rem 1rem 1.5rem;position:relative;}}
+.hero::before{{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse at center,rgba(0,229,255,.07) 0%,transparent 70%);pointer-events:none;}}
+.hero-badge{{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);border-radius:999px;padding:4px 14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.05em;margin-bottom:1rem;}}
+.hero-badge::before{{content:'●';font-size:8px;animation:pulse 2s infinite;}}
+@keyframes pulse{{0%,100%{{opacity:1}}50%{{opacity:.3}}}}
+.hero h1{{font-family:'Space Mono',monospace!important;font-size:clamp(1.8rem,4vw,2.6rem)!important;font-weight:700!important;color:#fff!important;line-height:1.15!important;letter-spacing:-.02em;margin-bottom:.5rem!important;}}
+.hero h1 span{{color:var(--accent);}}
+.hero p{{font-size:.95rem;color:var(--muted);font-weight:300;max-width:480px;margin:0 auto;}}
+.divider{{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:1.2rem 0;}}
+.stats-row{{display:flex;gap:.6rem;margin:1rem 0 1.5rem;justify-content:center;flex-wrap:wrap;}}
+.stat-pill{{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--muted);}}
+.stat-pill .dot{{width:6px;height:6px;border-radius:50%;}}
+.dot-green{{background:var(--green);box-shadow:0 0 5px var(--green);}}.dot-blue{{background:var(--accent);box-shadow:0 0 5px var(--accent);}}.dot-purple{{background:var(--purple);box-shadow:0 0 5px var(--purple);}}.dot-orange{{background:var(--orange);box-shadow:0 0 5px var(--orange);}}.dot-pink{{background:var(--pink);box-shadow:0 0 5px var(--pink);}}
+[data-testid="stChatMessage"]{{background:transparent!important;border:none!important;padding:0!important;}}
+[data-testid="stChatMessage"]>div{{background:transparent!important;}}
+[data-testid="stChatMessageContent"]{{background:transparent!important;}}
+.stChatMessage{{border-radius:var(--radius)!important;padding:1rem 1.2rem!important;border:1px solid var(--border)!important;margin-bottom:.6rem!important;background:var(--surface)!important;animation:fadeUp .25s ease;}}
+@keyframes fadeUp{{from{{opacity:0;transform:translateY(8px)}}to{{opacity:1;transform:translateY(0)}}}}
+.stChatMessage:has([data-testid="chatAvatarIcon-user"]){{background:var(--user-bg)!important;border-color:rgba(0,229,255,.15)!important;}}
+pre,code{{font-family:'Space Mono',monospace!important;font-size:13px!important;}}
+pre{{background:#0d1117!important;border:1px solid var(--border)!important;border-left:3px solid var(--accent)!important;border-radius:10px!important;padding:1rem 1.2rem!important;overflow-x:auto!important;}}
+code:not(pre code){{background:rgba(0,229,255,.08)!important;color:var(--accent)!important;border-radius:5px!important;padding:2px 6px!important;font-size:12.5px!important;}}
+[data-testid="stChatInputContainer"]{{position:fixed!important;bottom:0!important;left:50%!important;transform:translateX(-50%)!important;width:100%!important;max-width:960px!important;padding:0.5rem 1.5rem 1.2rem!important;background:linear-gradient(to top,var(--bg) 80%,transparent)!important;backdrop-filter:blur(12px);z-index:999!important;}}
+[data-testid="stChatInput"]{{background:var(--surface2)!important;border:1px solid var(--border)!important;border-radius:12px!important;color:var(--text)!important;font-size:15px!important;}}
+[data-testid="stChatInput"]:focus{{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(0,229,255,.1)!important;outline:none!important;}}
+[data-testid="stChatInputSubmitButton"] button{{background:var(--accent)!important;border:none!important;border-radius:8px!important;color:#000!important;font-weight:600!important;}}
+.badge{{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 10px;font-size:11px;margin-bottom:.5rem;}}
+.badge-green{{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:var(--green);}}
+.badge-red{{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}}
+.badge-purple{{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);color:#a78bfa;}}
+.badge-orange{{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:var(--orange);}}
+.badge-blue{{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);color:var(--accent);}}
+.badge-pink{{background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.3);color:var(--pink);}}
+.badge-teal{{background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.3);color:#2dd4bf;}}
+.output-box{{background:#0d1117;border:1px solid var(--border);border-left:3px solid var(--green);border-radius:10px;padding:.8rem 1.2rem;font-family:'Space Mono',monospace;font-size:13px;color:#a3e635;margin-top:.5rem;white-space:pre-wrap;}}
+.error-box{{background:#1a0a0a;border:1px solid #7f1d1d;border-left:3px solid var(--red);border-radius:10px;padding:.8rem 1.2rem;font-family:'Space Mono',monospace;font-size:13px;color:#fca5a5;margin-top:.5rem;white-space:pre-wrap;}}
+.result-box{{background:linear-gradient(135deg,#0d1117,#111827);border:1px solid var(--border);border-radius:10px;padding:.8rem 1.2rem;font-size:14px;color:var(--text);margin:.5rem 0;}}
+.result-box.orange{{border-left:3px solid var(--orange);}}.result-box.green{{border-left:3px solid var(--green);}}
+.btn-download{{display:inline-flex;align-items:center;gap:5px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--accent);padding:6px 14px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500;margin-top:.5rem;}}
+.stButton>button{{background:var(--surface2)!important;border:1px solid var(--border)!important;color:var(--muted)!important;border-radius:8px!important;font-size:13px!important;font-weight:500!important;padding:.4rem 1rem!important;transition:all .2s!important;}}
+.stButton>button:hover{{border-color:var(--accent)!important;color:var(--accent)!important;background:rgba(0,229,255,.06)!important;}}
+.category-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.8rem;margin:1.2rem 0;}}
+.category-card{{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:border-color .2s,transform .2s;}}
+.category-card:hover{{border-color:var(--accent);transform:translateY(-2px);}}
+.category-icon{{font-size:1.6rem;margin-bottom:.4rem;}}.category-title{{font-size:12.5px;font-weight:600;color:#94a3b8;margin-bottom:.2rem;}}.category-examples{{font-size:11px;color:var(--muted);line-height:1.6;}}
+.chat-image{{max-width:360px;max-height:280px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;display:block;object-fit:cover;}}
 
-:root {{
-    --bg:       #0a0c10;
-    --surface:  #111318;
-    --surface2: #1a1d24;
-    --border:   #232730;
-    --accent:   #00e5ff;
-    --text:     #e2e8f0;
-    --muted:    #64748b;
-    --user-bg:  #131b2e;
-    --green:    #10b981;
-    --purple:   #7c3aed;
-    --orange:   #f59e0b;
-    --red:      #ef4444;
-    --pink:     #ec4899;
-    --radius:   14px;
-}}
-
-*, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
-html, body, [data-testid="stAppViewContainer"] {{
-    background: var(--bg) !important;
-    color: var(--text) !important;
-    font-family: 'DM Sans','Noto Sans Devanagari','Noto Sans Bengali',
-                 'Noto Sans Arabic','Noto Sans JP','Noto Sans KR',
-                 'Noto Sans SC', sans-serif !important;
-}}
-
-[data-testid="stHeader"], [data-testid="stToolbar"],
-.stDeployButton, #MainMenu, footer {{ display: none !important; }}
-
-::-webkit-scrollbar {{ width: 4px; }}
-::-webkit-scrollbar-track {{ background: var(--bg); }}
-::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 4px; }}
-
-[data-testid="stAppViewContainer"] > .main > .block-container {{
-    max-width: 860px !important;
-    padding: 0 1.5rem 10rem !important;
-    margin: 0 auto !important;
-}}
-
-[data-testid="stSidebar"] {{
-    background: var(--surface) !important;
-    border-right: 1px solid var(--border) !important;
-}}
-[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
-[data-testid="stSidebar"] .stSelectbox > div,
-[data-testid="stSidebar"] .stTextInput > div > div {{
-    background: var(--surface2) !important;
-    border-color: var(--border) !important;
-}}
-[data-testid="stSidebar"] label {{ color: var(--muted) !important; font-size: 12px !important; }}
-[data-testid="stSidebar"] h3 {{
-    color: var(--accent) !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 13px !important; margin: .8rem 0 .4rem !important;
-}}
-[data-testid="stSidebar"] hr {{ border-color: var(--border) !important; }}
-[data-testid="stSidebar"] .stButton > button {{
-    width: 100% !important; background: var(--surface2) !important;
-    border: 1px solid var(--border) !important; color: var(--muted) !important;
-    border-radius: 8px !important; font-size: 12px !important;
-}}
-[data-testid="stSidebar"] .stButton > button:hover {{
-    border-color: var(--accent) !important; color: var(--accent) !important;
-}}
-[data-testid="stSidebar"] .stDownloadButton > button {{
-    width: 100% !important; background: rgba(0,229,255,.08) !important;
-    border: 1px solid rgba(0,229,255,.25) !important; color: var(--accent) !important;
-    border-radius: 8px !important; font-size: 12px !important;
-}}
-[data-testid="stSidebar"] .stExpander {{
-    background: var(--surface2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important; margin-bottom: .4rem !important;
-}}
-
-.hero {{ text-align: center; padding: 2.5rem 1rem 1.5rem; position: relative; }}
-.hero::before {{
-    content: ''; position: absolute; top: 0; left: 50%;
-    transform: translateX(-50%); width: 600px; height: 300px;
-    background: radial-gradient(ellipse at center, rgba(0,229,255,.07) 0%, transparent 70%);
-    pointer-events: none;
-}}
-.hero-badge {{
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2);
-    border-radius: 999px; padding: 4px 14px;
-    font-family: 'Space Mono', monospace; font-size: 11px;
-    color: var(--accent); letter-spacing: .05em; margin-bottom: 1rem;
-}}
-.hero-badge::before {{ content: '●'; font-size: 8px; animation: pulse 2s infinite; }}
-@keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:.3}} }}
-.hero h1 {{
-    font-family: 'Space Mono', monospace !important;
-    font-size: clamp(1.8rem,4vw,2.6rem) !important;
-    font-weight: 700 !important; color: #fff !important;
-    line-height: 1.15 !important; letter-spacing: -.02em; margin-bottom: .5rem !important;
-}}
-.hero h1 span {{ color: var(--accent); }}
-.hero p {{ font-size: .95rem; color: var(--muted); font-weight: 300; max-width: 460px; margin: 0 auto; }}
-.divider {{ height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:1.2rem 0; }}
-
-.stats-row {{ display:flex; gap:.6rem; margin:1rem 0 1.5rem; justify-content:center; flex-wrap:wrap; }}
-.stat-pill {{
-    display:flex; align-items:center; gap:6px;
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:999px; padding:5px 12px; font-size:12px; color:var(--muted);
-}}
-.stat-pill .dot {{ width:6px; height:6px; border-radius:50%; }}
-.dot-green  {{ background:var(--green);  box-shadow:0 0 5px var(--green); }}
-.dot-blue   {{ background:var(--accent); box-shadow:0 0 5px var(--accent); }}
-.dot-purple {{ background:var(--purple); box-shadow:0 0 5px var(--purple); }}
-.dot-orange {{ background:var(--orange); box-shadow:0 0 5px var(--orange); }}
-.dot-pink   {{ background:var(--pink);   box-shadow:0 0 5px var(--pink); }}
-
-[data-testid="stChatMessage"] {{ background:transparent !important; border:none !important; padding:0 !important; }}
-[data-testid="stChatMessage"] > div {{ background:transparent !important; }}
-[data-testid="stChatMessageContent"] {{ background:transparent !important; }}
-.stChatMessage {{
-    border-radius:var(--radius) !important; padding:1rem 1.2rem !important;
-    border:1px solid var(--border) !important; margin-bottom:.6rem !important;
-    background:var(--surface) !important; animation:fadeUp .25s ease;
-}}
-@keyframes fadeUp {{ from{{opacity:0;transform:translateY(8px)}} to{{opacity:1;transform:translateY(0)}} }}
-.stChatMessage:has([data-testid="chatAvatarIcon-user"]) {{
-    background:var(--user-bg) !important; border-color:rgba(0,229,255,.15) !important;
-}}
-
-pre, code {{ font-family:'Space Mono',monospace !important; font-size:13px !important; }}
-pre {{
-    background:#0d1117 !important; border:1px solid var(--border) !important;
-    border-left:3px solid var(--accent) !important; border-radius:10px !important;
-    padding:1rem 1.2rem !important; overflow-x:auto !important;
-}}
-code:not(pre code) {{
-    background:rgba(0,229,255,.08) !important; color:var(--accent) !important;
-    border-radius:5px !important; padding:2px 6px !important; font-size:12.5px !important;
-}}
-
-[data-testid="stChatInputContainer"] {{
-    position: fixed !important; bottom: 0 !important; left: 50% !important;
-    transform: translateX(-50%) !important; width: 100% !important;
-    max-width: 860px !important; padding: 0.5rem 1.5rem 1.2rem !important;
-    background: linear-gradient(to top, var(--bg) 80%, transparent) !important;
-    backdrop-filter: blur(12px); z-index: 999 !important;
-}}
-[data-testid="stChatInput"] {{
-    background: var(--surface2) !important; border: 1px solid var(--border) !important;
-    border-radius: 12px !important; color: var(--text) !important;
-    font-size: 15px !important;
-}}
-[data-testid="stChatInput"]:focus {{
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(0,229,255,.1) !important; outline: none !important;
-}}
-[data-testid="stChatInputSubmitButton"] button {{
-    background: var(--accent) !important; border: none !important;
-    border-radius: 8px !important; color: #000 !important; font-weight: 600 !important;
-}}
-
-.badge {{
-    display:inline-flex; align-items:center; gap:5px;
-    border-radius:6px; padding:3px 10px; font-size:11px;
-    margin-bottom:.5rem;
-}}
-.badge-green  {{ background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.25); color:var(--green); }}
-.badge-red    {{ background:rgba(239,68,68,.08);   border:1px solid rgba(239,68,68,.3);   color:#fca5a5; }}
-.badge-purple {{ background:rgba(124,58,237,.08);  border:1px solid rgba(124,58,237,.3);  color:#a78bfa; }}
-.badge-orange {{ background:rgba(245,158,11,.08);  border:1px solid rgba(245,158,11,.3);  color:var(--orange); }}
-.badge-blue   {{ background:rgba(0,229,255,.08);   border:1px solid rgba(0,229,255,.25);  color:var(--accent); }}
-.badge-pink   {{ background:rgba(236,72,153,.08);  border:1px solid rgba(236,72,153,.3);  color:var(--pink); }}
-
-.output-box {{
-    background:#0d1117; border:1px solid var(--border);
-    border-left:3px solid var(--green); border-radius:10px;
-    padding:.8rem 1.2rem; font-family:'Space Mono',monospace;
-    font-size:13px; color:#a3e635; margin-top:.5rem; white-space:pre-wrap;
-}}
-.error-box {{
-    background:#1a0a0a; border:1px solid #7f1d1d;
-    border-left:3px solid var(--red); border-radius:10px;
-    padding:.8rem 1.2rem; font-family:'Space Mono',monospace;
-    font-size:13px; color:#fca5a5; margin-top:.5rem; white-space:pre-wrap;
-}}
-.result-box {{
-    background:linear-gradient(135deg,#0d1117,#111827);
-    border:1px solid var(--border); border-radius:10px;
-    padding:.8rem 1.2rem; font-size:14px; color:var(--text); margin:.5rem 0;
-}}
-.result-box.orange {{ border-left:3px solid var(--orange); }}
-.result-box.green  {{ border-left:3px solid var(--green); }}
-
-.btn-download {{
-    display:inline-flex; align-items:center; gap:5px;
-    background:rgba(0,229,255,.1); border:1px solid rgba(0,229,255,.3);
-    color:var(--accent); padding:6px 14px; border-radius:8px;
-    text-decoration:none; font-size:12px; font-weight:500; margin-top:.5rem;
-}}
-
-.stButton > button {{
-    background:var(--surface2) !important; border:1px solid var(--border) !important;
-    color:var(--muted) !important; border-radius:8px !important;
-    font-size:13px !important; font-weight:500 !important;
-    padding:.4rem 1rem !important; transition:all .2s !important;
-}}
-.stButton > button:hover {{
-    border-color:var(--accent) !important; color:var(--accent) !important;
-    background:rgba(0,229,255,.06) !important;
-}}
-
-.category-grid {{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
-    gap:.8rem; margin:1.2rem 0;
-}}
-.category-card {{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:12px; padding:1rem; text-align:center;
-    transition:border-color .2s,transform .2s;
-}}
-.category-card:hover {{ border-color:var(--accent); transform:translateY(-2px); }}
-.category-icon  {{ font-size:1.6rem; margin-bottom:.4rem; }}
-.category-title {{ font-size:12.5px; font-weight:600; color:#94a3b8; margin-bottom:.2rem; }}
-.category-examples {{ font-size:11px; color:var(--muted); line-height:1.6; }}
-
-.chat-image {{
-    max-width: 360px; max-height: 280px;
-    border-radius: 12px; border: 1px solid var(--border);
-    margin-bottom: 8px; display: block; object-fit: cover;
-}}
-
-/* Language selector pill */
-.lang-selector-wrap {{
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(0,229,255,.05);
-    border: 1px solid rgba(0,229,255,.15);
-    border-radius: 12px; padding: 8px 12px; margin-bottom: 8px;
-}}
-.lang-flag {{ font-size: 18px; }}
-.lang-name {{ font-size: 13px; color: var(--accent); font-weight: 500; }}
-
-/* Language grid in sidebar */
-.lang-grid {{
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 6px; margin-top: 6px;
-}}
-.lang-item {{
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 6px 8px;
-    font-size: 12px; color: var(--muted);
-    cursor: pointer; text-align: center;
-    transition: all .2s;
-}}
-.lang-item:hover, .lang-item.active {{
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(0,229,255,.06);
-}}
-
+/* ── DATA VIZ STYLES ── */
+.viz-container{{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1rem 0;}}
+.viz-header{{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}}
+.viz-title{{font-family:'Space Mono',monospace;font-size:14px;color:var(--accent);font-weight:700;}}
+.viz-subtitle{{font-size:12px;color:var(--muted);}}
+.metric-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin:1rem 0;}}
+.metric-card{{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:border-color .2s;}}
+.metric-card:hover{{border-color:var(--accent);}}
+.metric-value{{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--accent);}}
+.metric-label{{font-size:11px;color:var(--muted);margin-top:.3rem;}}
+.insight-card{{background:linear-gradient(135deg,rgba(0,229,255,.05),rgba(124,58,237,.05));border:1px solid rgba(0,229,255,.15);border-radius:12px;padding:1rem 1.2rem;margin:.4rem 0;}}
+.insight-icon{{font-size:1.1rem;margin-right:.4rem;}}
+.insight-text{{font-size:13px;color:var(--text);line-height:1.6;}}
+.chart-tab{{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;margin:.2rem;transition:all .2s;}}
+.chart-tab:hover,.chart-tab.active{{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06);}}
+.data-table-wrap{{background:#0d1117;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:.8rem;}}
+.csv-drop-zone{{background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(124,58,237,.04));border:2px dashed rgba(0,229,255,.25);border-radius:16px;padding:2rem;text-align:center;margin:1rem 0;transition:border-color .3s;}}
+.csv-drop-zone:hover{{border-color:var(--accent);}}
+.csv-icon{{font-size:2.5rem;margin-bottom:.5rem;}}
+.csv-hint{{font-size:12px;color:var(--muted);margin-top:.4rem;}}
+.lang-selector-wrap{{display:flex;align-items:center;gap:8px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:12px;padding:8px 12px;margin-bottom:8px;}}
 {rtl_css}
 </style>
 """, unsafe_allow_html=True)
@@ -1374,6 +378,421 @@ client       = Groq(api_key=GROQ_KEY)
 MODEL        = "llama-3.3-70b-versatile"
 VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 MAX_HISTORY  = 20
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ████████  DATA VISUALIZATION ENGINE  ████████
+# ══════════════════════════════════════════════════════════════════════════════
+
+PLOTLY_THEME = dict(
+    template   = "plotly_dark",
+    paper_bgcolor = "#111318",
+    plot_bgcolor  = "#0d1117",
+    font_color    = "#e2e8f0",
+    font_family   = "DM Sans, sans-serif",
+    colorway   = ["#00e5ff","#7c3aed","#10b981","#f59e0b","#ec4899",
+                  "#3b82f6","#ef4444","#a78bfa","#34d399","#fbbf24"],
+)
+
+def apply_theme(fig):
+    """Apply Nova dark theme to any Plotly figure."""
+    fig.update_layout(
+        template      = "plotly_dark",
+        paper_bgcolor = PLOTLY_THEME["paper_bgcolor"],
+        plot_bgcolor  = PLOTLY_THEME["plot_bgcolor"],
+        font          = dict(color=PLOTLY_THEME["font_color"], family=PLOTLY_THEME["font_family"]),
+        margin        = dict(l=40, r=40, t=60, b=40),
+        legend        = dict(bgcolor="rgba(0,0,0,0)", bordercolor="#232730"),
+        hoverlabel    = dict(bgcolor="#1a1d24", bordercolor="#232730", font_color="#e2e8f0"),
+    )
+    fig.update_xaxes(gridcolor="#232730", zerolinecolor="#232730")
+    fig.update_yaxes(gridcolor="#232730", zerolinecolor="#232730")
+    return fig
+
+def parse_csv(uploaded_file) -> pd.DataFrame | None:
+    """Robust CSV parser — tries multiple encodings & separators."""
+    uploaded_file.seek(0)
+    raw = uploaded_file.read()
+    for enc in ["utf-8","latin-1","cp1252","utf-16"]:
+        try:
+            text = raw.decode(enc)
+            for sep in [",",";","\t","|"]:
+                try:
+                    df = pd.read_csv(io.StringIO(text), sep=sep, engine="python")
+                    if len(df.columns) > 1:
+                        # Clean column names
+                        df.columns = [str(c).strip() for c in df.columns]
+                        # Auto-convert numeric columns
+                        for col in df.columns:
+                            try:
+                                df[col] = pd.to_numeric(df[col].astype(str).str.replace(",",""), errors="ignore")
+                            except: pass
+                        return df
+                except: pass
+        except: pass
+    return None
+
+def get_col_types(df: pd.DataFrame):
+    """Returns (numeric_cols, categorical_cols, datetime_cols)."""
+    num  = df.select_dtypes(include=np.number).columns.tolist()
+    cat  = df.select_dtypes(include=["object","category","bool"]).columns.tolist()
+    # Try detecting datetime
+    dt_cols = []
+    for c in cat[:]:
+        try:
+            pd.to_datetime(df[c], infer_datetime_format=True)
+            dt_cols.append(c)
+        except: pass
+    return num, cat, dt_cols
+
+def smart_insights(df: pd.DataFrame, num_cols, cat_cols) -> list[str]:
+    """Generate automatic statistical insights."""
+    insights = []
+    # Shape
+    insights.append(f"📐 Dataset has **{len(df):,}** rows and **{len(df.columns)}** columns.")
+    # Missing
+    missing = df.isnull().sum().sum()
+    if missing > 0:
+        pct = missing / (df.shape[0]*df.shape[1]) * 100
+        insights.append(f"⚠️ **{missing:,}** missing values detected ({pct:.1f}% of data).")
+    else:
+        insights.append("✅ No missing values — dataset is complete.")
+    # Numeric insights
+    for col in num_cols[:4]:
+        s = df[col].dropna()
+        if len(s) == 0: continue
+        skew = s.skew()
+        skew_label = "right-skewed" if skew > 0.5 else "left-skewed" if skew < -0.5 else "normally distributed"
+        insights.append(f"📊 **{col}**: mean={s.mean():.2f}, std={s.std():.2f}, range=[{s.min():.2f}, {s.max():.2f}] — {skew_label}.")
+    # Categorical insights
+    for col in cat_cols[:3]:
+        vc = df[col].value_counts()
+        if len(vc) > 0:
+            top_val = vc.index[0]
+            top_pct = vc.iloc[0] / len(df) * 100
+            insights.append(f"🏷️ **{col}**: {df[col].nunique()} unique values. Most common: **'{top_val}'** ({top_pct:.1f}%).")
+    # Correlation
+    if len(num_cols) >= 2:
+        corr = df[num_cols].corr()
+        pairs = []
+        for i in range(len(num_cols)):
+            for j in range(i+1, len(num_cols)):
+                v = corr.iloc[i,j]
+                if abs(v) > 0.6:
+                    pairs.append((num_cols[i], num_cols[j], v))
+        if pairs:
+            pairs.sort(key=lambda x: abs(x[2]), reverse=True)
+            a,b,v = pairs[0]
+            direction = "positively" if v > 0 else "negatively"
+            insights.append(f"🔗 **{a}** and **{b}** are strongly {direction} correlated (r={v:.2f}).")
+    return insights
+
+def auto_charts(df: pd.DataFrame, num_cols, cat_cols, filename="data") -> list:
+    """Auto-generate the most useful charts based on data types."""
+    charts = []
+
+    # ── 1. Distribution of first numeric col ──────────────────────────────
+    if num_cols:
+        col = num_cols[0]
+        fig = px.histogram(df, x=col, nbins=30,
+                           title=f"Distribution of {col}",
+                           color_discrete_sequence=["#00e5ff"])
+        fig.update_traces(marker_line_color="#232730", marker_line_width=1)
+        charts.append(("histogram", f"📊 Distribution — {col}", fig))
+
+    # ── 2. Top categories bar chart ────────────────────────────────────────
+    if cat_cols and num_cols:
+        cat, num = cat_cols[0], num_cols[0]
+        if df[cat].nunique() <= 30:
+            grp = df.groupby(cat)[num].mean().nlargest(15).reset_index()
+            fig = px.bar(grp, x=cat, y=num,
+                         title=f"Average {num} by {cat}",
+                         color=num,
+                         color_continuous_scale="Teal")
+            fig.update_layout(xaxis_tickangle=-35)
+            charts.append(("bar", f"📊 Bar — {num} by {cat}", fig))
+
+    # ── 3. Scatter / relationship ──────────────────────────────────────────
+    if len(num_cols) >= 2:
+        x, y = num_cols[0], num_cols[1]
+        color_col = cat_cols[0] if cat_cols and df[cat_cols[0]].nunique() <= 12 else None
+        fig = px.scatter(df, x=x, y=y, color=color_col,
+                         title=f"{x} vs {y}",
+                         opacity=0.75,
+                         trendline="ols" if len(df) < 5000 else None,
+                         color_discrete_sequence=PLOTLY_THEME["colorway"])
+        charts.append(("scatter", f"📊 Scatter — {x} vs {y}", fig))
+
+    # ── 4. Pie / donut for top category ───────────────────────────────────
+    if cat_cols:
+        cat = cat_cols[0]
+        vc = df[cat].value_counts().nlargest(8)
+        fig = px.pie(values=vc.values, names=vc.index,
+                     title=f"Composition of {cat}",
+                     hole=0.4,
+                     color_discrete_sequence=PLOTLY_THEME["colorway"])
+        fig.update_traces(textposition="inside", textinfo="percent+label")
+        charts.append(("pie", f"🥧 Pie — {cat}", fig))
+
+    # ── 5. Line chart (time or index) ──────────────────────────────────────
+    if num_cols:
+        col = num_cols[0]
+        fig = px.line(df.reset_index(), x="index", y=col,
+                      title=f"Trend of {col}",
+                      color_discrete_sequence=["#10b981"])
+        fig.update_traces(line_width=2)
+        charts.append(("line", f"📈 Trend — {col}", fig))
+
+    # ── 6. Box plot — spread analysis ──────────────────────────────────────
+    if num_cols:
+        cols_to_plot = num_cols[:6]
+        df_melt = df[cols_to_plot].melt(var_name="Column", value_name="Value")
+        fig = px.box(df_melt, x="Column", y="Value",
+                     title="Distribution Spread (Box Plot)",
+                     color="Column",
+                     color_discrete_sequence=PLOTLY_THEME["colorway"])
+        charts.append(("box", "📦 Box Plot — All Numeric", fig))
+
+    # ── 7. Correlation heatmap ─────────────────────────────────────────────
+    if len(num_cols) >= 3:
+        corr = df[num_cols[:12]].corr().round(2)
+        fig = px.imshow(corr,
+                        text_auto=True,
+                        aspect="auto",
+                        title="Correlation Heatmap",
+                        color_continuous_scale="RdBu_r",
+                        zmin=-1, zmax=1)
+        charts.append(("heatmap", "🔥 Correlation Heatmap", fig))
+
+    # ── 8. Area chart ──────────────────────────────────────────────────────
+    if len(num_cols) >= 2:
+        cols = num_cols[:3]
+        df_sample = df[cols].head(200)
+        df_melt = df_sample.reset_index().melt(id_vars="index", var_name="Series", value_name="Value")
+        fig = px.area(df_melt, x="index", y="Value", color="Series",
+                      title="Area Chart — Numeric Trends",
+                      color_discrete_sequence=PLOTLY_THEME["colorway"])
+        charts.append(("area", "📉 Area — Multi-Series", fig))
+
+    # Apply theme to all
+    for i, (ctype, label, fig) in enumerate(charts):
+        charts[i] = (ctype, label, apply_theme(fig))
+
+    return charts
+
+def build_custom_chart(df: pd.DataFrame, chart_type: str,
+                       x_col: str, y_col: str, color_col: str | None) -> go.Figure | None:
+    """Build a user-specified custom chart."""
+    try:
+        kwargs = dict(data_frame=df, x=x_col, title=f"{chart_type.title()}: {x_col} vs {y_col}",
+                      color_discrete_sequence=PLOTLY_THEME["colorway"])
+        if color_col and color_col != "None": kwargs["color"] = color_col
+
+        if chart_type == "bar":
+            fig = px.bar(df, x=x_col, y=y_col, **{k:v for k,v in kwargs.items() if k not in ["data_frame","x","title","color_discrete_sequence"]},
+                         data_frame=df, title=kwargs["title"],
+                         color_discrete_sequence=kwargs["color_discrete_sequence"])
+        elif chart_type == "line":
+            fig = px.line(df, x=x_col, y=y_col,
+                          title=kwargs["title"],
+                          color_discrete_sequence=kwargs["color_discrete_sequence"])
+        elif chart_type == "scatter":
+            fig = px.scatter(df, x=x_col, y=y_col,
+                             color=kwargs.get("color"),
+                             title=kwargs["title"],
+                             color_discrete_sequence=kwargs["color_discrete_sequence"],
+                             opacity=0.75)
+        elif chart_type == "area":
+            fig = px.area(df, x=x_col, y=y_col,
+                          title=kwargs["title"],
+                          color_discrete_sequence=kwargs["color_discrete_sequence"])
+        elif chart_type == "histogram":
+            fig = px.histogram(df, x=x_col, nbins=30,
+                               title=f"Distribution of {x_col}",
+                               color_discrete_sequence=["#00e5ff"])
+        elif chart_type == "box":
+            fig = px.box(df, x=x_col if x_col != y_col else None, y=y_col,
+                         color=kwargs.get("color"),
+                         title=kwargs["title"],
+                         color_discrete_sequence=kwargs["color_discrete_sequence"])
+        elif chart_type == "violin":
+            fig = px.violin(df, x=x_col if x_col != y_col else None, y=y_col,
+                            color=kwargs.get("color"),
+                            title=kwargs["title"],
+                            box=True,
+                            color_discrete_sequence=kwargs["color_discrete_sequence"])
+        elif chart_type == "pie":
+            vc = df[x_col].value_counts().nlargest(10)
+            fig = px.pie(values=vc.values, names=vc.index,
+                         title=f"Composition of {x_col}",
+                         hole=0.4,
+                         color_discrete_sequence=PLOTLY_THEME["colorway"])
+        elif chart_type == "sunburst":
+            if color_col and color_col != "None":
+                fig = px.sunburst(df, path=[x_col, color_col], values=y_col if y_col in df.select_dtypes(include=np.number).columns.tolist() else None,
+                                  title=kwargs["title"],
+                                  color_discrete_sequence=PLOTLY_THEME["colorway"])
+            else:
+                vc = df[x_col].value_counts().nlargest(15)
+                fig = px.sunburst(dict(names=vc.index.tolist(), parents=[""]*len(vc), values=vc.values.tolist()),
+                                  names="names", parents="parents", values="values",
+                                  title=f"Sunburst of {x_col}")
+        else:
+            return None
+        return apply_theme(fig)
+    except Exception as e:
+        st.error(f"Chart error: {e}")
+        return None
+
+def render_data_viz_panel(df: pd.DataFrame, filename: str = "data.csv"):
+    """Full data visualization panel rendered inline."""
+    num_cols, cat_cols, dt_cols = get_col_types(df)
+
+    st.markdown(f'<div class="badge badge-teal">📊 {T("chart_title")} · {filename}</div>', unsafe_allow_html=True)
+
+    # ── Metric overview ────────────────────────────────────────────────────
+    st.markdown(f"#### {T('chart_overview')}")
+    metrics = [
+        (f"{len(df):,}", T("chart_rows")),
+        (str(len(df.columns)), T("chart_cols")),
+        (str(len(num_cols)), T("chart_numeric")),
+        (str(len(cat_cols)), T("chart_categorical")),
+        (str(df.isnull().sum().sum()), T("chart_missing")),
+        (f"{df.memory_usage(deep=True).sum()/1024:.1f} KB", "Memory"),
+    ]
+    cols = st.columns(len(metrics))
+    for i, (val, label) in enumerate(metrics):
+        with cols[i]:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{val}</div>
+                <div class="metric-label">{label}</div>
+            </div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Data preview table ─────────────────────────────────────────────────
+    with st.expander("📋 Preview Data (first 20 rows)", expanded=False):
+        st.dataframe(
+            df.head(20),
+            use_container_width=True,
+            hide_index=False,
+        )
+        # Statistical summary
+        if num_cols:
+            st.markdown("**📐 Statistical Summary**")
+            st.dataframe(df[num_cols].describe().round(3), use_container_width=True)
+
+    # ── AI Smart Insights ──────────────────────────────────────────────────
+    st.markdown(f"#### {T('chart_ai_insights')}")
+    insights = smart_insights(df, num_cols, cat_cols)
+    for ins in insights:
+        st.markdown(f"""
+        <div class="insight-card">
+            <span class="insight-text">{ins}</span>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Auto-generated charts ──────────────────────────────────────────────
+    st.markdown(f"#### {T('chart_title')}")
+
+    with st.spinner(T("chart_generating")):
+        charts = auto_charts(df, num_cols, cat_cols, filename)
+
+    if charts:
+        # Show charts in 2-column grid
+        for i in range(0, len(charts), 2):
+            c1, c2 = st.columns(2)
+            with c1:
+                _, label, fig = charts[i]
+                st.markdown(f"<div style='font-size:12px;color:var(--muted);margin-bottom:4px'>{label}</div>", unsafe_allow_html=True)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar":True,"displaylogo":False})
+            if i+1 < len(charts):
+                with c2:
+                    _, label, fig = charts[i+1]
+                    st.markdown(f"<div style='font-size:12px;color:var(--muted);margin-bottom:4px'>{label}</div>", unsafe_allow_html=True)
+                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar":True,"displaylogo":False})
+    else:
+        st.info("⚠️ Could not auto-generate charts. Try adding more numeric columns.")
+
+    # ── Custom Chart Builder ────────────────────────────────────────────────
+    st.markdown(f"#### {T('chart_custom')}")
+
+    all_cols = df.columns.tolist()
+    chart_types = {
+        T("chart_bar"):"bar", T("chart_line"):"line", T("chart_scatter"):"scatter",
+        T("chart_area"):"area", T("chart_histogram"):"histogram",
+        T("chart_box"):"box", T("chart_violin"):"violin",
+        T("chart_pie"):"pie", T("chart_sunburst"):"sunburst",
+    }
+
+    cb1, cb2, cb3, cb4, cb5 = st.columns([2,2,2,2,1])
+    with cb1:
+        chosen_type = st.selectbox(T("chart_types"), list(chart_types.keys()), key="cv_type")
+    with cb2:
+        x_col = st.selectbox(T("chart_select_x"), all_cols, key="cv_x")
+    with cb3:
+        y_default = num_cols[0] if num_cols else all_cols[0]
+        y_col = st.selectbox(T("chart_select_y"), all_cols,
+                             index=all_cols.index(y_default) if y_default in all_cols else 0,
+                             key="cv_y")
+    with cb4:
+        color_opts = ["None"] + cat_cols
+        color_col = st.selectbox(T("chart_select_color"), color_opts, key="cv_color")
+    with cb5:
+        st.markdown("<br>", unsafe_allow_html=True)
+        gen_chart = st.button(T("chart_generate"), key="cv_gen", use_container_width=True)
+
+    if gen_chart:
+        cc = None if color_col == "None" else color_col
+        custom_fig = build_custom_chart(df, chart_types[chosen_type], x_col, y_col, cc)
+        if custom_fig:
+            st.plotly_chart(custom_fig, use_container_width=True, config={"displayModeBar":True,"displaylogo":False})
+
+    # ── Download processed CSV ─────────────────────────────────────────────
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label    = T("chart_download_csv"),
+        data     = csv_bytes,
+        file_name= f"nova_processed_{filename}",
+        mime     = "text/csv",
+        key      = "dl_csv_processed",
+    )
+
+def get_csv_ai_analysis(df: pd.DataFrame, question: str) -> str:
+    """Ask AI about the loaded CSV data."""
+    num_cols, cat_cols, _ = get_col_types(df)
+    stats = df.describe(include="all").to_string()
+    sample = df.head(10).to_string()
+    corr = df[num_cols].corr().round(2).to_string() if len(num_cols) >= 2 else "N/A"
+    context = (
+        f"Dataset: {len(df)} rows × {len(df.columns)} columns\n"
+        f"Columns: {list(df.columns)}\n"
+        f"Numeric cols: {num_cols}\nCategorical cols: {cat_cols}\n\n"
+        f"Statistical Summary:\n{stats}\n\n"
+        f"Correlation Matrix:\n{corr}\n\n"
+        f"Sample Data (first 10 rows):\n{sample}\n\n"
+        f"Missing values per column:\n{df.isnull().sum().to_dict()}\n"
+    )
+    lang_instruction = T("sys_prompt_lang")
+    messages = [
+        {"role":"system","content":(
+            f"You are Nova AI, an expert data analyst. {lang_instruction} "
+            "Analyze the dataset provided and give clear, insightful answers. "
+            "Use bullet points, bold key numbers, and be specific with statistics. "
+            "Suggest visualizations when appropriate."
+        )},
+        {"role":"user","content":f"Dataset info:\n{context}\n\nQuestion: {question}"}
+    ]
+    return stream_response(messages, max_tokens=1024, temperature=0.2)
+
+def is_csv_analysis_query(q: str) -> bool:
+    """Detect if user is asking about a loaded CSV."""
+    if not st.session_state.get("csv_df") is not None: return False
+    keywords = ["data","csv","chart","graph","plot","column","row","average","mean",
+                "max","min","correlation","trend","distribution","analyze","analyse",
+                "insight","show me","tell me","what","how many","which","compare"]
+    return any(k in q.lower() for k in keywords)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  IMAGE PROCESSING
@@ -1399,16 +818,13 @@ def image_to_base64(uploaded_file) -> tuple:
         b64  = base64.b64encode(buf.read()).decode()
         mime = f"image/{save_fmt.lower()}"
         return b64, mime, img.size[0], img.size[1]
-    except Exception as e:
+    except:
         return None, None, 0, 0
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  VISION ANALYSIS
-# ══════════════════════════════════════════════════════════════════════════════
 def get_vision_prompt(user_text: str) -> str:
     q = user_text.lower()
-    if any(k in q for k in ["read","text","ocr","extract text","what does it say","what text","words","written","transcribe"]):
-        return f"Read and transcribe ALL text visible in this image exactly as written. Then answer: {user_text}"
+    if any(k in q for k in ["read","text","ocr","extract text","what does it say","written","transcribe"]):
+        return f"Read and transcribe ALL text visible in this image exactly. Then answer: {user_text}"
     elif any(k in q for k in ["solve","calculate","math","equation","problem","formula"]):
         return f"Solve the math problem shown in this image. Show step-by-step working. {user_text}"
     elif any(k in q for k in ["code","program","script","debug","error","fix","bug"]):
@@ -1417,20 +833,13 @@ def get_vision_prompt(user_text: str) -> str:
         return f"Analyze this chart/graph/table in detail. Extract all data, trends, and insights. {user_text}"
     elif any(k in q for k in ["ui","design","website","app","interface","layout"]):
         return f"Analyze this UI/UX design. Describe layout, design choices, and suggest improvements. {user_text}"
-    elif any(k in q for k in ["translate","language","foreign","hindi","french","chinese"]):
-        return f"Read all text in this image and translate it to English. {user_text}"
     elif any(k in q for k in ["document","invoice","receipt","form","certificate","id","card"]):
-        return f"Extract all information from this document. Read every field and value carefully. {user_text}"
-    elif any(k in q for k in ["food","recipe","ingredients","calories","dish","meal"]):
-        return f"Identify this food/dish, describe it, estimate ingredients and calories. {user_text}"
+        return f"Extract all information from this document carefully. {user_text}"
     else:
         return (
-            "Analyze this image comprehensively:\n"
-            "1. Describe everything you see in detail\n"
-            "2. Read any visible text\n"
-            "3. Identify objects, colors, patterns\n"
-            "4. Note any important details\n\n"
-            f"Also answer this specific request: {user_text if user_text.strip() else 'What is in this image?'}"
+            "Analyze this image comprehensively:\n1. Describe everything in detail\n"
+            "2. Read any visible text\n3. Identify objects, colors, patterns\n"
+            f"Also answer: {user_text if user_text.strip() else 'What is in this image?'}"
         )
 
 def analyze_image_stream(b64: str, mime: str, user_prompt: str) -> str:
@@ -1441,23 +850,14 @@ def analyze_image_stream(b64: str, mime: str, user_prompt: str) -> str:
         stream = client.chat.completions.create(
             model    = VISION_MODEL,
             messages = [
-                {
-                    "role": "system",
-                    "content": (
-                        f"You are Nova AI with powerful vision. Created by Samiran. "
-                        f"Analyze images with exceptional detail and accuracy. "
-                        f"Read text perfectly (OCR), identify objects, solve problems, "
-                        f"analyze data, review code, and answer any question about images. "
-                        f"Be thorough, accurate, and helpful. {lang_instruction}"
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
-                        {"type": "text",      "text": user_prompt}
-                    ]
-                }
+                {"role":"system","content":(
+                    f"You are Nova AI with powerful vision. Created by Samiran. "
+                    f"Analyze images with exceptional accuracy. {lang_instruction}"
+                )},
+                {"role":"user","content":[
+                    {"type":"image_url","image_url":{"url":f"data:{mime};base64,{b64}"}},
+                    {"type":"text","text":user_prompt}
+                ]}
             ],
             max_tokens=2048, temperature=0.2, stream=True,
         )
@@ -1476,8 +876,7 @@ def analyze_image_stream(b64: str, mime: str, user_prompt: str) -> str:
 # ══════════════════════════════════════════════════════════════════════════════
 #  STREAMING TEXT
 # ══════════════════════════════════════════════════════════════════════════════
-def stream_response(messages: list, max_tokens: int = 4096,
-                    temperature: float = 0.25) -> str:
+def stream_response(messages: list, max_tokens: int = 4096, temperature: float = 0.25) -> str:
     full = ""
     box  = st.empty()
     try:
@@ -1504,12 +903,12 @@ CURRENCIES = ["USD","EUR","GBP","INR","JPY","CAD","AUD","CHF","CNY","HKD",
               "TRY","AED","SAR","THB","IDR","MYR","PHP","VND","EGP","PKR"]
 
 MODE_PROMPTS = {
-    "🤖 Default":  "",
-    "💻 Coder":    "CODER MODE: Focus on perfect production-ready code.",
-    "🎨 Creative": "CREATIVE MODE: Be imaginative and expressive.",
-    "📊 Analyst":  "ANALYST MODE: Be data-driven, precise, use tables.",
-    "🎓 Teacher":  "TEACHER MODE: Explain step by step with examples.",
-    "✍️ Writer":   "WRITER MODE: Clear, engaging, polished writing.",
+    "🤖 Default":"","💻 Coder":"CODER MODE: Focus on perfect production-ready code.",
+    "🎨 Creative":"CREATIVE MODE: Be imaginative and expressive.",
+    "📊 Analyst":"ANALYST MODE: Be data-driven, precise, use tables.",
+    "🎓 Teacher":"TEACHER MODE: Explain step by step with examples.",
+    "✍️ Writer":"WRITER MODE: Clear, engaging, polished writing.",
+    "📊 Data Scientist":"DATA SCIENCE MODE: Expert in statistics, ML, data analysis, visualization. Suggest Python code with pandas/plotly.",
 }
 
 GAME_KEYWORDS = ["game","snake game","tetris","pacman","flappy bird","2048",
@@ -1548,16 +947,14 @@ SPORTS_MAP = {
     "champions league":"UEFA Champions League","world cup":"FIFA World Cup",
     "basketball":"basketball","nba":"NBA basketball","tennis":"tennis",
     "badminton":"badminton","hockey":"hockey","formula 1":"Formula 1",
-    "f1":"F1 race","boxing":"boxing","mma":"MMA UFC","ufc":"UFC",
-    "olympics":"Olympics","kabaddi":"kabaddi",
+    "f1":"F1 race","boxing":"boxing","mma":"MMA UFC","ufc":"UFC","olympics":"Olympics",
 }
 IPL_TEAMS = ["csk","mi","rcb","kkr","srh","pbks","dc","gt","lsg","rr",
              "chennai","mumbai","bangalore","kolkata","hyderabad",
              "punjab","delhi","gujarat","lucknow","rajasthan"]
 
 LANGUAGE_MAP = {
-    "python":("python","3.10.0"),
-    "javascript":("javascript","18.15.0"),"js":("javascript","18.15.0"),
+    "python":("python","3.10.0"),"javascript":("javascript","18.15.0"),"js":("javascript","18.15.0"),
     "typescript":("typescript","5.0.3"),"java":("java","15.0.2"),
     "c++":("c++","10.2.0"),"cpp":("c++","10.2.0"),"c":("c","10.2.0"),
     "rust":("rust","1.68.2"),"go":("go","1.16.2"),"ruby":("ruby","3.0.1"),
@@ -1591,8 +988,7 @@ def get_weather(city):
 def extract_city(q):
     m = re.search(r"(?:weather|temperature|forecast|humidity|climate)\s+(?:report\s+)?(?:in|for|of|at)\s+([A-Za-z ,]+?)(?:\?|$)",q,re.IGNORECASE)
     if m: return m.group(1).strip().rstrip(",")
-    sw = {"what","is","the","weather","report","temperature","forecast","today",
-          "current","now","like","how","give","me","show","humidity","climate","condition","a","an"}
+    sw = {"what","is","the","weather","report","temperature","forecast","today","current","now","like","how","give","me","show","humidity","climate","condition","a","an"}
     return " ".join(w for w in q.replace("?","").split() if w.lower() not in sw).strip() or "Guwahati"
 
 def is_weather_query(q):
@@ -1626,9 +1022,7 @@ def extract_stock_symbol(q):
 
 def is_stock_query(q):
     ql=q.lower()
-    return (any(a in ql for a in ["stock","share price","stock price","price of","market price",
-                                   "trading at","crypto","bitcoin","ethereum","sensex","nifty",
-                                   "nasdaq","dow jones","coin price"]) or
+    return (any(a in ql for a in ["stock","share price","stock price","price of","market price","trading at","crypto","bitcoin","ethereum","sensex","nifty","nasdaq","dow jones","coin price"]) or
             any(k in ql for k in STOCK_ALIASES))
 
 # ── Sports ────────────────────────────────────────────────────────────────────
@@ -1645,7 +1039,7 @@ def fetch_live_cricket():
                     if s.get("r"): scores+=f"\n  {s.get('inning','')}: {s.get('r','')}/{s.get('w','')} ({s.get('o','')} ov)"
                 results.append(f"**{m.get('name','')}**\n  {m.get('status','')}{scores}")
     except: pass
-    for sq in [f"IPL 2025 today match {datetime.now().strftime('%B %d')} live score","IPL 2025 match playing today"]:
+    for sq in [f"IPL 2025 today match {datetime.now().strftime('%B %d')} live score"]:
         try:
             r=requests.get(f"https://news.google.com/rss/search?q={requests.utils.quote(sq)}&hl=en-IN&gl=IN&ceid=IN:en",
                            headers={"User-Agent":"Mozilla/5.0"},timeout=6)
@@ -1678,8 +1072,7 @@ def is_sports_query(q):
     ql=q.lower()
     if any(p in ql for p in ["who made you","history of","rules of","how to play"]): return False
     if any(t in ql for t in IPL_TEAMS): return True
-    actions=["score","result","match","game","live","standings","winner","champion",
-             "playoff","final","tournament","who won","playing today","which team","schedule"]
+    actions=["score","result","match","game","live","standings","winner","champion","playoff","final","tournament","who won","playing today","which team","schedule"]
     sports=list(SPORTS_MAP.keys())
     return (any(re.search(r"\b"+re.escape(a)+r"\b",ql) for a in actions) and
             any(re.search(r"\b"+re.escape(s)+r"\b",ql) for s in sports))
@@ -1710,7 +1103,7 @@ def extract_news_topic(q):
 def web_search(q):
     try:
         r=requests.get(f"https://html.duckduckgo.com/html/?q={requests.utils.quote(q)}",
-                       headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"},timeout=10)
+                       headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},timeout=10)
         snips=re.findall(r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>',r.text,re.DOTALL)
         titles=re.findall(r'class="result__title"[^>]*>.*?<a[^>]*>(.*?)</a>',r.text,re.DOTALL)
         cs=[re.sub(r"<[^>]+>","",s).strip() for s in snips[:5]]
@@ -1721,8 +1114,6 @@ def web_search(q):
         data=r2.json(); parts=[]
         if data.get("Answer"): parts.append(data["Answer"])
         if data.get("Abstract"): parts.append(data["Abstract"][:500])
-        for t in data.get("RelatedTopics",[])[:3]:
-            if isinstance(t,dict) and t.get("Text"): parts.append(t["Text"][:200])
         return "\n".join(parts) if parts else "No results."
     except Exception as e: return f"Search failed:{e}"
 
@@ -1753,11 +1144,9 @@ def solve_math(expr):
     try:
         e=re.sub(r"(calculate|compute|solve|evaluate|what is|how much is|=)","",expr,flags=re.IGNORECASE).strip()
         e=re.sub(r"[?!]","",e).replace("^","**").strip()
-        safe={"sin":math.sin,"cos":math.cos,"tan":math.tan,"asin":math.asin,
-              "acos":math.acos,"atan":math.atan,"log":math.log10,"ln":math.log,
-              "log2":math.log2,"sqrt":math.sqrt,"exp":math.exp,"abs":abs,
-              "pi":math.pi,"e":math.e,"ceil":math.ceil,"floor":math.floor,
-              "round":round,"pow":math.pow,"factorial":math.factorial}
+        safe={"sin":math.sin,"cos":math.cos,"tan":math.tan,"asin":math.asin,"acos":math.acos,"atan":math.atan,
+              "log":math.log10,"ln":math.log,"log2":math.log2,"sqrt":math.sqrt,"exp":math.exp,"abs":abs,
+              "pi":math.pi,"e":math.e,"ceil":math.ceil,"floor":math.floor,"round":round,"pow":math.pow,"factorial":math.factorial}
         result=eval(e,{"__builtins__":{}},safe)
         if isinstance(result,float): result=round(result,10)
         return str(result)
@@ -1822,8 +1211,7 @@ def convert_unit(q):
 
 def is_unit_query(q):
     ql=q.lower()
-    units=["km","miles","meters","feet","cm","inches","kg","pounds","grams",
-           "celsius","fahrenheit","kelvin","liters","gallons","mph","kmh","gb","mb","tb"]
+    units=["km","miles","meters","feet","cm","inches","kg","pounds","grams","celsius","fahrenheit","kelvin","liters","gallons","mph","kmh","gb","mb","tb"]
     trig=["convert","how many","how much","to","equals"]
     return any(u in ql for u in units) and any(t in ql for t in trig) and bool(re.search(r"\d",q))
 
@@ -1908,22 +1296,20 @@ def get_badge(ct):
             "general":""}.get(ct,"")
 
 def get_spinner_text(ct):
-    return {"game":T("live_game"),"app":T("live_app"),
-            "software":T("live_software"),"design":T("live_design"),
-            "code":"💻 Writing world-class code…","general":"✨ Thinking…"}.get(ct,"✨ Thinking…")
+    return {"game":T("live_game"),"app":T("live_app"),"software":T("live_software"),
+            "design":T("live_design"),"code":"💻 Writing world-class code…","general":"✨ Thinking…"}.get(ct,"✨ Thinking…")
 
 def get_system_prompt(ct):
     mode=st.session_state.get("ai_mode","🤖 Default")
     mode_extra=MODE_PROMPTS.get(mode,""); td=today_str()
     lang_instruction = T("sys_prompt_lang")
-    base=(f"You are Nova AI — world's BEST AI assistant with vision, created by Samiran. "
+    base=(f"You are Nova AI — world's BEST AI assistant with vision and data analysis, created by Samiran. "
           f"Today: {td}. If asked who made you: 'Nova AI, created by Samiran.' "
           f"Never mention Meta, Llama, OpenAI, Groq. Full conversation memory. "
           f"NEVER write partial code. ALWAYS complete implementations. "
           f"Do NOT generate images — you can ANALYZE images but not create them. "
           f"{lang_instruction} {mode_extra}\n\n"
-          f"LIVE DATA: When real-time data provided, use as ABSOLUTE TRUTH. "
-          f"Answer directly. NEVER redirect to external sites. Today is {td}.\n\n")
+          f"LIVE DATA: When real-time data provided, use as ABSOLUTE TRUTH. Today is {td}.\n\n")
     if ct=="game":
         return base+"GAME DEV: ONE COMPLETE HTML5 game in single ```html block. Canvas 60fps, score/highscore, start/gameover screens, Web Audio sounds, keyboard+touch controls, particles, neon dark theme."
     elif ct=="app":
@@ -1988,11 +1374,11 @@ def build_html_preview(blocks):
 # ══════════════════════════════════════════════════════════════════════════════
 for key,default in [
     ("messages",[]),("temperature",0.25),("max_tokens",4096),
-    ("ai_mode","🤖 Default"),("uploaded_file_content",None),
-    ("uploaded_file_name",None),("pending_image_b64",None),
-    ("pending_image_mime",None),("pending_image_name",None),
-    ("show_image_uploader",False),("show_file_uploader",False),
+    ("ai_mode","🤖 Default"),("uploaded_file_content",None),("uploaded_file_name",None),
+    ("pending_image_b64",None),("pending_image_mime",None),("pending_image_name",None),
+    ("show_image_uploader",False),("show_file_uploader",False),("show_csv_uploader",False),
     ("lang_code","en"),("lang_name","🌐 English"),
+    ("csv_df",None),("csv_filename",None),("csv_analyzed",False),
 ]:
     if key not in st.session_state: st.session_state[key]=default
 
@@ -2003,94 +1389,84 @@ with st.sidebar:
     st.markdown("""
     <div style='text-align:center;padding:1.2rem 0 .8rem'>
         <div style='font-size:1.4rem;font-weight:700;font-family:Space Mono,monospace;color:#00e5ff'>✨ Nova AI</div>
-        <div style='font-size:11px;color:#64748b;margin-top:.3rem'>Created by Samiran · v5.0</div>
+        <div style='font-size:11px;color:#64748b;margin-top:.3rem'>Created by Samiran · v5.1</div>
     </div>""", unsafe_allow_html=True)
     st.divider()
 
-    # ── 🌍 LANGUAGE SELECTOR ──────────────────────────────────────────────────
+    # ── Language ──────────────────────────────────────────────────────────
     st.markdown(f"### {T('language_label')}")
-
-    # Current language display
     st.markdown(f"""
     <div class="lang-selector-wrap">
-        <span class="lang-flag">{st.session_state['lang_name'].split()[0]}</span>
-        <span class="lang-name">{st.session_state['lang_name']}</span>
-    </div>
-    """, unsafe_allow_html=True)
+        <span style="font-size:18px">{st.session_state['lang_name'].split()[0]}</span>
+        <span style="font-size:13px;color:#00e5ff;font-weight:500">{st.session_state['lang_name']}</span>
+    </div>""", unsafe_allow_html=True)
 
-    # Language selectbox
-    lang_choice = st.selectbox(
-        "Choose Language",
-        options=list(LANGUAGES.keys()),
+    lang_choice = st.selectbox("Language",list(LANGUAGES.keys()),
         index=list(LANGUAGES.keys()).index(st.session_state["lang_name"]),
-        label_visibility="collapsed",
-        key="lang_select"
-    )
+        label_visibility="collapsed",key="lang_select")
     if lang_choice != st.session_state["lang_name"]:
-        st.session_state["lang_name"] = lang_choice
-        st.session_state["lang_code"] = LANGUAGES[lang_choice]
+        st.session_state["lang_name"]=lang_choice
+        st.session_state["lang_code"]=LANGUAGES[lang_choice]
         st.rerun()
 
-    # Quick language flags grid
-    st.markdown("""
-    <div style='font-size:10px;color:#64748b;margin-top:6px;margin-bottom:4px'>
-        Quick select:
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Show flags in a compact grid using columns
-    lang_keys = list(LANGUAGES.keys())
-    cols = st.columns(4)
-    for i, lk in enumerate(lang_keys):
-        with cols[i % 4]:
-            flag = lk.split()[0]
-            code = LANGUAGES[lk]
-            is_active = code == st.session_state["lang_code"]
-            btn_style = "border-color:var(--accent);color:var(--accent);" if is_active else ""
-            if st.button(flag, key=f"lang_flag_{code}",
-                         help=lk,
-                         use_container_width=True):
-                st.session_state["lang_name"] = lk
-                st.session_state["lang_code"] = code
+    lang_keys=list(LANGUAGES.keys())
+    cols=st.columns(4)
+    for i,lk in enumerate(lang_keys):
+        with cols[i%4]:
+            if st.button(lk.split()[0],key=f"lf_{LANGUAGES[lk]}",help=lk,use_container_width=True):
+                st.session_state["lang_name"]=lk
+                st.session_state["lang_code"]=LANGUAGES[lk]
                 st.rerun()
-
     st.divider()
 
-    # ── Settings ──────────────────────────────────────────────────────────────
+    # ── Settings ──────────────────────────────────────────────────────────
     st.markdown(f"### {T('settings')}")
-    st.session_state["temperature"]=st.slider(
-        T("temperature"),0.0,1.0,
-        value=st.session_state["temperature"],step=0.05,
-        help="Low=factual | High=creative"
-    )
-    st.session_state["max_tokens"]=st.select_slider(
-        T("max_length"),
-        options=[512,1024,2048,4096,8192],
-        value=st.session_state["max_tokens"]
-    )
+    st.session_state["temperature"]=st.slider(T("temperature"),0.0,1.0,value=st.session_state["temperature"],step=0.05)
+    st.session_state["max_tokens"]=st.select_slider(T("max_length"),options=[512,1024,2048,4096,8192],value=st.session_state["max_tokens"])
     st.divider()
 
     st.markdown(f"### {T('ai_mode')}")
-    st.session_state["ai_mode"]=st.selectbox(
-        "Mode",list(MODE_PROMPTS.keys()),
-        index=0,label_visibility="collapsed"
-    )
+    st.session_state["ai_mode"]=st.selectbox("Mode",list(MODE_PROMPTS.keys()),index=0,label_visibility="collapsed")
     st.divider()
 
+    # ── CSV Quick Upload in Sidebar ────────────────────────────────────────
+    st.markdown("### 📊 Quick CSV Upload")
+    sidebar_csv = st.file_uploader("Drop CSV here",type=["csv"],key="sidebar_csv",label_visibility="collapsed")
+    if sidebar_csv:
+        df_tmp = parse_csv(sidebar_csv)
+        if df_tmp is not None:
+            st.session_state["csv_df"]       = df_tmp
+            st.session_state["csv_filename"] = sidebar_csv.name
+            st.session_state["csv_analyzed"] = False
+            st.success(f"✅ {sidebar_csv.name} ({len(df_tmp):,} rows)")
+        else:
+            st.error("❌ Could not parse CSV")
+    if st.session_state.get("csv_df") is not None:
+        df_info = st.session_state["csv_df"]
+        st.markdown(f"""
+        <div style='background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);
+                    border-radius:10px;padding:8px 12px;margin-top:4px;'>
+            <div style='font-size:12px;color:#00e5ff;font-weight:600'>📊 {st.session_state['csv_filename']}</div>
+            <div style='font-size:11px;color:#64748b'>{len(df_info):,} rows · {len(df_info.columns)} cols</div>
+        </div>""", unsafe_allow_html=True)
+        if st.button("🗑️ Clear CSV",key="clear_csv_sb"):
+            st.session_state["csv_df"]=None; st.session_state["csv_filename"]=None
+            st.session_state["csv_analyzed"]=False; st.rerun()
+    st.divider()
+
+    # ── Quick Tools ────────────────────────────────────────────────────────
     st.markdown(f"### {T('quick_tools')}")
     with st.expander(T("currency")):
         amt=st.number_input(T("amount"),value=1.0,min_value=0.0,key="sb_amt")
         c1,c2=st.columns(2)
         with c1: fc=st.selectbox(T("from_curr"),CURRENCIES,index=0,key="sb_fc")
         with c2: tc=st.selectbox(T("to_curr"),CURRENCIES,index=3,key="sb_tc")
-        if st.button(T("convert_btn"),key="sb_conv"):
-            st.markdown(get_exchange_rate(fc,tc,amt))
+        if st.button(T("convert_btn"),key="sb_conv"): st.markdown(get_exchange_rate(fc,tc,amt))
 
     with st.expander(T("units")):
         uin=st.text_input(T("unit_placeholder"),key="sb_uin")
         if st.button(T("unit_btn"),key="sb_unit"):
-            res=convert_unit(uin)
-            st.markdown(res if res else "⚠️ Try: '100 km to miles'")
+            res=convert_unit(uin); st.markdown(res if res else "⚠️ Try: '100 km to miles'")
 
     with st.expander(T("calculator")):
         cin=st.text_input(T("calc_placeholder"),key="sb_cin")
@@ -2102,9 +1478,7 @@ with st.sidebar:
     with st.expander(T("qr_code")):
         qin=st.text_input(T("qr_placeholder"),key="sb_qin")
         if st.button(T("qr_btn"),key="sb_qr") and qin:
-            url=qr_url(qin)
-            st.image(url,width=180)
-            st.markdown(f"[⬇️ Download]({url})")
+            url=qr_url(qin); st.image(url,width=180); st.markdown(f"[⬇️ Download]({url})")
 
     st.divider()
     st.markdown(f"### {T('export')}")
@@ -2115,11 +1489,7 @@ with st.sidebar:
         with cb: st.download_button(T("download_json"),data=export_json_chat(),file_name=f"nova_{ts}.json",mime="application/json",use_container_width=True)
     else: st.caption(T("no_msgs"))
     st.divider()
-    st.markdown(
-        f"<div style='text-align:center;font-size:10px;color:#374151'>"
-        f"Nova AI · Samiran · v5.0<br>{datetime.now().strftime('%B %Y')}</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<div style='text-align:center;font-size:10px;color:#374151'>Nova AI · Samiran · v5.1<br>{datetime.now().strftime('%B %Y')}</div>",unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  HERO
@@ -2137,19 +1507,34 @@ st.markdown(f"""
     <div class="stat-pill"><span class="dot dot-orange"></span>{T('stat_games')}</div>
     <div class="stat-pill"><span class="dot dot-green"></span>{T('stat_files')}</div>
     <div class="stat-pill"><span class="dot dot-green"></span>{T('stat_live')}</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span>{T('stat_charts')}</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
-# Toolbar
 col1,col2,col3=st.columns([5,1,1])
 with col2:
     count=len([m for m in st.session_state.messages if m["role"]=="user"])
-    label = f"{count} {T('msgp') if count!=1 else T('msgs')}"
+    label=f"{count} {T('msgp') if count!=1 else T('msgs')}"
     st.markdown(f"<p style='text-align:right;color:var(--muted);font-size:12px;padding-top:.5rem'>{label}</p>",unsafe_allow_html=True)
 with col3:
-    if st.button(T("clear")):
-        st.session_state.messages=[]; st.rerun()
+    if st.button(T("clear")): st.session_state.messages=[]; st.rerun()
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  CSV VISUALIZATION PANEL — shown above chat when CSV is loaded
+# ══════════════════════════════════════════════════════════════════════════════
+if st.session_state.get("csv_df") is not None and not st.session_state.get("csv_analyzed"):
+    df   = st.session_state["csv_df"]
+    fname= st.session_state.get("csv_filename","data.csv")
+    render_data_viz_panel(df, fname)
+    st.session_state["csv_analyzed"] = True
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+elif st.session_state.get("csv_df") is not None and st.session_state.get("csv_analyzed"):
+    # Show compact toolbar for loaded CSV
+    df   = st.session_state["csv_df"]
+    fname= st.session_state.get("csv_filename","data.csv")
+    with st.expander(f"📊 {fname} — {len(df):,} rows · Click to re-open charts", expanded=False):
+        render_data_viz_panel(df, fname)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CHAT HISTORY
@@ -2162,10 +1547,10 @@ if not st.session_state.messages:
     </div>
     <div class="category-grid">
         <div class="category-card"><div class="category-icon">👁️</div><div class="category-title">{T('cat_vision')}</div><div class="category-examples">{T('cat_vision_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">📊</div><div class="category-title">{T('cat_charts')}</div><div class="category-examples">{T('cat_charts_ex')}</div></div>
         <div class="category-card"><div class="category-icon">🎮</div><div class="category-title">{T('cat_games')}</div><div class="category-examples">{T('cat_games_ex')}</div></div>
         <div class="category-card"><div class="category-icon">🚀</div><div class="category-title">{T('cat_apps')}</div><div class="category-examples">{T('cat_apps_ex')}</div></div>
         <div class="category-card"><div class="category-icon">💻</div><div class="category-title">{T('cat_code')}</div><div class="category-examples">{T('cat_code_ex')}</div></div>
-        <div class="category-card"><div class="category-icon">📁</div><div class="category-title">{T('cat_files')}</div><div class="category-examples">{T('cat_files_ex')}</div></div>
         <div class="category-card"><div class="category-icon">🌐</div><div class="category-title">{T('cat_live')}</div><div class="category-examples">{T('cat_live_ex')}</div></div>
     </div>
     <div class="divider"></div>
@@ -2173,161 +1558,148 @@ if not st.session_state.messages:
 else:
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
-            if msg.get("meta"):
-                st.markdown(msg["meta"],unsafe_allow_html=True)
+            if msg.get("meta"): st.markdown(msg["meta"],unsafe_allow_html=True)
             if msg.get("image_b64") and msg.get("image_mime"):
                 try:
                     img_bytes=base64.b64decode(msg["image_b64"])
-                    img=Image.open(io.BytesIO(img_bytes))
-                    st.image(img,caption=msg.get("image_name","Uploaded image"),width=350)
+                    st.image(Image.open(io.BytesIO(img_bytes)),caption=msg.get("image_name",""),width=350)
                 except: pass
             st.markdown(msg["content"])
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  BOTTOM INPUT AREA
+#  PENDING PREVIEWS
 # ══════════════════════════════════════════════════════════════════════════════
 if st.session_state.get("pending_image_b64"):
-    fname = st.session_state.get("pending_image_name","image")
+    fname=st.session_state.get("pending_image_name","image")
     try:
-        img_bytes = base64.b64decode(st.session_state["pending_image_b64"])
-        img       = Image.open(io.BytesIO(img_bytes))
-        col_img, col_info, col_x = st.columns([1,5,1])
-        with col_img:
-            st.image(img, width=56)
-        with col_info:
-            st.markdown(
-                f"<div style='padding-top:8px'>"
-                f"<div style='font-size:13px;color:#e2e8f0;font-weight:500'>🖼️ {fname}</div>"
-                f"<div style='font-size:11px;color:#64748b'>{T('img_ready')}</div>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
-        with col_x:
-            if st.button("✕", key="clear_pending_img"):
-                st.session_state["pending_image_b64"]  = None
-                st.session_state["pending_image_mime"] = None
-                st.session_state["pending_image_name"] = None
-                st.rerun()
+        img_bytes=base64.b64decode(st.session_state["pending_image_b64"])
+        ci,cinfo,cx=st.columns([1,5,1])
+        with ci: st.image(Image.open(io.BytesIO(img_bytes)),width=56)
+        with cinfo:
+            st.markdown(f"<div style='padding-top:8px'><div style='font-size:13px;color:#e2e8f0;font-weight:500'>🖼️ {fname}</div><div style='font-size:11px;color:#64748b'>{T('img_ready')}</div></div>",unsafe_allow_html=True)
+        with cx:
+            if st.button("✕",key="clr_img"):
+                st.session_state["pending_image_b64"]=None; st.session_state["pending_image_mime"]=None; st.session_state["pending_image_name"]=None; st.rerun()
     except: pass
 
 if st.session_state.get("uploaded_file_content"):
-    fname = st.session_state.get("uploaded_file_name","file")
-    col_fi, col_fx = st.columns([8,1])
-    with col_fi:
-        st.markdown(
-            f'<div class="badge badge-purple" style="margin:4px 0">📁 {fname} — {T("file_ready")}</div>',
-            unsafe_allow_html=True
-        )
-    with col_fx:
-        if st.button("✕", key="clear_pending_file"):
-            st.session_state["uploaded_file_content"] = None
-            st.session_state["uploaded_file_name"]    = None
-            st.rerun()
+    fname=st.session_state.get("uploaded_file_name","file")
+    cfi,cfx=st.columns([8,1])
+    with cfi: st.markdown(f'<div class="badge badge-purple">📁 {fname} — {T("file_ready")}</div>',unsafe_allow_html=True)
+    with cfx:
+        if st.button("✕",key="clr_file"):
+            st.session_state["uploaded_file_content"]=None; st.session_state["uploaded_file_name"]=None; st.rerun()
 
-# ── Upload toolbar ─────────────────────────────────────────────────────────────
-tb_col1, tb_col2, tb_col3, tb_col4 = st.columns([1,1,1,6])
+if st.session_state.get("csv_df") is not None:
+    fname=st.session_state.get("csv_filename","data.csv")
+    df=st.session_state["csv_df"]
+    ccsv,ccsvx=st.columns([8,1])
+    with ccsv:
+        st.markdown(f'<div class="badge badge-teal">📊 {fname} · {len(df):,} rows · {len(df.columns)} cols — {T("chart_ask").replace("…","")}</div>',unsafe_allow_html=True)
+    with ccsvx:
+        if st.button("✕",key="clr_csv2"):
+            st.session_state["csv_df"]=None; st.session_state["csv_filename"]=None; st.session_state["csv_analyzed"]=False; st.rerun()
 
-with tb_col1:
-    img_btn_label = T("img_btn_done") if st.session_state.get("pending_image_b64") else T("img_btn")
-    if st.button(img_btn_label, key="toggle_img_upload", help="Upload an image for AI to analyze"):
-        st.session_state["show_image_uploader"] = not st.session_state["show_image_uploader"]
-        st.session_state["show_file_uploader"]  = False
-        st.rerun()
+# ══════════════════════════════════════════════════════════════════════════════
+#  UPLOAD TOOLBAR
+# ══════════════════════════════════════════════════════════════════════════════
+tb1,tb2,tb3,tb4,tb5=st.columns([1,1,1,1,5])
 
-with tb_col2:
-    file_btn_label = T("file_btn_done") if st.session_state.get("uploaded_file_content") else T("file_btn")
-    if st.button(file_btn_label, key="toggle_file_upload", help="Upload a file for AI to analyze"):
-        st.session_state["show_file_uploader"]  = not st.session_state["show_file_uploader"]
-        st.session_state["show_image_uploader"] = False
-        st.rerun()
+with tb1:
+    img_lbl=T("img_btn_done") if st.session_state.get("pending_image_b64") else T("img_btn")
+    if st.button(img_lbl,key="tog_img",help="Upload image"):
+        st.session_state["show_image_uploader"]=not st.session_state["show_image_uploader"]
+        st.session_state["show_file_uploader"]=False; st.session_state["show_csv_uploader"]=False; st.rerun()
 
-with tb_col3:
-    if st.button(T("help_btn"), key="show_help"):
-        st.session_state["show_image_uploader"] = False
-        st.session_state["show_file_uploader"]  = False
+with tb2:
+    file_lbl=T("file_btn_done") if st.session_state.get("uploaded_file_content") else T("file_btn")
+    if st.button(file_lbl,key="tog_file",help="Upload file"):
+        st.session_state["show_file_uploader"]=not st.session_state["show_file_uploader"]
+        st.session_state["show_image_uploader"]=False; st.session_state["show_csv_uploader"]=False; st.rerun()
+
+with tb3:
+    csv_lbl=T("csv_btn_done") if st.session_state.get("csv_df") is not None else T("csv_btn")
+    if st.button(csv_lbl,key="tog_csv",help="Upload CSV for charts"):
+        st.session_state["show_csv_uploader"]=not st.session_state["show_csv_uploader"]
+        st.session_state["show_image_uploader"]=False; st.session_state["show_file_uploader"]=False; st.rerun()
+
+with tb4:
+    if st.button(T("help_btn"),key="show_help"):
+        st.session_state["show_image_uploader"]=False; st.session_state["show_file_uploader"]=False; st.session_state["show_csv_uploader"]=False
 
 # ── Image uploader panel ───────────────────────────────────────────────────────
 if st.session_state.get("show_image_uploader"):
     st.markdown(f"""
-    <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;
-                padding:1.2rem;margin-bottom:.5rem;'>
-        <div style='font-size:13px;color:#00e5ff;font-weight:600;margin-bottom:.5rem'>
-            {T('img_upload_title')}
-        </div>
-        <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>
-            {T('img_upload_hint')}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    img_file = st.file_uploader(
-        "Choose image",
-        type=["jpg","jpeg","png","gif","bmp","webp","tiff"],
-        key="main_img_upload",
-        label_visibility="collapsed"
-    )
-
-    if img_file is not None:
-        b64, mime, w, h = image_to_base64(img_file)
+    <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;padding:1.2rem;margin-bottom:.5rem;'>
+        <div style='font-size:13px;color:#00e5ff;font-weight:600;margin-bottom:.5rem'>{T('img_upload_title')}</div>
+        <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>{T('img_upload_hint')}</div>
+    </div>""", unsafe_allow_html=True)
+    img_file=st.file_uploader("img",type=["jpg","jpeg","png","gif","bmp","webp","tiff"],key="main_img",label_visibility="collapsed")
+    if img_file:
+        b64,mime,w,h=image_to_base64(img_file)
         if b64:
-            st.session_state["pending_image_b64"]  = b64
-            st.session_state["pending_image_mime"] = mime
-            st.session_state["pending_image_name"] = img_file.name
-            st.session_state["show_image_uploader"]= False
-            col_prev, col_info = st.columns([1,2])
-            with col_prev:
-                img_bytes = base64.b64decode(b64)
-                preview   = Image.open(io.BytesIO(img_bytes))
-                st.image(preview, width=120)
-            with col_info:
-                st.success(f"✅ {img_file.name}")
-                st.caption(f"Size: {w}×{h}px · {mime}")
-                st.info(T("img_ready"))
-        else:
-            st.error("❌ Could not process image. Try a different format.")
-
-    # Example prompts — translated
-    st.markdown(f"""
-    <div style='margin-top:.8rem'>
-        <div style='font-size:11px;color:#64748b;margin-bottom:.4rem'>{T('example_q')}</div>
-        <div style='display:flex;flex-wrap:wrap;gap:6px'>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex1')}</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex2')}</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex3')}</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex4')}</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex5')}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+            st.session_state["pending_image_b64"]=b64; st.session_state["pending_image_mime"]=mime
+            st.session_state["pending_image_name"]=img_file.name; st.session_state["show_image_uploader"]=False
+            cp,ci2=st.columns([1,2])
+            with cp: st.image(Image.open(io.BytesIO(base64.b64decode(b64))),width=120)
+            with ci2: st.success(f"✅ {img_file.name}"); st.caption(f"{w}×{h}px · {mime}"); st.info(T("img_ready"))
+        else: st.error("❌ Could not process image.")
+    st.markdown(f"""<div style='margin-top:.8rem'><div style='font-size:11px;color:#64748b;margin-bottom:.4rem'>{T('example_q')}</div>
+    <div style='display:flex;flex-wrap:wrap;gap:6px'>
+        {''.join(f"<span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T(k)}</span>" for k in ['ex1','ex2','ex3','ex4','ex5'])}
+    </div></div>""", unsafe_allow_html=True)
 
 # ── File uploader panel ────────────────────────────────────────────────────────
 if st.session_state.get("show_file_uploader"):
     st.markdown(f"""
-    <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;
-                padding:1.2rem;margin-bottom:.5rem;'>
-        <div style='font-size:13px;color:#a78bfa;font-weight:600;margin-bottom:.5rem'>
-            {T('file_upload_title')}
-        </div>
-        <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>
-            {T('file_upload_hint')}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;padding:1.2rem;margin-bottom:.5rem;'>
+        <div style='font-size:13px;color:#a78bfa;font-weight:600;margin-bottom:.5rem'>{T('file_upload_title')}</div>
+        <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>{T('file_upload_hint')}</div>
+    </div>""", unsafe_allow_html=True)
+    doc_file=st.file_uploader("doc",type=["txt","csv","json","py","js","ts","html","css","java","cpp","c","md","rs","go"],key="main_doc",label_visibility="collapsed")
+    if doc_file:
+        content=read_uploaded_file(doc_file)
+        st.session_state["uploaded_file_content"]=content; st.session_state["uploaded_file_name"]=doc_file.name
+        st.session_state["show_file_uploader"]=False; st.success(f"✅ {doc_file.name}"); st.info(T("file_ready"))
 
-    doc_file = st.file_uploader(
-        "Choose file",
-        type=["txt","csv","json","py","js","ts","html","css","java","cpp","c","md","rs","go"],
-        key="main_doc_upload",
-        label_visibility="collapsed"
-    )
+# ── CSV uploader panel ─────────────────────────────────────────────────────────
+if st.session_state.get("show_csv_uploader"):
+    st.markdown(f"""
+    <div style='background:#1a1d24;border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:1.5rem;margin-bottom:.5rem;'>
+        <div style='font-size:14px;color:#00e5ff;font-weight:700;margin-bottom:.5rem'>{T('csv_upload_title')}</div>
+        <div style='font-size:12px;color:#64748b;margin-bottom:1rem'>{T('csv_upload_hint')}</div>
+        <div style='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;'>
+            {"".join(f"<div style='background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:8px;padding:6px;text-align:center;font-size:11px;color:#94a3b8'>✅ {t}</div>" for t in ['Bar Charts','Line Charts','Scatter Plots','Pie Charts','Heatmaps','Box Plots','Histograms','Area Charts'])}
+        </div>
+    </div>""", unsafe_allow_html=True)
 
-    if doc_file is not None:
-        content = read_uploaded_file(doc_file)
-        st.session_state["uploaded_file_content"] = content
-        st.session_state["uploaded_file_name"]    = doc_file.name
-        st.session_state["show_file_uploader"]    = False
-        st.success(f"✅ {doc_file.name} ready!")
-        st.info(T("file_ready"))
+    csv_file=st.file_uploader("csv",type=["csv"],key="main_csv_up",label_visibility="collapsed")
+    if csv_file:
+        with st.spinner(T("chart_generating")):
+            df_parsed=parse_csv(csv_file)
+        if df_parsed is not None:
+            st.session_state["csv_df"]       = df_parsed
+            st.session_state["csv_filename"] = csv_file.name
+            st.session_state["csv_analyzed"] = False
+            st.session_state["show_csv_uploader"]=False
+            st.success(f"✅ {csv_file.name} — {len(df_parsed):,} rows × {len(df_parsed.columns)} columns loaded!")
+            st.info(T("csv_ready"))
+            st.rerun()
+        else:
+            st.error("❌ Could not parse this CSV. Check the format and try again.")
+
+    # Sample CSV download
+    sample_csv = """Name,Age,Salary,Department,City,Experience,Rating
+Alice,28,75000,Engineering,New York,5,4.2
+Bob,34,95000,Marketing,London,10,3.8
+Carol,22,55000,Design,Paris,2,4.7
+David,45,120000,Engineering,Tokyo,20,4.1
+Eve,31,88000,Marketing,New York,8,4.5
+Frank,27,62000,Design,London,3,3.9
+Grace,38,105000,Engineering,Paris,15,4.6
+Henry,29,79000,Marketing,Tokyo,6,4.0
+"""
+    st.download_button("⬇️ Download Sample CSV",data=sample_csv,file_name="sample_data.csv",mime="text/csv",key="dl_sample")
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CHAT INPUT
@@ -2336,41 +1708,66 @@ if prompt := st.chat_input(T("chat_placeholder")):
 
     has_image = bool(st.session_state.get("pending_image_b64"))
     has_file  = bool(st.session_state.get("uploaded_file_content"))
+    has_csv   = st.session_state.get("csv_df") is not None
 
-    user_msg = {"role":"user","content":prompt,"meta":""}
+    user_msg={"role":"user","content":prompt,"meta":""}
     if has_image:
-        user_msg["image_b64"]  = st.session_state["pending_image_b64"]
-        user_msg["image_mime"] = st.session_state["pending_image_mime"]
-        user_msg["image_name"] = st.session_state["pending_image_name"]
-
+        user_msg["image_b64"] =st.session_state["pending_image_b64"]
+        user_msg["image_mime"]=st.session_state["pending_image_mime"]
+        user_msg["image_name"]=st.session_state["pending_image_name"]
     st.session_state.messages.append(user_msg)
 
     with st.chat_message("user"):
         if has_image:
             try:
                 img_bytes=base64.b64decode(st.session_state["pending_image_b64"])
-                st.image(Image.open(io.BytesIO(img_bytes)),
-                         caption=st.session_state.get("pending_image_name","Image"),width=350)
+                st.image(Image.open(io.BytesIO(img_bytes)),caption=st.session_state.get("pending_image_name",""),width=350)
             except: pass
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
         response=""; meta=""
 
-        # ── 🖼️ IMAGE ANALYSIS ────────────────────────────────────────────────
+        # ── 🖼️ IMAGE ─────────────────────────────────────────────────────
         if has_image:
-            b64  = st.session_state["pending_image_b64"]
-            mime = st.session_state["pending_image_mime"]
-            name = st.session_state.get("pending_image_name","image")
-            meta = f'<div class="badge badge-pink">👁️ Vision AI · {name}</div>'
-            st.markdown(meta, unsafe_allow_html=True)
-            vision_prompt = get_vision_prompt(prompt)
+            b64=st.session_state["pending_image_b64"]; mime=st.session_state["pending_image_mime"]
+            name=st.session_state.get("pending_image_name","image")
+            meta=f'<div class="badge badge-pink">👁️ Vision AI · {name}</div>'
+            st.markdown(meta,unsafe_allow_html=True)
             with st.spinner(T("analyzing")):
-                response = analyze_image_stream(b64, mime, vision_prompt)
-            st.session_state["pending_image_b64"]  = None
-            st.session_state["pending_image_mime"] = None
-            st.session_state["pending_image_name"] = None
+                response=analyze_image_stream(b64,mime,get_vision_prompt(prompt))
+            st.session_state["pending_image_b64"]=None; st.session_state["pending_image_mime"]=None; st.session_state["pending_image_name"]=None
 
+        # ── 📊 CSV DATA QUESTION ──────────────────────────────────────────
+        elif has_csv and is_csv_analysis_query(prompt):
+            df=st.session_state["csv_df"]; fname=st.session_state.get("csv_filename","data.csv")
+            meta=f'<div class="badge badge-teal">📊 Data Analysis · {fname}</div>'
+            st.markdown(meta,unsafe_allow_html=True)
+
+            # Check if user wants a specific chart
+            ql=prompt.lower()
+            chart_requested=None
+            if any(k in ql for k in ["bar chart","bar graph","bar plot"]): chart_requested="bar"
+            elif any(k in ql for k in ["line chart","line graph","trend"]): chart_requested="line"
+            elif any(k in ql for k in ["scatter","scatter plot","scatter chart"]): chart_requested="scatter"
+            elif any(k in ql for k in ["pie chart","pie graph","donut"]): chart_requested="pie"
+            elif any(k in ql for k in ["histogram","distribution"]): chart_requested="histogram"
+            elif any(k in ql for k in ["box plot","box chart","boxplot"]): chart_requested="box"
+            elif any(k in ql for k in ["heatmap","heat map","correlation"]): chart_requested="heatmap"
+            elif any(k in ql for k in ["area chart","area graph"]): chart_requested="area"
+
+            if chart_requested:
+                num_cols,cat_cols,_=get_col_types(df)
+                x_col=cat_cols[0] if cat_cols else df.columns[0]
+                y_col=num_cols[0] if num_cols else df.columns[0]
+                fig=build_custom_chart(df,chart_requested,x_col,y_col,None)
+                if fig:
+                    st.plotly_chart(fig,use_container_width=True,config={"displayModeBar":True,"displaylogo":False})
+
+            with st.spinner(T("chart_analyzing")):
+                response=get_csv_ai_analysis(df,prompt)
+
+        # ── QR ────────────────────────────────────────────────────────────
         elif is_qr_query(prompt):
             content=extract_qr_content(prompt); url=qr_url(content)
             meta='<div class="badge badge-green">📱 QR Code</div>'
@@ -2402,7 +1799,7 @@ if prompt := st.chat_input(T("chat_placeholder")):
                 meta='<div class="badge badge-orange">🔢 Calculated</div>'
                 st.markdown(meta,unsafe_allow_html=True)
                 st.markdown(f'<div class="result-box orange" style="font-family:Space Mono,monospace;font-size:16px;color:#f59e0b">= {result}</div>',unsafe_allow_html=True)
-                msgs=build_messages(f"The answer to '{prompt}' is {result}. Briefly explain in 2 lines.")
+                msgs=build_messages(f"Answer to '{prompt}' is {result}. Explain briefly.")
                 explanation=stream_response(msgs,max_tokens=200,temperature=st.session_state["temperature"])
                 response=f"= **{result}**\n\n{explanation}"
 
@@ -2410,7 +1807,7 @@ if prompt := st.chat_input(T("chat_placeholder")):
             url=extract_url(prompt)
             if url:
                 with st.spinner(f"{T('reading_url')} {url[:50]}…"): page=fetch_url_content(url)
-                meta=f'<div class="badge badge-green">🌐 URL read</div>'
+                meta='<div class="badge badge-green">🌐 URL read</div>'
                 st.markdown(meta,unsafe_allow_html=True)
                 msgs=build_messages(f"URL: {url}\nContent:\n{page}\n\nRequest: {prompt}")
                 response=stream_response(msgs,max_tokens=st.session_state["max_tokens"],temperature=st.session_state["temperature"])
@@ -2433,17 +1830,14 @@ if prompt := st.chat_input(T("chat_placeholder")):
                     st.markdown(meta,unsafe_allow_html=True)
                     response=(f"### 📈 {L.get('Name',dname)}\n_{L.get('Exchange','')} · {L.get('Market','')}_\n\n"
                               f"| Detail | Value |\n|--------|-------|\n"
-                              f"| 💰 Price | **{L.get('Price','N/A')}** |\n"
-                              f"| 📊 Change | {L.get('Change','N/A')} |\n"
-                              f"| 📈 Day High | {L.get('Day High','N/A')} |\n"
-                              f"| 📉 Day Low | {L.get('Day Low','N/A')} |\n"
+                              f"| 💰 Price | **{L.get('Price','N/A')}** |\n| 📊 Change | {L.get('Change','N/A')} |\n"
+                              f"| 📈 Day High | {L.get('Day High','N/A')} |\n| 📉 Day Low | {L.get('Day Low','N/A')} |\n"
                               f"| 🔢 Volume | {L.get('Volume','N/A')} |\n\n_Delayed ~15 min_")
                     st.markdown(response)
 
         if not response and is_sports_query(prompt):
             with st.spinner(T("fetching_sports")):
-                cricket=fetch_live_cricket()
-                sport_term="general"
+                cricket=fetch_live_cricket(); sport_term="general"
                 for k,v in SPORTS_MAP.items():
                     if k in prompt.lower(): sport_term=v; break
                 extra=get_sports_news(sport_term) if sport_term!="general" else ""
@@ -2468,25 +1862,19 @@ if prompt := st.chat_input(T("chat_placeholder")):
                 L=dict(l.split(": ",1) for l in wd.strip().splitlines() if ": " in l)
                 meta='<div class="badge badge-green">🌤️ Live weather</div>'
                 st.markdown(meta,unsafe_allow_html=True)
-                response=(f"### 🌍 {L.get('City',city)}\n\n"
-                          f"| Detail | Value |\n|--------|-------|\n"
-                          f"| 🌡️ Temperature | {L.get('Temperature','N/A')} |\n"
-                          f"| 🌤️ Condition | {L.get('Condition','N/A')} |\n"
-                          f"| 💧 Humidity | {L.get('Humidity','N/A')} |\n"
-                          f"| 💨 Wind Speed | {L.get('Wind Speed','N/A')} |\n"
-                          f"| 👁️ Visibility | {L.get('Visibility','N/A')} |\n"
-                          f"| ☀️ UV Index | {L.get('UV Index','N/A')} |\n")
+                response=(f"### 🌍 {L.get('City',city)}\n\n| Detail | Value |\n|--------|-------|\n"
+                          f"| 🌡️ Temperature | {L.get('Temperature','N/A')} |\n| 🌤️ Condition | {L.get('Condition','N/A')} |\n"
+                          f"| 💧 Humidity | {L.get('Humidity','N/A')} |\n| 💨 Wind Speed | {L.get('Wind Speed','N/A')} |\n"
+                          f"| 👁️ Visibility | {L.get('Visibility','N/A')} |\n| ☀️ UV Index | {L.get('UV Index','N/A')} |")
                 st.markdown(response)
             else:
-                response=f"❌ Could not fetch weather for **{city}**."
-                st.markdown(response)
+                response=f"❌ Could not fetch weather for **{city}**."; st.markdown(response)
 
         if not response:
             ct=classify_creation(prompt); search_results=""; searched=False
             if needs_search(prompt):
                 with st.spinner(T("searching")):
-                    search_results=web_search(prompt)
-                    facts=get_current_facts(prompt)
+                    search_results=web_search(prompt); facts=get_current_facts(prompt)
                     if facts: search_results+="\n\nRecent headlines:\n"+facts
                     searched=True
             if searched:
@@ -2505,18 +1893,15 @@ if prompt := st.chat_input(T("chat_placeholder")):
                         if attempt>0: time.sleep(60)
                     msgs=build_messages(prompt,search_results,ct)
                     response=stream_response(msgs,max_tokens=st.session_state["max_tokens"],temperature=st.session_state["temperature"])
-
                     blocks=extract_code_blocks(response)
                     langs=[l for l,_ in blocks]
                     is_web=any(l in ("html","css","javascript","js") for l in langs)
                     code,lang=(blocks[0][1],blocks[0][0]) if blocks else (None,None)
-
                     if is_web:
                         html_src=build_html_preview(blocks)
                         if html_src:
                             st.markdown("---")
-                            plabels={"game":T("live_game"),"app":T("live_app"),
-                                     "software":T("live_software"),"design":T("live_design")}
+                            plabels={"game":T("live_game"),"app":T("live_app"),"software":T("live_software"),"design":T("live_design")}
                             st.markdown(f"### {plabels.get(ct,T('live_preview'))}")
                             h=650 if ct in ("game","app","software") else 520
                             st.components.v1.html(html_src,height=h,scrolling=True)
