@@ -11,9 +11,8 @@ import hashlib
 import os
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 💾 PERSISTENT MEMORY DATABASE SYSTEM
+# PERSISTENT MEMORY DATABASE SYSTEM 💾
 # ══════════════════════════════════════════════════════════════════════════════
-
 DB_PATH = "soveren_memory.db"
 
 def init_database():
@@ -379,6 +378,7 @@ UI_TEXT = {
         "qr_btn": "Generate QR",
         "download_md": "📝 MD",
         "download_json": "📊 JSON",
+        "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Upload Image for Vision AI",
         "img_upload_hint": "Supports: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Upload File for Analysis",
@@ -429,185 +429,54 @@ UI_TEXT = {
         "badge": "लाइव · मुफ्त · असीमित · विज़न AI",
         "chat_placeholder": "कुछ भी पूछें — यहाँ टाइप करें या Image / File क्लिक करें…",
         "clear": "🗑️ साफ़ करें",
-        "msgs": "संदेश",
-        "msgp": "संदेश",
+        "msgs": "संदेश", "msgp": "संदेश",
         "hero_q": "आज आप क्या करना चाहेंगे?",
-        "cat_vision": "विज़न AI",
-        "cat_vision_ex": "कोई भी छवि अपलोड करें\nAI पढ़ता और विश्लेषण करता है",
-        "cat_games": "गेम्स",
-        "cat_games_ex": "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps": "ऐप्स",
-        "cat_apps_ex": "Dashboard · Todo\nई-कॉमर्स\nPortfolio",
-        "cat_code": "कोड",
-        "cat_code_ex": "Python · JS · Java\nC++ · Go · Rust\nSQL और अधिक",
-        "cat_files": "फ़ाइलें",
-        "cat_files_ex": "CSV · JSON · कोड\nAI विश्लेषण करता है",
-        "cat_live": "लाइव डेटा",
-        "cat_live_ex": "क्रिकेट · स्टॉक्स\nमौसम · समाचार\nकोई भी URL",
-        "cat_memory": "मेमोरी",
-        "cat_memory_ex": "आपको याद रखता है\nसत्रों में\nडेटाबेस",
-        "img_btn": "🖼️ छवि",
-        "img_btn_done": "🖼️ ✓",
-        "file_btn": "📄 फ़ाइल",
-        "file_btn_done": "📄 ✓",
-        "help_btn": "❓ सहायता",
-        "settings": "⚙️ मॉडल सेटिंग",
-        "temperature": "तापमान",
-        "max_length": "अधिकतम लंबाई",
-        "ai_mode": "🎭 AI मोड",
-        "quick_tools": "🛠️ त्वरित टूल्स",
-        "currency": "💱 मुद्रा",
-        "units": "📐 इकाई",
-        "calculator": "🔢 कैलकुलेटर",
-        "qr_code": "📱 QR कोड",
-        "export": "💾 निर्यात",
+        "cat_vision": "विज़न AI", "cat_vision_ex": "कोई भी छवि अपलोड करें\nAI पढ़ता और विश्लेषण करता है",
+        "cat_games": "गेम्स", "cat_games_ex": "Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps": "ऐप्स", "cat_apps_ex": "Dashboard · Todo\nई-कॉमर्स\nPortfolio",
+        "cat_code": "कोड", "cat_code_ex": "Python · JS · Java\nC++ · Go · Rust\nSQL और अधिक",
+        "cat_files": "फ़ाइलें", "cat_files_ex": "CSV · JSON · कोड\nAI विश्लेषण करता है",
+        "cat_live": "लाइव डेटा", "cat_live_ex": "क्रिकेट · स्टॉक्स\nमौसम · समाचार\nकोई भी URL",
+        "cat_memory": "मेमोरी", "cat_memory_ex": "आपको याद रखता है\nसत्रों में\nडेटाबेस",
+        "img_btn": "🖼️ छवि", "img_btn_done": "🖼️ ✓",
+        "file_btn": "📄 फ़ाइल", "file_btn_done": "📄 ✓",
+        "help_btn": "❓ सहायता", "settings": "⚙️ मॉडल सेटिंग",
+        "temperature": "तापमान", "max_length": "अधिकतम लंबाई",
+        "ai_mode": "🎭 AI मोड", "quick_tools": "🛠️ त्वरित टूल्स",
+        "currency": "💱 मुद्रा", "units": "📐 इकाई",
+        "calculator": "🔢 कैलकुलेटर", "qr_code": "📱 QR कोड", "export": "💾 निर्यात",
         "no_msgs": "अभी कोई संदेश नहीं।",
-        "convert_btn": "कन्वर्ट करें 💱",
-        "calc_btn": "गणना करें 🔢",
-        "unit_btn": "कन्वर्ट करें 📐",
-        "qr_btn": "QR बनाएं",
-        "download_md": "📝 MD",
-        "download_json": "📊 JSON",
+        "convert_btn": "कन्वर्ट करें 💱", "calc_btn": "गणना करें 🔢", "unit_btn": "कन्वर्ट करें 📐",
+        "qr_btn": "QR बनाएं", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ विज़न AI के लिए छवि अपलोड करें",
         "img_upload_hint": "समर्थित: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 विश्लेषण के लिए फ़ाइल अपलोड करें",
         "file_upload_hint": "समर्थित: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
         "img_ready": "तैयार · नीचे अपना प्रश्न टाइप करें ↓",
         "file_ready": "इस फ़ाइल के बारे में कुछ भी पूछें",
-        "analyzing": "👁️ छवि का विश्लेषण हो रहा है…",
-        "searching": "🔍 खोज रहे हैं…",
-        "fetching_weather": "🌤️ मौसम जानकारी ला रहे हैं…",
-        "fetching_stock": "📈 डेटा ला रहे हैं",
+        "analyzing": "👁️ छवि का विश्लेषण हो रहा है…", "searching": "🔍 खोज रहे हैं…",
+        "fetching_weather": "🌤️ मौसम जानकारी ला रहे हैं…", "fetching_stock": "📈 डेटा ला रहे हैं",
         "fetching_sports": "🏏 लाइव स्पोर्ट्स डेटा ला रहे हैं…",
-        "fetching_news": "📰 समाचार ला रहे हैं…",
-        "fetching_rate": "💱 विनिमय दर ला रहे हैं…",
-        "reading_url": "🌐 पढ़ रहे हैं",
-        "running_code": "⚙️ चला रहे हैं",
-        "run_btn": "▶ चलाएं",
-        "live_preview": "🖥️ प्रीव्यू",
-        "live_game": "🎮 लाइव गेम!",
-        "live_app": "🚀 लाइव ऐप",
-        "live_software": "⚙️ लाइव सॉफ्टवेयर",
-        "live_design": "✨ लाइव डिज़ाइन",
-        "download": "⬇️ डाउनलोड",
-        "example_q": "💡 उदाहरण प्रश्न:",
-        "ex1": "इस छवि में क्या है?",
-        "ex2": "टेक्स्ट पढ़ें",
-        "ex3": "यह गणित हल करें",
-        "ex4": "यह कोड समझाएं",
-        "ex5": "यह चार्ट विश्लेषण करें",
-        "unit_placeholder": "जैसे: 100 किमी से मील",
-        "calc_placeholder": "जैसे: sqrt(144)",
-        "qr_placeholder": "टेक्स्ट या URL",
-        "amount": "राशि",
-        "from_curr": "से",
-        "to_curr": "में",
+        "fetching_news": "📰 समाचार ला रहे हैं…", "fetching_rate": "💱 विनिमय दर ला रहे हैं…",
+        "reading_url": "🌐 पढ़ रहे हैं", "running_code": "⚙️ चला रहे हैं", "run_btn": "▶ चलाएं",
+        "live_preview": "🖥️ प्रीव्यू", "live_game": "🎮 लाइव गेम!", "live_app": "🚀 लाइव ऐप",
+        "live_software": "⚙️ लाइव सॉफ्टवेयर", "live_design": "✨ लाइव डिज़ाइन", "download": "⬇️ डाउनलोड",
+        "example_q": "💡 उदाहरण प्रश्न:", "ex1": "इस छवि में क्या है?", "ex2": "टेक्स्ट पढ़ें",
+        "ex3": "यह गणित हल करें", "ex4": "यह कोड समझाएं", "ex5": "यह चार्ट विश्लेषण करें",
+        "unit_placeholder": "जैसे: 100 किमी से मील", "calc_placeholder": "जैसे: sqrt(144)",
+        "qr_placeholder": "टेक्स्ट या URL", "amount": "राशि", "from_curr": "से", "to_curr": "में",
         "no_results": "कोई परिणाम नहीं।",
-        "stat_memory": "💾 स्थायी मेमोरी",
-        "stat_vision": "👁️ विज़न AI",
-        "stat_sports": "🏏 लाइव स्पोर्ट्स",
-        "stat_games": "🎮 गेम्स और ऐप्स",
-        "stat_files": "📁 फ़ाइलें और URLs",
-        "stat_live": "💱 लाइव डेटा",
-        "language_label": "🌍 भाषा",
-        "sys_prompt_lang": "हिंदी में उत्तर दें।",
-    },
-    "bn": {
-        "title": "Soveren",
-        "subtitle": "বিশ্বের সবচেয়ে স্মার্ট AI — ছবি দেখে, অ্যাপ তৈরি করে, সব লাইভ জানে।",
-        "badge": "লাইভ · বিনামূল্যে · সীমাহীন · ভিশন AI",
-        "chat_placeholder": "যেকোনো কিছু জিজ্ঞাসা করুন — এখানে টাইপ করুন বা উপরে 🖼️ ছবি / 📄 ফাইল ক্লিক করুন…",
-        "clear": "🗑️ মুছুন",
-        "msgs": "বার্তা",
-        "msgp": "বার্তা",
-        "hero_q": "আজ আপনি কী করতে চান?",
-        "cat_vision": "ভিশন AI",
-        "cat_vision_ex": "যেকোনো ছবি আপলোড করুন\nAI পড়ে ও বিশ্লেষণ করে",
-        "cat_games": "গেমস",
-        "cat_games_ex": "Snake · Tetris\nChess · 2048\nPacman · RPG",
-        "cat_apps": "অ্যাপস",
-        "cat_apps_ex": "Dashboard · Todo\nই-কমার্স\nPortfolio",
-        "cat_code": "কোড",
-        "cat_code_ex": "Python · JS · Java\nC++ · Go · Rust\nSQL এবং আরও",
-        "cat_files": "ফাইলস",
-        "cat_files_ex": "CSV · JSON · কোড\nAI বিশ্লেষণ করে",
-        "cat_live": "লাইভ ডেটা",
-        "cat_live_ex": "ক্রিকেট · শেয়ার\nআবহাওয়া · সংবাদ\nযেকোনো URL",
-        "cat_memory": "মেমোরি",
-        "cat_memory_ex": "আপনাকে মনে রাখে\nসেশন জুড়ে\nডেটাবেস",
-        "img_btn": "🖼️ ছবি",
-        "img_btn_done": "🖼️ ✓",
-        "file_btn": "📄 ফাইল",
-        "file_btn_done": "📄 ✓",
-        "help_btn": "❓ সাহায্য",
-        "settings": "⚙️ মডেল সেটিংস",
-        "temperature": "তাপমাত্রা",
-        "max_length": "সর্বোচ্চ দৈর্ঘ্য",
-        "ai_mode": "🎭 AI মোড",
-        "quick_tools": "🛠️ দ্রুত সরঞ্জাম",
-        "currency": "💱 মুদ্রা",
-        "units": "📐 একক",
-        "calculator": "🔢 ক্যালকুলেটর",
-        "qr_code": "📱 QR কোড",
-        "export": "💾 রপ্তানি",
-        "no_msgs": "এখনো কোনো বার্তা নেই।",
-        "convert_btn": "রূপান্তর করুন 💱",
-        "calc_btn": "গণনা করুন 🔢",
-        "unit_btn": "রূপান্তর করুন 📐",
-        "qr_btn": "QR তৈরি করুন",
-        "download_md": "📝 MD",
-        "download_json": "📊 JSON",
-        "img_upload_title": "👁️ ভিশন AI-এর জন্য ছবি আপলোড করুন",
-        "img_upload_hint": "সমর্থিত: JPG, PNG, GIF, BMP, WebP, TIFF",
-        "file_upload_title": "📁 বিশ্লেষণের জন্য ফাইল আপলোড করুন",
-        "file_upload_hint": "সমর্থিত: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
-        "img_ready": "প্রস্তুত · নিচে আপনার প্রশ্ন টাইপ করুন ↓",
-        "file_ready": "এই ফাইল সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন",
-        "analyzing": "👁️ ছবি বিশ্লেষণ হচ্ছে…",
-        "searching": "🔍 অনুসন্ধান হচ্ছে…",
-        "fetching_weather": "🌤️ আবহাওয়া আনা হচ্ছে…",
-        "fetching_stock": "📈 ডেটা আনা হচ্ছে",
-        "fetching_sports": "🏏 লাইভ স্পোর্টস ডেটা আনা হচ্ছে…",
-        "fetching_news": "📰 সংবাদ আনা হচ্ছে…",
-        "fetching_rate": "💱 বিনিময় হার আনা হচ্ছে…",
-        "reading_url": "🌐 পড়া হচ্ছে",
-        "running_code": "⚙️ চালানো হচ্ছে",
-        "run_btn": "▶ চালান",
-        "live_preview": "🖥️ প্রিভিউ",
-        "live_game": "🎮 লাইভ গেম!",
-        "live_app": "🚀 লাইভ অ্যাপ",
-        "live_software": "⚙️ লাইভ সফটওয়্যার",
-        "live_design": "✨ লাইভ ডিজাইন",
-        "download": "⬇️ ডাউনলোড",
-        "example_q": "💡 উদাহরণ প্রশ্ন:",
-        "ex1": "এই ছবিতে কী আছে?",
-        "ex2": "টেক্সট পড়ুন",
-        "ex3": "এই গণিত সমাধান করুন",
-        "ex4": "এই কোড বুঝিয়ে দিন",
-        "ex5": "এই চার্ট বিশ্লেষণ করুন",
-        "unit_placeholder": "যেমন: ১০০ কিমি থেকে মাইল",
-        "calc_placeholder": "যেমন: sqrt(144)",
-        "qr_placeholder": "টেক্সট বা URL",
-        "amount": "পরিমাণ",
-        "from_curr": "থেকে",
-        "to_curr": "তে",
-        "no_results": "কোনো ফলাফল নেই।",
-        "stat_memory": "💾 স্থায়ী মেমোরি",
-        "stat_vision": "👁️ ভিশন AI",
-        "stat_sports": "🏏 লাইভ স্পোর্টস",
-        "stat_games": "🎮 গেমস ও অ্যাপস",
-        "stat_files": "📁 ফাইলস ও URLs",
-        "stat_live": "💱 লাইভ ডেটা",
-        "language_label": "🌍 ভাষা",
-        "sys_prompt_lang": "বাংলায় উত্তর দিন।",
+        "stat_memory": "💾 स्थायी मेमोरी", "stat_vision": "👁️ विज़न AI",
+        "stat_sports": "🏏 लाइव स्पोर्ट्स", "stat_games": "🎮 गेम्स और ऐप्स",
+        "stat_files": "📁 फ़ाइलें और URLs", "stat_live": "💱 लाइव डेटा",
+        "language_label": "🌍 भाषा", "sys_prompt_lang": "हिंदी में उत्तर दें।",
     },
     "es": {
         "title": "Soveren",
         "subtitle": "La IA más inteligente del mundo — ve imágenes, crea apps, sabe todo en vivo.",
         "badge": "EN VIVO · GRATIS · ILIMITADO · IA DE VISIÓN",
-        "chat_placeholder": "Pregunta lo que quieras — escribe aquí o haz clic en 🖼️ Imagen / 📄 Archivo…",
-        "clear": "🗑️ Borrar",
-        "msgs": "mensaje", "msgp": "mensajes",
+        "chat_placeholder": "Pregunta lo que quieras — escribe aquí o haz clic en Imagen / Archivo…",
+        "clear": "🗑️ Borrar", "msgs": "mensaje", "msgp": "mensajes",
         "hero_q": "¿Qué quieres hacer hoy?",
         "cat_vision": "IA de Visión", "cat_vision_ex": "Sube cualquier imagen\nIA lee y analiza",
         "cat_games": "Juegos", "cat_games_ex": "Snake · Tetris\nAjedrez · 2048\nPacman · RPG",
@@ -625,7 +494,7 @@ UI_TEXT = {
         "calculator": "🔢 Calculadora", "qr_code": "📱 Código QR", "export": "💾 Exportar",
         "no_msgs": "Aún no hay mensajes.",
         "convert_btn": "Convertir 💱", "calc_btn": "Calcular 🔢", "unit_btn": "Convertir 📐",
-        "qr_btn": "Generar QR", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "Generar QR", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Subir imagen para IA de Visión",
         "img_upload_hint": "Soporta: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Subir archivo para análisis",
@@ -640,10 +509,8 @@ UI_TEXT = {
         "live_preview": "🖥️ Vista previa", "live_game": "🎮 ¡Juego en Vivo!",
         "live_app": "🚀 App en Vivo", "live_software": "⚙️ Software en Vivo",
         "live_design": "✨ Diseño en Vivo", "download": "⬇️ Descargar",
-        "example_q": "💡 Ejemplos:",
-        "ex1": "¿Qué hay en esta imagen?", "ex2": "Lee el texto",
-        "ex3": "Resuelve esta matemática", "ex4": "Explica este código",
-        "ex5": "Analiza este gráfico",
+        "example_q": "💡 Ejemplos:", "ex1": "¿Qué hay en esta imagen?", "ex2": "Lee el texto",
+        "ex3": "Resuelve esta matemática", "ex4": "Explica este código", "ex5": "Analiza este gráfico",
         "unit_placeholder": "ej. 100 km a millas", "calc_placeholder": "ej. sqrt(144)",
         "qr_placeholder": "Texto o URL", "amount": "Cantidad", "from_curr": "De", "to_curr": "A",
         "no_results": "Sin resultados.",
@@ -656,7 +523,7 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "L'IA la plus intelligente au monde — voit des images, crée des apps, sait tout en direct.",
         "badge": "EN DIRECT · GRATUIT · ILLIMITÉ · IA VISION",
-        "chat_placeholder": "Demandez n'importe quoi — tapez ici ou cliquez sur 🖼️ Image / 📄 Fichier…",
+        "chat_placeholder": "Demandez n'importe quoi — tapez ici ou cliquez sur Image / Fichier…",
         "clear": "🗑️ Effacer", "msgs": "message", "msgp": "messages",
         "hero_q": "Que souhaitez-vous faire aujourd'hui ?",
         "cat_vision": "IA Vision", "cat_vision_ex": "Téléchargez une image\nL'IA lit et analyse",
@@ -675,7 +542,7 @@ UI_TEXT = {
         "calculator": "🔢 Calculatrice", "qr_code": "📱 Code QR", "export": "💾 Exporter",
         "no_msgs": "Pas encore de messages.",
         "convert_btn": "Convertir 💱", "calc_btn": "Calculer 🔢", "unit_btn": "Convertir 📐",
-        "qr_btn": "Générer QR", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "Générer QR", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Télécharger une image pour l'IA Vision",
         "img_upload_hint": "Supporté: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Télécharger un fichier pour analyse",
@@ -690,8 +557,7 @@ UI_TEXT = {
         "live_preview": "🖥️ Aperçu", "live_game": "🎮 Jeu en Direct!",
         "live_app": "🚀 App en Direct", "live_software": "⚙️ Logiciel en Direct",
         "live_design": "✨ Design en Direct", "download": "⬇️ Télécharger",
-        "example_q": "💡 Exemples de questions:",
-        "ex1": "Qu'y a-t-il dans cette image ?", "ex2": "Lire le texte",
+        "example_q": "💡 Exemples de questions:", "ex1": "Qu'y a-t-il dans cette image ?", "ex2": "Lire le texte",
         "ex3": "Résoudre ce problème", "ex4": "Expliquer ce code", "ex5": "Analyser ce graphique",
         "unit_placeholder": "ex. 100 km en miles", "calc_placeholder": "ex. sqrt(144)",
         "qr_placeholder": "Texte ou URL", "amount": "Montant", "from_curr": "De", "to_curr": "Vers",
@@ -705,7 +571,7 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "Die klügste KI der Welt — sieht Bilder, baut Apps, weiß alles live.",
         "badge": "LIVE · KOSTENLOS · UNBEGRENZT · VISION KI",
-        "chat_placeholder": "Frag alles — hier tippen oder oben auf 🖼️ Bild / 📄 Datei klicken…",
+        "chat_placeholder": "Frag alles — hier tippen oder oben auf Bild / Datei klicken…",
         "clear": "🗑️ Löschen", "msgs": "Nachricht", "msgp": "Nachrichten",
         "hero_q": "Was möchten Sie heute tun?",
         "cat_vision": "Vision KI", "cat_vision_ex": "Bild hochladen\nKI liest und analysiert",
@@ -724,7 +590,7 @@ UI_TEXT = {
         "calculator": "🔢 Rechner", "qr_code": "📱 QR-Code", "export": "💾 Exportieren",
         "no_msgs": "Noch keine Nachrichten.",
         "convert_btn": "Umrechnen 💱", "calc_btn": "Berechnen 🔢", "unit_btn": "Umrechnen 📐",
-        "qr_btn": "QR erstellen", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "QR erstellen", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Bild für Vision KI hochladen",
         "img_upload_hint": "Unterstützt: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Datei zur Analyse hochladen",
@@ -739,8 +605,7 @@ UI_TEXT = {
         "live_preview": "🖥️ Vorschau", "live_game": "🎮 Live-Spiel!",
         "live_app": "🚀 Live-App", "live_software": "⚙️ Live-Software",
         "live_design": "✨ Live-Design", "download": "⬇️ Herunterladen",
-        "example_q": "💡 Beispielfragen:",
-        "ex1": "Was ist auf diesem Bild?", "ex2": "Text lesen",
+        "example_q": "💡 Beispielfragen:", "ex1": "Was ist auf diesem Bild?", "ex2": "Text lesen",
         "ex3": "Diese Mathe lösen", "ex4": "Diesen Code erklären", "ex5": "Dieses Diagramm analysieren",
         "unit_placeholder": "z.B. 100 km in Meilen", "calc_placeholder": "z.B. sqrt(144)",
         "qr_placeholder": "Text oder URL", "amount": "Betrag", "from_curr": "Von", "to_curr": "Nach",
@@ -754,7 +619,7 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "世界最高の AI — 画像を見て、アプリを作り、すべてをリアルタイムで知っています。",
         "badge": "ライブ · 無料 · 無制限 · ビジョン AI",
-        "chat_placeholder": "何でも聞いてください — ここに入力するか 🖼️ 画像 / 📄 ファイルをクリック…",
+        "chat_placeholder": "何でも聞いてください — ここに入力するか 画像 🖼️ / 📄 ファイルをクリック…",
         "clear": "🗑️ クリア", "msgs": "メッセージ", "msgp": "メッセージ",
         "hero_q": "今日は何をしたいですか？",
         "cat_vision": "ビジョン AI", "cat_vision_ex": "画像をアップロード\nAI が読み取り分析",
@@ -773,7 +638,7 @@ UI_TEXT = {
         "calculator": "🔢 計算機", "qr_code": "📱 QR コード", "export": "💾 エクスポート",
         "no_msgs": "まだメッセージはありません。",
         "convert_btn": "変換 💱", "calc_btn": "計算 🔢", "unit_btn": "変換 📐",
-        "qr_btn": "QR 生成", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "QR 生成", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ ビジョン AI 用に画像をアップロード",
         "img_upload_hint": "対応: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 分析用ファイルをアップロード",
@@ -788,8 +653,7 @@ UI_TEXT = {
         "live_preview": "🖥️ プレビュー", "live_game": "🎮 ライブゲーム!",
         "live_app": "🚀 ライブアプリ", "live_software": "⚙️ ライブソフトウェア",
         "live_design": "✨ ライブデザイン", "download": "⬇️ ダウンロード",
-        "example_q": "💡 例の質問:",
-        "ex1": "この画像には何がありますか？", "ex2": "テキストを読む",
+        "example_q": "💡 例の質問:", "ex1": "この画像には何がありますか？", "ex2": "テキストを読む",
         "ex3": "この数学を解く", "ex4": "このコードを説明する", "ex5": "このグラフを分析する",
         "unit_placeholder": "例: 100 km to miles", "calc_placeholder": "例: sqrt(144)",
         "qr_placeholder": "テキストまたは URL", "amount": "金額", "from_curr": "から", "to_curr": "へ",
@@ -803,7 +667,7 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "世界上最聪明的 AI — 看图像、构建应用、实时了解一切。",
         "badge": "实时 · 免费 · 无限 · 视觉 AI",
-        "chat_placeholder": "问任何问题 — 在此输入或点击上方 🖼️ 图像 / 📄 文件…",
+        "chat_placeholder": "问任何问题 — 在此输入或点击上方 图像 🖼️ / 📄 文件…",
         "clear": "🗑️ 清除", "msgs": "条消息", "msgp": "条消息",
         "hero_q": "您今天想做什么？",
         "cat_vision": "视觉 AI", "cat_vision_ex": "上传任何图像\nAI 读取并分析",
@@ -822,7 +686,7 @@ UI_TEXT = {
         "calculator": "🔢 计算器", "qr_code": "📱 二维码", "export": "💾 导出",
         "no_msgs": "暂无消息。",
         "convert_btn": "转换 💱", "calc_btn": "计算 🔢", "unit_btn": "转换 📐",
-        "qr_btn": "生成二维码", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "生成二维码", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ 上传图像以供视觉 AI 分析",
         "img_upload_hint": "支持: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 上传文件进行分析",
@@ -837,8 +701,7 @@ UI_TEXT = {
         "live_preview": "🖥️ 预览", "live_game": "🎮 实时游戏!",
         "live_app": "🚀 实时应用", "live_software": "⚙️ 实时软件",
         "live_design": "✨ 实时设计", "download": "⬇️ 下载",
-        "example_q": "💡 示例问题：",
-        "ex1": "这张图片里有什么？", "ex2": "读取文字",
+        "example_q": "💡 示例问题：", "ex1": "这张图片里有什么？", "ex2": "读取文字",
         "ex3": "解这道数学题", "ex4": "解释这段代码", "ex5": "分析这个图表",
         "unit_placeholder": "例：100 公里转英里", "calc_placeholder": "例：sqrt(144)",
         "qr_placeholder": "文本或 URL", "amount": "金额", "from_curr": "从", "to_curr": "到",
@@ -852,14 +715,14 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "أذكى ذكاء اصطناعي في العالم — يرى الصور، يبني التطبيقات، يعرف كل شيء مباشرة.",
         "badge": "مباشر · مجاني · غير محدود · رؤية AI",
-        "chat_placeholder": "اسأل أي شيء — اكتب هنا أو انقر على 🖼️ صورة / 📄 ملف…",
+        "chat_placeholder": "اسأل أي شيء — اكتب هنا أو انقر على صورة 🖼️ / 📄 ملف...",
         "clear": "🗑️ مسح", "msgs": "رسالة", "msgp": "رسائل",
         "hero_q": "ماذا تريد أن تفعل اليوم؟",
         "cat_vision": "رؤية AI", "cat_vision_ex": "ارفع أي صورة\nالذكاء الاصطناعي يقرأ ويحلل",
         "cat_games": "ألعاب", "cat_games_ex": "Snake · Tetris\n2048 · شطرنج\nPacman · RPG",
         "cat_apps": "تطبيقات", "cat_apps_ex": "لوحة تحكم · مهام\nتجارة إلكترونية\nمحفظة",
         "cat_code": "كود", "cat_code_ex": "Python · JS · Java\nC++ · Go · Rust\nSQL وأكثر",
-        "cat_files": "ملفات", "cat_files_ex": "CSV · JSON · كود\nيحللها الذكاء الاصطناعي",
+        "cat_files": "ملفات", "cat_files_ex": "CSV · JSON · كود\nالذكاء الاصطناعي يحللها",
         "cat_live": "بيانات مباشرة", "cat_live_ex": "كريكيت · أسهم\nطقس · أخبار\nأي URL",
         "cat_memory": "ذاكرة", "cat_memory_ex": "يتذكرك\nعبر الجلسات\nقاعدة بيانات",
         "img_btn": "🖼️ صورة", "img_btn_done": "🖼️ ✓",
@@ -871,7 +734,7 @@ UI_TEXT = {
         "calculator": "🔢 حاسبة", "qr_code": "📱 رمز QR", "export": "💾 تصدير",
         "no_msgs": "لا توجد رسائل بعد.",
         "convert_btn": "تحويل 💱", "calc_btn": "احسب 🔢", "unit_btn": "تحويل 📐",
-        "qr_btn": "إنشاء QR", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "إنشاء QR", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ ارفع صورة لرؤية AI",
         "img_upload_hint": "مدعوم: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 ارفع ملف للتحليل",
@@ -886,8 +749,7 @@ UI_TEXT = {
         "live_preview": "🖥️ معاينة", "live_game": "🎮 لعبة مباشرة!",
         "live_app": "🚀 تطبيق مباشر", "live_software": "⚙️ برنامج مباشر",
         "live_design": "✨ تصميم مباشر", "download": "⬇️ تحميل",
-        "example_q": "💡 أسئلة مثالية:",
-        "ex1": "ماذا يوجد في هذه الصورة؟", "ex2": "اقرأ النص",
+        "example_q": "💡 أسئلة مثالية:", "ex1": "ماذا يوجد في هذه الصورة؟", "ex2": "اقرأ النص",
         "ex3": "حل هذه الرياضيات", "ex4": "اشرح هذا الكود", "ex5": "حلل هذا الرسم البياني",
         "unit_placeholder": "مثال: 100 كم إلى ميل", "calc_placeholder": "مثال: sqrt(144)",
         "qr_placeholder": "نص أو URL", "amount": "المبلغ", "from_curr": "من", "to_curr": "إلى",
@@ -920,7 +782,7 @@ UI_TEXT = {
         "calculator": "🔢 Калькулятор", "qr_code": "📱 QR-код", "export": "💾 Экспорт",
         "no_msgs": "Сообщений пока нет.",
         "convert_btn": "Конвертировать 💱", "calc_btn": "Вычислить 🔢", "unit_btn": "Конвертировать 📐",
-        "qr_btn": "Создать QR", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "Создать QR", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Загрузить изображение для Vision ИИ",
         "img_upload_hint": "Поддерживается: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Загрузить файл для анализа",
@@ -935,8 +797,7 @@ UI_TEXT = {
         "live_preview": "🖥️ Предпросмотр", "live_game": "🎮 Живая игра!",
         "live_app": "🚀 Живое приложение", "live_software": "⚙️ Живой софт",
         "live_design": "✨ Живой дизайн", "download": "⬇️ Скачать",
-        "example_q": "💡 Примеры вопросов:",
-        "ex1": "Что на этом изображении?", "ex2": "Прочитать текст",
+        "example_q": "💡 Примеры вопросов:", "ex1": "Что на этом изображении?", "ex2": "Прочитать текст",
         "ex3": "Решить эту математику", "ex4": "Объяснить этот код", "ex5": "Проанализировать график",
         "unit_placeholder": "напр. 100 км в мили", "calc_placeholder": "напр. sqrt(144)",
         "qr_placeholder": "Текст или URL", "amount": "Сумма", "from_curr": "Из", "to_curr": "В",
@@ -950,7 +811,7 @@ UI_TEXT = {
         "title": "Soveren",
         "subtitle": "A IA mais inteligente do mundo — vê imagens, cria apps, sabe tudo ao vivo.",
         "badge": "AO VIVO · GRÁTIS · ILIMITADO · IA DE VISÃO",
-        "chat_placeholder": "Pergunte qualquer coisa — digite aqui ou clique em 🖼️ Imagem / 📄 Arquivo…",
+        "chat_placeholder": "Pergunte qualquer coisa — digite aqui ou clique em Imagem / Arquivo…",
         "clear": "🗑️ Limpar", "msgs": "mensagem", "msgp": "mensagens",
         "hero_q": "O que você quer fazer hoje?",
         "cat_vision": "IA de Visão", "cat_vision_ex": "Envie qualquer imagem\nIA lê e analisa",
@@ -969,7 +830,7 @@ UI_TEXT = {
         "calculator": "🔢 Calculadora", "qr_code": "📱 Código QR", "export": "💾 Exportar",
         "no_msgs": "Ainda não há mensagens.",
         "convert_btn": "Converter 💱", "calc_btn": "Calcular 🔢", "unit_btn": "Converter 📐",
-        "qr_btn": "Gerar QR", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "Gerar QR", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ Enviar imagem para IA de Visão",
         "img_upload_hint": "Suporta: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 Enviar arquivo para análise",
@@ -984,8 +845,7 @@ UI_TEXT = {
         "live_preview": "🖥️ Visualização", "live_game": "🎮 Jogo ao Vivo!",
         "live_app": "🚀 App ao Vivo", "live_software": "⚙️ Software ao Vivo",
         "live_design": "✨ Design ao Vivo", "download": "⬇️ Baixar",
-        "example_q": "💡 Exemplos de perguntas:",
-        "ex1": "O que há nesta imagem?", "ex2": "Ler o texto",
+        "example_q": "💡 Exemplos de perguntas:", "ex1": "O que há nesta imagem?", "ex2": "Ler o texto",
         "ex3": "Resolver esta matemática", "ex4": "Explicar este código", "ex5": "Analisar este gráfico",
         "unit_placeholder": "ex. 100 km para milhas", "calc_placeholder": "ex. sqrt(144)",
         "qr_placeholder": "Texto ou URL", "amount": "Valor", "from_curr": "De", "to_curr": "Para",
@@ -1018,7 +878,7 @@ UI_TEXT = {
         "calculator": "🔢 계산기", "qr_code": "📱 QR 코드", "export": "💾 내보내기",
         "no_msgs": "아직 메시지가 없습니다.",
         "convert_btn": "변환 💱", "calc_btn": "계산 🔢", "unit_btn": "변환 📐",
-        "qr_btn": "QR 생성", "download_md": "📝 MD", "download_json": "📊 JSON",
+        "qr_btn": "QR 생성", "download_md": "📝 MD", "download_json": "📊 JSON", "download_pdf": "📄 PDF",
         "img_upload_title": "👁️ 비전 AI 용 이미지 업로드",
         "img_upload_hint": "지원: JPG, PNG, GIF, BMP, WebP, TIFF",
         "file_upload_title": "📁 분석용 파일 업로드",
@@ -1033,8 +893,7 @@ UI_TEXT = {
         "live_preview": "🖥️ 미리보기", "live_game": "🎮 라이브 게임!",
         "live_app": "🚀 라이브 앱", "live_software": "⚙️ 라이브 소프트웨어",
         "live_design": "✨ 라이브 디자인", "download": "⬇️ 다운로드",
-        "example_q": "💡 예시 질문:",
-        "ex1": "이 이미지에 무엇이 있나요?", "ex2": "텍스트 읽기",
+        "example_q": "💡 예시 질문:", "ex1": "이 이미지에 무엇이 있나요?", "ex2": "텍스트 읽기",
         "ex3": "이 수학 풀기", "ex4": "이 코드 설명하기", "ex5": "이 차트 분석하기",
         "unit_placeholder": "예: 100 km 를 miles 로", "calc_placeholder": "예: sqrt(144)",
         "qr_placeholder": "텍스트 또는 URL", "amount": "금액", "from_curr": "에서", "to_curr": "로",
@@ -1297,14 +1156,17 @@ GAME_KEYWORDS = ["game","snake game","tetris","pacman","flappy bird","2048",
                  "shooter","puzzle game","card game","memory game","quiz game","breakout",
                  "pong","asteroids","space invaders","racing game","rpg","tower defense",
                  "clicker game","battle","dungeon","maze","arcade"]
+
 APP_KEYWORDS = ["app","application","dashboard","admin panel","landing page",
-                "portfolio","website","web app","e-commerce","shop","store","blog",
+                "portfolio","website","web app","ecommerce","shop","store","blog",
                 "chat app","todo app","calculator app","login page","signup","form",
                 "expense tracker","budget","note app","kanban","timer","stopwatch",
                 "music player","image gallery","calendar","analytics","chart","crm",
                 "netflix clone","youtube clone","twitter clone","whatsapp ui"]
+
 SOFTWARE_KEYWORDS = ["software","tool","utility","desktop app","file manager",
                      "text editor","password manager","api tester","converter","automation","cli tool"]
+
 DESIGN_KEYWORDS = ["design","ui","ux","mockup","prototype","wireframe",
                    "beautiful","modern","stunning","animated","glassmorphism","neumorphism",
                    "gradient","dark theme","light theme","component","ui kit","hero section",
@@ -1321,6 +1183,7 @@ STOCK_ALIASES = {
     "dogecoin":"DOGE-USD","doge":"DOGE-USD","solana":"SOL-USD",
     "dow jones":"^DJI","nasdaq":"^IXIC","s&p 500":"^GSPC",
 }
+
 SPORTS_MAP = {
     "cricket":"cricket","ipl":"IPL cricket","t20":"T20 cricket",
     "football":"football","soccer":"soccer","premier league":"Premier League",
@@ -1330,9 +1193,11 @@ SPORTS_MAP = {
     "f1":"F1 race","boxing":"boxing","mma":"MMA UFC","ufc":"UFC",
     "olympics":"Olympics","kabaddi":"kabaddi",
 }
+
 IPL_TEAMS = ["csk","mi","rcb","kkr","srh","pbks","dc","gt","lsg","rr",
              "chennai","mumbai","bangalore","kolkata","hyderabad",
              "punjab","delhi","gujarat","lucknow","rajasthan"]
+
 LANGUAGE_MAP = {
     "python":("python","3.10.0"),"javascript":("javascript","18.15.0"),
     "js":("javascript","18.15.0"),"typescript":("typescript","5.0.3"),
@@ -1343,6 +1208,7 @@ LANGUAGE_MAP = {
     "shell":("bash","5.2.0"),"sql":("sqlite3","3.36.0"),"lua":("lua","5.4.4"),
     "scala":("scala","3.2.2"),
 }
+
 SEARCH_TRIGGERS = [
     "who is","who was","who won","who are","what is","what was","what happened",
     "when is","when was","where is","current","latest","recent","today",
@@ -1597,6 +1463,7 @@ def is_unit_query(q):
 
 def qr_url(text): return f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(text)}"
 def is_qr_query(q): return any(k in q.lower() for k in ["qr code","qr for","generate qr","make qr","create qr"])
+
 def extract_qr_content(q):
     m=re.search(r"https?://\S+",q)
     if m: return m.group(0)
@@ -1624,7 +1491,7 @@ def fetch_url_content(url):
         text=r.text
         for tag in ["script","style","nav","footer","header","aside"]:
             text=re.sub(f"<{tag}[^>]*>[\\s\\S]*?</{tag}>","",text,flags=re.IGNORECASE)
-        text=re.sub(r"<[^>]+>"," ",text); text=re.sub(r"\s+"," ",text).strip()
+        text=re.sub(r"<[^>]+"," ",text); text=re.sub(r"\s+"," ",text).strip()
         return text[:4000] if len(text)>100 else "Could not extract content."
     except Exception as e: return f"URL fetch failed: {e}"
 
@@ -1633,6 +1500,9 @@ def extract_url(q):
     m=re.search(r"https?://\S+",q)
     return m.group(0).rstrip(".,)>") if m else ""
 
+# ══════════════════════════════════════════════════════════════════════════════
+# EXPORT FUNCTIONS (MD + JSON + PDF)
+# ══════════════════════════════════════════════════════════════════════════════
 def export_md():
     lines=["# Soveren — Chat Export",f"_Exported: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_\n---\n"]
     for m in st.session_state.messages:
@@ -1644,6 +1514,76 @@ def export_md():
 def export_json_chat():
     return json.dumps([{"role":m["role"],"content":re.sub(r"<[^>]+>","",m["content"]).strip()}
                        for m in st.session_state.messages],indent=2,ensure_ascii=False)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PDF EXPORT FUNCTION 📄 NEW
+# ══════════════════════════════════════════════════════════════════════════════
+def export_pdf():
+    try:
+        from fpdf import FPDF
+
+        class ChatPDF(FPDF):
+            def header(self):
+                self.set_font("Helvetica", "B", 16)
+                self.set_text_color(0, 180, 220)
+                self.cell(0, 12, "Soveren - Chat Export", align="C", new_x="LMARGIN", new_y="NEXT")
+                self.set_font("Helvetica", "", 9)
+                self.set_text_color(100, 116, 139)
+                self.cell(0, 6,
+                          f"Exported: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  |  Session: {SESSION_ID[:8]}...",
+                          align="C", new_x="LMARGIN", new_y="NEXT")
+                self.set_draw_color(35, 39, 48)
+                self.set_line_width(0.5)
+                self.line(10, self.get_y(), 200, self.get_y())
+                self.ln(4)
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font("Helvetica", "I", 8)
+                self.set_text_color(100, 116, 139)
+                self.cell(0, 10, f"Soveren · Created by Samiran · Page {self.page_no()}", align="C")
+
+        pdf = ChatPDF()
+        pdf.set_auto_page_break(auto=True, margin=18)
+        pdf.add_page()
+
+        for msg in st.session_state.messages:
+            role = msg["role"]
+            content = re.sub(r"<[^>]+>", "", msg.get("content", "")).strip()
+            if not content:
+                continue
+
+            if role == "user":
+                pdf.set_text_color(0, 180, 220)
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.cell(0, 6, "You", new_x="LMARGIN", new_y="NEXT")
+                pdf.set_text_color(226, 232, 240)
+                pdf.set_font("Helvetica", "", 10)
+            else:
+                pdf.set_text_color(16, 185, 129)
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.cell(0, 6, "Soveren", new_x="LMARGIN", new_y="NEXT")
+                pdf.set_text_color(226, 232, 240)
+                pdf.set_font("Helvetica", "", 10)
+
+            try:
+                pdf.multi_cell(0, 6, content, new_x="LMARGIN", new_y="NEXT")
+            except Exception:
+                safe_content = content.encode("latin-1", errors="replace").decode("latin-1")
+                pdf.multi_cell(0, 6, safe_content, new_x="LMARGIN", new_y="NEXT")
+
+            pdf.set_draw_color(35, 39, 48)
+            pdf.set_line_width(0.2)
+            pdf.line(10, pdf.get_y() + 1, 200, pdf.get_y() + 1)
+            pdf.ln(4)
+
+        return bytes(pdf.output())
+
+    except ImportError:
+        return None
+    except Exception as e:
+        st.error(f"PDF export error: {e}")
+        return None
 
 def classify_creation(q):
     ql=q.lower()
@@ -1822,8 +1762,8 @@ with st.sidebar:
     st.markdown(f"### {T('ai_mode')}")
     st.session_state["ai_mode"]=st.selectbox("Mode",list(MODE_PROMPTS.keys()),index=0,label_visibility="collapsed")
     st.divider()
-    st.markdown(f"### {T('quick_tools')}")
 
+    st.markdown(f"### {T('quick_tools')}")
     with st.expander(T("currency")):
         amt=st.number_input(T("amount"),value=1.0,min_value=0.0,key="sb_amt")
         c1,c2=st.columns(2)
@@ -1852,18 +1792,53 @@ with st.sidebar:
             st.markdown(f"[⬇️ Download]({url})")
 
     st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # EXPORT SECTION — MD + JSON + PDF 📄
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown(f"### {T('export')}")
     if st.session_state["messages"]:
-        ca,cb=st.columns(2)
-        ts=datetime.now().strftime("%Y%m%d_%H%M")
-        with ca: st.download_button(T("download_md"),data=export_md(),file_name=f"soveren_{ts}.md",mime="text/markdown",use_container_width=True)
-        with cb: st.download_button(T("download_json"),data=export_json_chat(),file_name=f"soveren_{ts}.json",mime="application/json",use_container_width=True)
-    else: st.caption(T("no_msgs"))
+        ts = datetime.now().strftime("%Y%m%d_%H%M")
+
+        # Row 1: Markdown + JSON
+        ca, cb = st.columns(2)
+        with ca:
+            st.download_button(
+                T("download_md"),
+                data=export_md(),
+                file_name=f"soveren_{ts}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+        with cb:
+            st.download_button(
+                T("download_json"),
+                data=export_json_chat(),
+                file_name=f"soveren_{ts}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+
+        # Row 2: PDF Export (NEW)
+        pdf_bytes = export_pdf()
+        if pdf_bytes:
+            st.download_button(
+                label=T("download_pdf"),
+                data=pdf_bytes,
+                file_name=f"soveren_{ts}.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+                help="Download full chat as a formatted PDF file"
+            )
+        else:
+            st.caption("⚠️ Install `fpdf2` for PDF export: `pip install fpdf2`")
+    else:
+        st.caption(T("no_msgs"))
 
     st.divider()
 
     # ══════════════════════════════════════════════════════════════════════════
-    # 💾 PERSISTENT MEMORY PANEL
+    # PERSISTENT MEMORY PANEL 💾
     # ══════════════════════════════════════════════════════════════════════════
     st.markdown("### 💾 Memory")
     stats=get_session_stats(SESSION_ID)
@@ -2117,7 +2092,6 @@ if prompt := st.chat_input(T("chat_placeholder")):
         user_msg["image_mime"]=st.session_state["pending_image_mime"]
         user_msg["image_name"]=st.session_state["pending_image_name"]
     st.session_state.messages.append(user_msg)
-    # 💾 Save to DB
     save_message_db(SESSION_ID,"user",prompt)
     save_preferences_db(SESSION_ID)
 
@@ -2297,7 +2271,8 @@ if prompt := st.chat_input(T("chat_placeholder")):
                         elif code and lang and lang not in ("html","css"):
                             rk=f"run_{len(st.session_state.messages)}"
                             if st.button(f"{T('run_btn')} {lang.title()}",key=rk):
-                                with st.spinner(f"{T('running_code')} {lang}…"): out=run_code(code,lang)
+                                with st.spinner(f"{T('running_code')} {lang}…"):
+                                    out=run_code(code,lang)
                                 cls="error-box" if "❌" in out else "output-box"
                                 st.markdown(f'<div class="{cls}">{out}</div>',unsafe_allow_html=True)
                         break
@@ -2307,7 +2282,5 @@ if prompt := st.chat_input(T("chat_placeholder")):
 
         if response:
             st.session_state.messages.append({"role":"assistant","content":response,"meta":meta})
-            # 💾 Save AI response to DB
             save_message_db(SESSION_ID,"assistant",response)
-            # 🧠 Auto-extract memories
             extract_and_save_memories(SESSION_ID,prompt,response)
