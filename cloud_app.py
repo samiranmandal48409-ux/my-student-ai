@@ -7,6 +7,1079 @@ import xml.etree.ElementTree as ET
 from PIL import Image
 import io
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  LANGUAGE SYSTEM — Full translations
+# ══════════════════════════════════════════════════════════════════════════════
+LANGUAGES = {
+    "🌐 English": "en",
+    "🇮🇳 हिंदी":   "hi",
+    "🇧🇩 বাংলা":  "bn",
+    "🇪🇸 Español": "es",
+    "🇫🇷 Français":"fr",
+    "🇩🇪 Deutsch": "de",
+    "🇯🇵 日本語":   "ja",
+    "🇨🇳 中文":    "zh",
+    "🇦🇪 العربية": "ar",
+    "🇷🇺 Русский": "ru",
+    "🇵🇹 Português":"pt",
+    "🇰🇷 한국어":   "ko",
+}
+
+UI_TEXT = {
+    "en": {
+        "title":           "Nova AI",
+        "subtitle":        "The world's smartest AI — sees images, builds apps, knows everything live.",
+        "badge":           "LIVE · FREE · UNLIMITED · VISION AI",
+        "chat_placeholder":"Ask anything — type here or click 🖼️ Image / 📄 File above…",
+        "clear":           "🗑️ Clear",
+        "msgs":            "msg",
+        "msgp":            "msgs",
+        "hero_q":          "What would you like to do today?",
+        "cat_vision":      "Vision AI",
+        "cat_vision_ex":   "Upload any image\nAI reads & analyzes",
+        "cat_games":       "Games",
+        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps":        "Apps",
+        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
+        "cat_code":        "Code",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL & more",
+        "cat_files":       "Files",
+        "cat_files_ex":    "CSV · JSON · Code\nAI analyzes it",
+        "cat_live":        "Live Data",
+        "cat_live_ex":     "Cricket · Stocks\nWeather · News\nAny URL",
+        "img_btn":         "🖼️ Image",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 File",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Help",
+        "settings":        "⚙️ Model Settings",
+        "temperature":     "Temperature",
+        "max_length":      "Max Length",
+        "ai_mode":         "🎭 AI Mode",
+        "quick_tools":     "🛠️ Quick Tools",
+        "currency":        "💱 Currency",
+        "units":           "📐 Units",
+        "calculator":      "🔢 Calculator",
+        "qr_code":         "📱 QR Code",
+        "export":          "💾 Export",
+        "no_msgs":         "No messages yet.",
+        "convert_btn":     "Convert 💱",
+        "calc_btn":        "Calculate 🔢",
+        "unit_btn":        "Convert 📐",
+        "qr_btn":          "Generate QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Upload Image for Vision AI",
+        "img_upload_hint": "Supports: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Upload File for Analysis",
+        "file_upload_hint": "Supports: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Ready · Type your question below ↓",
+        "file_ready":      "Ask me anything about this file",
+        "analyzing":       "👁️ Analyzing image…",
+        "searching":       "🔍 Searching…",
+        "fetching_weather":"🌤️ Fetching weather…",
+        "fetching_stock":  "📈 Fetching",
+        "fetching_sports": "🏏 Fetching live sports data…",
+        "fetching_news":   "📰 Fetching news…",
+        "fetching_rate":   "💱 Fetching rates…",
+        "reading_url":     "🌐 Reading",
+        "running_code":    "⚙️ Running",
+        "run_btn":         "▶ Run",
+        "live_preview":    "🖥️ Preview",
+        "live_game":       "🎮 Live Game!",
+        "live_app":        "🚀 Live App",
+        "live_software":   "⚙️ Live Software",
+        "live_design":     "✨ Live Design",
+        "download":        "⬇️ Download",
+        "example_q":       "💡 Example questions:",
+        "ex1": "What is in this image?",
+        "ex2": "Read the text",
+        "ex3": "Solve this math",
+        "ex4": "Explain this code",
+        "ex5": "Analyze this chart",
+        "unit_placeholder":"e.g. 100 km to miles",
+        "calc_placeholder":"e.g. sqrt(144)",
+        "qr_placeholder":  "Text or URL",
+        "amount":          "Amount",
+        "from_curr":       "From",
+        "to_curr":         "To",
+        "no_results":      "No results.",
+        "stat_memory":     "🧠 Memory",
+        "stat_vision":     "👁️ Vision AI",
+        "stat_sports":     "🏏 Live Sports",
+        "stat_games":      "🎮 Games & Apps",
+        "stat_files":      "📁 Files & URLs",
+        "stat_live":       "💱 Live Data",
+        "language_label":  "🌍 Language",
+        "sys_prompt_lang": "Respond in English.",
+    },
+    "hi": {
+        "title":           "Nova AI",
+        "subtitle":        "दुनिया का सबसे स्मार्ट AI — छवियां देखता है, ऐप्स बनाता है, सब कुछ लाइव जानता है।",
+        "badge":           "लाइव · मुफ़्त · असीमित · विज़न AI",
+        "chat_placeholder":"कुछ भी पूछें — यहाँ टाइप करें या ऊपर 🖼️ Image / 📄 File क्लिक करें…",
+        "clear":           "🗑️ साफ़ करें",
+        "msgs":            "संदेश",
+        "msgp":            "संदेश",
+        "hero_q":          "आज आप क्या करना चाहेंगे?",
+        "cat_vision":      "विज़न AI",
+        "cat_vision_ex":   "कोई भी छवि अपलोड करें\nAI पढ़ता और विश्लेषण करता है",
+        "cat_games":       "गेम्स",
+        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps":        "ऐप्स",
+        "cat_apps_ex":     "Dashboard · Todo\nई-कॉमर्स\nPortfolio",
+        "cat_code":        "कोड",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL और अधिक",
+        "cat_files":       "फ़ाइलें",
+        "cat_files_ex":    "CSV · JSON · कोड\nAI विश्लेषण करता है",
+        "cat_live":        "लाइव डेटा",
+        "cat_live_ex":     "क्रिकेट · शेयर\nमौसम · समाचार\nकोई भी URL",
+        "img_btn":         "🖼️ छवि",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 फ़ाइल",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ सहायता",
+        "settings":        "⚙️ मॉडल सेटिंग",
+        "temperature":     "तापमान",
+        "max_length":      "अधिकतम लंबाई",
+        "ai_mode":         "🎭 AI मोड",
+        "quick_tools":     "🛠️ त्वरित टूल्स",
+        "currency":        "💱 मुद्रा",
+        "units":           "📐 इकाई",
+        "calculator":      "🔢 कैलकुलेटर",
+        "qr_code":         "📱 QR कोड",
+        "export":          "💾 निर्यात",
+        "no_msgs":         "अभी कोई संदेश नहीं।",
+        "convert_btn":     "कन्वर्ट करें 💱",
+        "calc_btn":        "गणना करें 🔢",
+        "unit_btn":        "कन्वर्ट करें 📐",
+        "qr_btn":          "QR बनाएं",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ विज़न AI के लिए छवि अपलोड करें",
+        "img_upload_hint": "समर्थित: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 विश्लेषण के लिए फ़ाइल अपलोड करें",
+        "file_upload_hint": "समर्थित: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "तैयार · नीचे अपना प्रश्न टाइप करें ↓",
+        "file_ready":      "इस फ़ाइल के बारे में कुछ भी पूछें",
+        "analyzing":       "👁️ छवि का विश्लेषण हो रहा है…",
+        "searching":       "🔍 खोज रहे हैं…",
+        "fetching_weather":"🌤️ मौसम जानकारी ला रहे हैं…",
+        "fetching_stock":  "📈 डेटा ला रहे हैं",
+        "fetching_sports": "🏏 लाइव स्पोर्ट्स डेटा ला रहे हैं…",
+        "fetching_news":   "📰 समाचार ला रहे हैं…",
+        "fetching_rate":   "💱 विनिमय दर ला रहे हैं…",
+        "reading_url":     "🌐 पढ़ रहे हैं",
+        "running_code":    "⚙️ चला रहे हैं",
+        "run_btn":         "▶ चलाएं",
+        "live_preview":    "🖥️ प्रीव्यू",
+        "live_game":       "🎮 लाइव गेम!",
+        "live_app":        "🚀 लाइव ऐप",
+        "live_software":   "⚙️ लाइव सॉफ़्टवेयर",
+        "live_design":     "✨ लाइव डिज़ाइन",
+        "download":        "⬇️ डाउनलोड",
+        "example_q":       "💡 उदाहरण प्रश्न:",
+        "ex1": "इस छवि में क्या है?",
+        "ex2": "टेक्स्ट पढ़ें",
+        "ex3": "यह गणित हल करें",
+        "ex4": "यह कोड समझाएं",
+        "ex5": "यह चार्ट विश्लेषण करें",
+        "unit_placeholder":"जैसे: 100 किमी से मील",
+        "calc_placeholder":"जैसे: sqrt(144)",
+        "qr_placeholder":  "टेक्स्ट या URL",
+        "amount":          "राशि",
+        "from_curr":       "से",
+        "to_curr":         "में",
+        "no_results":      "कोई परिणाम नहीं।",
+        "stat_memory":     "🧠 मेमोरी",
+        "stat_vision":     "👁️ विज़न AI",
+        "stat_sports":     "🏏 लाइव स्पोर्ट्स",
+        "stat_games":      "🎮 गेम्स और ऐप्स",
+        "stat_files":      "📁 फ़ाइलें और URLs",
+        "stat_live":       "💱 लाइव डेटा",
+        "language_label":  "🌍 भाषा",
+        "sys_prompt_lang": "हिंदी में उत्तर दें। उपयोगकर्ता हिंदी में बात कर रहा है।",
+    },
+    "bn": {
+        "title":           "Nova AI",
+        "subtitle":        "বিশ্বের সবচেয়ে স্মার্ট AI — ছবি দেখে, অ্যাপ তৈরি করে, সব লাইভ জানে।",
+        "badge":           "লাইভ · বিনামূল্যে · সীমাহীন · ভিশন AI",
+        "chat_placeholder":"যেকোনো কিছু জিজ্ঞাসা করুন — এখানে টাইপ করুন বা উপরে 🖼️ ছবি / 📄 ফাইল ক্লিক করুন…",
+        "clear":           "🗑️ মুছুন",
+        "msgs":            "বার্তা",
+        "msgp":            "বার্তা",
+        "hero_q":          "আজ আপনি কী করতে চান?",
+        "cat_vision":      "ভিশন AI",
+        "cat_vision_ex":   "যেকোনো ছবি আপলোড করুন\nAI পড়ে ও বিশ্লেষণ করে",
+        "cat_games":       "গেমস",
+        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps":        "অ্যাপস",
+        "cat_apps_ex":     "Dashboard · Todo\nই-কমার্স\nPortfolio",
+        "cat_code":        "কোড",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL এবং আরও",
+        "cat_files":       "ফাইলস",
+        "cat_files_ex":    "CSV · JSON · কোড\nAI বিশ্লেষণ করে",
+        "cat_live":        "লাইভ ডেটা",
+        "cat_live_ex":     "ক্রিকেট · শেয়ার\nআবহাওয়া · সংবাদ\nযেকোনো URL",
+        "img_btn":         "🖼️ ছবি",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 ফাইল",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ সাহায্য",
+        "settings":        "⚙️ মডেল সেটিংস",
+        "temperature":     "তাপমাত্রা",
+        "max_length":      "সর্বোচ্চ দৈর্ঘ্য",
+        "ai_mode":         "🎭 AI মোড",
+        "quick_tools":     "🛠️ দ্রুত সরঞ্জাম",
+        "currency":        "💱 মুদ্রা",
+        "units":           "📐 একক",
+        "calculator":      "🔢 ক্যালকুলেটর",
+        "qr_code":         "📱 QR কোড",
+        "export":          "💾 রপ্তানি",
+        "no_msgs":         "এখনো কোনো বার্তা নেই।",
+        "convert_btn":     "রূপান্তর করুন 💱",
+        "calc_btn":        "গণনা করুন 🔢",
+        "unit_btn":        "রূপান্তর করুন 📐",
+        "qr_btn":          "QR তৈরি করুন",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ ভিশন AI-এর জন্য ছবি আপলোড করুন",
+        "img_upload_hint": "সমর্থিত: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 বিশ্লেষণের জন্য ফাইল আপলোড করুন",
+        "file_upload_hint": "সমর্থিত: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "প্রস্তুত · নিচে আপনার প্রশ্ন টাইপ করুন ↓",
+        "file_ready":      "এই ফাইল সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন",
+        "analyzing":       "👁️ ছবি বিশ্লেষণ হচ্ছে…",
+        "searching":       "🔍 অনুসন্ধান হচ্ছে…",
+        "fetching_weather":"🌤️ আবহাওয়া আনা হচ্ছে…",
+        "fetching_stock":  "📈 ডেটা আনা হচ্ছে",
+        "fetching_sports": "🏏 লাইভ স্পোর্টস ডেটা আনা হচ্ছে…",
+        "fetching_news":   "📰 সংবাদ আনা হচ্ছে…",
+        "fetching_rate":   "💱 বিনিময় হার আনা হচ্ছে…",
+        "reading_url":     "🌐 পড়া হচ্ছে",
+        "running_code":    "⚙️ চালানো হচ্ছে",
+        "run_btn":         "▶ চালান",
+        "live_preview":    "🖥️ প্রিভিউ",
+        "live_game":       "🎮 লাইভ গেম!",
+        "live_app":        "🚀 লাইভ অ্যাপ",
+        "live_software":   "⚙️ লাইভ সফটওয়্যার",
+        "live_design":     "✨ লাইভ ডিজাইন",
+        "download":        "⬇️ ডাউনলোড",
+        "example_q":       "💡 উদাহরণ প্রশ্ন:",
+        "ex1": "এই ছবিতে কী আছে?",
+        "ex2": "টেক্সট পড়ুন",
+        "ex3": "এই গণিত সমাধান করুন",
+        "ex4": "এই কোড বুঝিয়ে দিন",
+        "ex5": "এই চার্ট বিশ্লেষণ করুন",
+        "unit_placeholder":"যেমন: ১০০ কিমি থেকে মাইল",
+        "calc_placeholder":"যেমন: sqrt(144)",
+        "qr_placeholder":  "টেক্সট বা URL",
+        "amount":          "পরিমাণ",
+        "from_curr":       "থেকে",
+        "to_curr":         "তে",
+        "no_results":      "কোনো ফলাফল নেই।",
+        "stat_memory":     "🧠 মেমোরি",
+        "stat_vision":     "👁️ ভিশন AI",
+        "stat_sports":     "🏏 লাইভ স্পোর্টস",
+        "stat_games":      "🎮 গেমস ও অ্যাপস",
+        "stat_files":      "📁 ফাইলস ও URLs",
+        "stat_live":       "💱 লাইভ ডেটা",
+        "language_label":  "🌍 ভাষা",
+        "sys_prompt_lang": "বাংলায় উত্তর দিন। ব্যবহারকারী বাংলায় কথা বলছেন।",
+    },
+    "es": {
+        "title":           "Nova AI",
+        "subtitle":        "La IA más inteligente del mundo — ve imágenes, crea apps, sabe todo en vivo.",
+        "badge":           "EN VIVO · GRATIS · ILIMITADO · IA DE VISIÓN",
+        "chat_placeholder":"Pregunta lo que quieras — escribe aquí o haz clic en 🖼️ Imagen / 📄 Archivo…",
+        "clear":           "🗑️ Borrar",
+        "msgs":            "mensaje",
+        "msgp":            "mensajes",
+        "hero_q":          "¿Qué quieres hacer hoy?",
+        "cat_vision":      "IA de Visión",
+        "cat_vision_ex":   "Sube cualquier imagen\nIA lee y analiza",
+        "cat_games":       "Juegos",
+        "cat_games_ex":    "Snake · Tetris\nAjedrez · 2048\nPacman · RPG",
+        "cat_apps":        "Aplicaciones",
+        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
+        "cat_code":        "Código",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL y más",
+        "cat_files":       "Archivos",
+        "cat_files_ex":    "CSV · JSON · Código\nIA lo analiza",
+        "cat_live":        "Datos en Vivo",
+        "cat_live_ex":     "Cricket · Bolsa\nClima · Noticias\nCualquier URL",
+        "img_btn":         "🖼️ Imagen",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 Archivo",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Ayuda",
+        "settings":        "⚙️ Ajustes",
+        "temperature":     "Temperatura",
+        "max_length":      "Longitud máx.",
+        "ai_mode":         "🎭 Modo IA",
+        "quick_tools":     "🛠️ Herramientas",
+        "currency":        "💱 Divisa",
+        "units":           "📐 Unidades",
+        "calculator":      "🔢 Calculadora",
+        "qr_code":         "📱 Código QR",
+        "export":          "💾 Exportar",
+        "no_msgs":         "Aún no hay mensajes.",
+        "convert_btn":     "Convertir 💱",
+        "calc_btn":        "Calcular 🔢",
+        "unit_btn":        "Convertir 📐",
+        "qr_btn":          "Generar QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Subir imagen para IA de Visión",
+        "img_upload_hint": "Soporta: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Subir archivo para análisis",
+        "file_upload_hint": "Soporta: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Listo · Escribe tu pregunta abajo ↓",
+        "file_ready":      "Pregúntame sobre este archivo",
+        "analyzing":       "👁️ Analizando imagen…",
+        "searching":       "🔍 Buscando…",
+        "fetching_weather":"🌤️ Obteniendo clima…",
+        "fetching_stock":  "📈 Obteniendo",
+        "fetching_sports": "🏏 Obteniendo datos deportivos…",
+        "fetching_news":   "📰 Obteniendo noticias…",
+        "fetching_rate":   "💱 Obteniendo tasas…",
+        "reading_url":     "🌐 Leyendo",
+        "running_code":    "⚙️ Ejecutando",
+        "run_btn":         "▶ Ejecutar",
+        "live_preview":    "🖥️ Vista previa",
+        "live_game":       "🎮 ¡Juego en Vivo!",
+        "live_app":        "🚀 App en Vivo",
+        "live_software":   "⚙️ Software en Vivo",
+        "live_design":     "✨ Diseño en Vivo",
+        "download":        "⬇️ Descargar",
+        "example_q":       "💡 Ejemplos:",
+        "ex1": "¿Qué hay en esta imagen?",
+        "ex2": "Lee el texto",
+        "ex3": "Resuelve esta matemática",
+        "ex4": "Explica este código",
+        "ex5": "Analiza este gráfico",
+        "unit_placeholder":"ej. 100 km a millas",
+        "calc_placeholder":"ej. sqrt(144)",
+        "qr_placeholder":  "Texto o URL",
+        "amount":          "Cantidad",
+        "from_curr":       "De",
+        "to_curr":         "A",
+        "no_results":      "Sin resultados.",
+        "stat_memory":     "🧠 Memoria",
+        "stat_vision":     "👁️ Visión IA",
+        "stat_sports":     "🏏 Deportes",
+        "stat_games":      "🎮 Juegos y Apps",
+        "stat_files":      "📁 Archivos y URLs",
+        "stat_live":       "💱 Datos en Vivo",
+        "language_label":  "🌍 Idioma",
+        "sys_prompt_lang": "Responde en español.",
+    },
+    "fr": {
+        "title":           "Nova AI",
+        "subtitle":        "L'IA la plus intelligente au monde — voit des images, crée des apps, sait tout en direct.",
+        "badge":           "EN DIRECT · GRATUIT · ILLIMITÉ · IA VISION",
+        "chat_placeholder":"Demandez n'importe quoi — tapez ici ou cliquez sur 🖼️ Image / 📄 Fichier…",
+        "clear":           "🗑️ Effacer",
+        "msgs":            "message",
+        "msgp":            "messages",
+        "hero_q":          "Que souhaitez-vous faire aujourd'hui ?",
+        "cat_vision":      "IA Vision",
+        "cat_vision_ex":   "Téléchargez une image\nL'IA lit et analyse",
+        "cat_games":       "Jeux",
+        "cat_games_ex":    "Snake · Tetris\nÉchecs · 2048\nPacman · RPG",
+        "cat_apps":        "Applications",
+        "cat_apps_ex":     "Dashboard · Todo\nE-commerce\nPortfolio",
+        "cat_code":        "Code",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL et plus",
+        "cat_files":       "Fichiers",
+        "cat_files_ex":    "CSV · JSON · Code\nL'IA analyse",
+        "cat_live":        "Données Live",
+        "cat_live_ex":     "Cricket · Bourse\nMétéo · Actualités\nn'importe quel URL",
+        "img_btn":         "🖼️ Image",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 Fichier",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Aide",
+        "settings":        "⚙️ Paramètres",
+        "temperature":     "Température",
+        "max_length":      "Longueur max.",
+        "ai_mode":         "🎭 Mode IA",
+        "quick_tools":     "🛠️ Outils rapides",
+        "currency":        "💱 Devise",
+        "units":           "📐 Unités",
+        "calculator":      "🔢 Calculatrice",
+        "qr_code":         "📱 Code QR",
+        "export":          "💾 Exporter",
+        "no_msgs":         "Pas encore de messages.",
+        "convert_btn":     "Convertir 💱",
+        "calc_btn":        "Calculer 🔢",
+        "unit_btn":        "Convertir 📐",
+        "qr_btn":          "Générer QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Télécharger une image pour l'IA Vision",
+        "img_upload_hint": "Supporté: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Télécharger un fichier pour analyse",
+        "file_upload_hint": "Supporté: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Prêt · Tapez votre question ci-dessous ↓",
+        "file_ready":      "Posez-moi n'importe quelle question sur ce fichier",
+        "analyzing":       "👁️ Analyse de l'image…",
+        "searching":       "🔍 Recherche…",
+        "fetching_weather":"🌤️ Récupération météo…",
+        "fetching_stock":  "📈 Récupération",
+        "fetching_sports": "🏏 Récupération des données sportives…",
+        "fetching_news":   "📰 Récupération des actualités…",
+        "fetching_rate":   "💱 Récupération des taux…",
+        "reading_url":     "🌐 Lecture de",
+        "running_code":    "⚙️ Exécution",
+        "run_btn":         "▶ Exécuter",
+        "live_preview":    "🖥️ Aperçu",
+        "live_game":       "🎮 Jeu en Direct!",
+        "live_app":        "🚀 App en Direct",
+        "live_software":   "⚙️ Logiciel en Direct",
+        "live_design":     "✨ Design en Direct",
+        "download":        "⬇️ Télécharger",
+        "example_q":       "💡 Exemples de questions:",
+        "ex1": "Qu'y a-t-il dans cette image ?",
+        "ex2": "Lire le texte",
+        "ex3": "Résoudre ce problème",
+        "ex4": "Expliquer ce code",
+        "ex5": "Analyser ce graphique",
+        "unit_placeholder":"ex. 100 km en miles",
+        "calc_placeholder":"ex. sqrt(144)",
+        "qr_placeholder":  "Texte ou URL",
+        "amount":          "Montant",
+        "from_curr":       "De",
+        "to_curr":         "Vers",
+        "no_results":      "Aucun résultat.",
+        "stat_memory":     "🧠 Mémoire",
+        "stat_vision":     "👁️ Vision IA",
+        "stat_sports":     "🏏 Sports Live",
+        "stat_games":      "🎮 Jeux et Apps",
+        "stat_files":      "📁 Fichiers et URLs",
+        "stat_live":       "💱 Données Live",
+        "language_label":  "🌍 Langue",
+        "sys_prompt_lang": "Répondez en français.",
+    },
+    "de": {
+        "title":           "Nova AI",
+        "subtitle":        "Die klügste KI der Welt — sieht Bilder, baut Apps, weiß alles live.",
+        "badge":           "LIVE · KOSTENLOS · UNBEGRENZT · VISION KI",
+        "chat_placeholder":"Frag alles — hier tippen oder oben auf 🖼️ Bild / 📄 Datei klicken…",
+        "clear":           "🗑️ Löschen",
+        "msgs":            "Nachricht",
+        "msgp":            "Nachrichten",
+        "hero_q":          "Was möchten Sie heute tun?",
+        "cat_vision":      "Vision KI",
+        "cat_vision_ex":   "Bild hochladen\nKI liest und analysiert",
+        "cat_games":       "Spiele",
+        "cat_games_ex":    "Snake · Tetris\nSchach · 2048\nPacman · RPG",
+        "cat_apps":        "Apps",
+        "cat_apps_ex":     "Dashboard · Todo\nE-Commerce\nPortfolio",
+        "cat_code":        "Code",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL und mehr",
+        "cat_files":       "Dateien",
+        "cat_files_ex":    "CSV · JSON · Code\nKI analysiert",
+        "cat_live":        "Live-Daten",
+        "cat_live_ex":     "Cricket · Aktien\nWetter · Nachrichten\nJede URL",
+        "img_btn":         "🖼️ Bild",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 Datei",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Hilfe",
+        "settings":        "⚙️ Modelleinstellungen",
+        "temperature":     "Temperatur",
+        "max_length":      "Max. Länge",
+        "ai_mode":         "🎭 KI-Modus",
+        "quick_tools":     "🛠️ Schnellwerkzeuge",
+        "currency":        "💱 Währung",
+        "units":           "📐 Einheiten",
+        "calculator":      "🔢 Rechner",
+        "qr_code":         "📱 QR-Code",
+        "export":          "💾 Exportieren",
+        "no_msgs":         "Noch keine Nachrichten.",
+        "convert_btn":     "Umrechnen 💱",
+        "calc_btn":        "Berechnen 🔢",
+        "unit_btn":        "Umrechnen 📐",
+        "qr_btn":          "QR erstellen",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Bild für Vision KI hochladen",
+        "img_upload_hint": "Unterstützt: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Datei zur Analyse hochladen",
+        "file_upload_hint": "Unterstützt: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Bereit · Frage unten eingeben ↓",
+        "file_ready":      "Stell mir Fragen zu dieser Datei",
+        "analyzing":       "👁️ Bild wird analysiert…",
+        "searching":       "🔍 Suche läuft…",
+        "fetching_weather":"🌤️ Wetter wird abgerufen…",
+        "fetching_stock":  "📈 Daten werden abgerufen",
+        "fetching_sports": "🏏 Live-Sportdaten werden abgerufen…",
+        "fetching_news":   "📰 Nachrichten werden abgerufen…",
+        "fetching_rate":   "💱 Kurse werden abgerufen…",
+        "reading_url":     "🌐 Lesen von",
+        "running_code":    "⚙️ Ausführen",
+        "run_btn":         "▶ Ausführen",
+        "live_preview":    "🖥️ Vorschau",
+        "live_game":       "🎮 Live-Spiel!",
+        "live_app":        "🚀 Live-App",
+        "live_software":   "⚙️ Live-Software",
+        "live_design":     "✨ Live-Design",
+        "download":        "⬇️ Herunterladen",
+        "example_q":       "💡 Beispielfragen:",
+        "ex1": "Was ist auf diesem Bild?",
+        "ex2": "Text lesen",
+        "ex3": "Diese Mathe lösen",
+        "ex4": "Diesen Code erklären",
+        "ex5": "Dieses Diagramm analysieren",
+        "unit_placeholder":"z.B. 100 km in Meilen",
+        "calc_placeholder":"z.B. sqrt(144)",
+        "qr_placeholder":  "Text oder URL",
+        "amount":          "Betrag",
+        "from_curr":       "Von",
+        "to_curr":         "Nach",
+        "no_results":      "Keine Ergebnisse.",
+        "stat_memory":     "🧠 Gedächtnis",
+        "stat_vision":     "👁️ Vision KI",
+        "stat_sports":     "🏏 Live-Sport",
+        "stat_games":      "🎮 Spiele & Apps",
+        "stat_files":      "📁 Dateien & URLs",
+        "stat_live":       "💱 Live-Daten",
+        "language_label":  "🌍 Sprache",
+        "sys_prompt_lang": "Antworten Sie auf Deutsch.",
+    },
+    "ja": {
+        "title":           "Nova AI",
+        "subtitle":        "世界最高のAI — 画像を見て、アプリを作り、すべてをリアルタイムで知っています。",
+        "badge":           "ライブ · 無料 · 無制限 · ビジョンAI",
+        "chat_placeholder":"何でも聞いてください — ここに入力するか🖼️画像/📄ファイルをクリック…",
+        "clear":           "🗑️ クリア",
+        "msgs":            "メッセージ",
+        "msgp":            "メッセージ",
+        "hero_q":          "今日は何をしたいですか？",
+        "cat_vision":      "ビジョンAI",
+        "cat_vision_ex":   "画像をアップロード\nAIが読み取り分析",
+        "cat_games":       "ゲーム",
+        "cat_games_ex":    "Snake · Tetris\nChess · 2048\nPacman · RPG",
+        "cat_apps":        "アプリ",
+        "cat_apps_ex":     "Dashboard · Todo\nEコマース\nPortfolio",
+        "cat_code":        "コード",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQLなど",
+        "cat_files":       "ファイル",
+        "cat_files_ex":    "CSV · JSON · コード\nAIが分析",
+        "cat_live":        "ライブデータ",
+        "cat_live_ex":     "クリケット · 株価\n天気 · ニュース\nどんなURL",
+        "img_btn":         "🖼️ 画像",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 ファイル",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ ヘルプ",
+        "settings":        "⚙️ モデル設定",
+        "temperature":     "温度",
+        "max_length":      "最大長",
+        "ai_mode":         "🎭 AIモード",
+        "quick_tools":     "🛠️ クイックツール",
+        "currency":        "💱 通貨",
+        "units":           "📐 単位",
+        "calculator":      "🔢 計算機",
+        "qr_code":         "📱 QRコード",
+        "export":          "💾 エクスポート",
+        "no_msgs":         "まだメッセージはありません。",
+        "convert_btn":     "変換 💱",
+        "calc_btn":        "計算 🔢",
+        "unit_btn":        "変換 📐",
+        "qr_btn":          "QR生成",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ ビジョンAI用に画像をアップロード",
+        "img_upload_hint": "対応: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 分析用ファイルをアップロード",
+        "file_upload_hint": "対応: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "準備完了 · 下に質問を入力 ↓",
+        "file_ready":      "このファイルについて何でも聞いてください",
+        "analyzing":       "👁️ 画像を分析中…",
+        "searching":       "🔍 検索中…",
+        "fetching_weather":"🌤️ 天気を取得中…",
+        "fetching_stock":  "📈 データを取得中",
+        "fetching_sports": "🏏 スポーツデータを取得中…",
+        "fetching_news":   "📰 ニュースを取得中…",
+        "fetching_rate":   "💱 レートを取得中…",
+        "reading_url":     "🌐 読み込み中",
+        "running_code":    "⚙️ 実行中",
+        "run_btn":         "▶ 実行",
+        "live_preview":    "🖥️ プレビュー",
+        "live_game":       "🎮 ライブゲーム!",
+        "live_app":        "🚀 ライブアプリ",
+        "live_software":   "⚙️ ライブソフトウェア",
+        "live_design":     "✨ ライブデザイン",
+        "download":        "⬇️ ダウンロード",
+        "example_q":       "💡 例の質問:",
+        "ex1": "この画像には何がありますか？",
+        "ex2": "テキストを読む",
+        "ex3": "この数学を解く",
+        "ex4": "このコードを説明する",
+        "ex5": "このグラフを分析する",
+        "unit_placeholder":"例: 100 km to miles",
+        "calc_placeholder":"例: sqrt(144)",
+        "qr_placeholder":  "テキストまたはURL",
+        "amount":          "金額",
+        "from_curr":       "から",
+        "to_curr":         "へ",
+        "no_results":      "結果なし。",
+        "stat_memory":     "🧠 メモリ",
+        "stat_vision":     "👁️ ビジョンAI",
+        "stat_sports":     "🏏 ライブスポーツ",
+        "stat_games":      "🎮 ゲームとアプリ",
+        "stat_files":      "📁 ファイルとURL",
+        "stat_live":       "💱 ライブデータ",
+        "language_label":  "🌍 言語",
+        "sys_prompt_lang": "日本語で答えてください。",
+    },
+    "zh": {
+        "title":           "Nova AI",
+        "subtitle":        "世界上最聪明的AI — 看图像、构建应用、实时了解一切。",
+        "badge":           "实时 · 免费 · 无限 · 视觉AI",
+        "chat_placeholder":"问任何问题 — 在此输入或点击上方 🖼️ 图像 / 📄 文件…",
+        "clear":           "🗑️ 清除",
+        "msgs":            "条消息",
+        "msgp":            "条消息",
+        "hero_q":          "您今天想做什么？",
+        "cat_vision":      "视觉AI",
+        "cat_vision_ex":   "上传任何图像\nAI读取并分析",
+        "cat_games":       "游戏",
+        "cat_games_ex":    "贪吃蛇 · 俄罗斯方块\n国际象棋 · 2048\nPacman · RPG",
+        "cat_apps":        "应用",
+        "cat_apps_ex":     "仪表板 · 待办\n电子商务\n作品集",
+        "cat_code":        "代码",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL等",
+        "cat_files":       "文件",
+        "cat_files_ex":    "CSV · JSON · 代码\nAI分析",
+        "cat_live":        "实时数据",
+        "cat_live_ex":     "板球 · 股票\n天气 · 新闻\n任何URL",
+        "img_btn":         "🖼️ 图像",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 文件",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ 帮助",
+        "settings":        "⚙️ 模型设置",
+        "temperature":     "温度",
+        "max_length":      "最大长度",
+        "ai_mode":         "🎭 AI模式",
+        "quick_tools":     "🛠️ 快速工具",
+        "currency":        "💱 货币",
+        "units":           "📐 单位",
+        "calculator":      "🔢 计算器",
+        "qr_code":         "📱 二维码",
+        "export":          "💾 导出",
+        "no_msgs":         "暂无消息。",
+        "convert_btn":     "转换 💱",
+        "calc_btn":        "计算 🔢",
+        "unit_btn":        "转换 📐",
+        "qr_btn":          "生成二维码",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ 上传图像以供视觉AI分析",
+        "img_upload_hint": "支持: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 上传文件进行分析",
+        "file_upload_hint": "支持: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "准备就绪 · 在下方输入问题 ↓",
+        "file_ready":      "请询问关于此文件的任何问题",
+        "analyzing":       "👁️ 正在分析图像…",
+        "searching":       "🔍 正在搜索…",
+        "fetching_weather":"🌤️ 正在获取天气…",
+        "fetching_stock":  "📈 正在获取",
+        "fetching_sports": "🏏 正在获取实时体育数据…",
+        "fetching_news":   "📰 正在获取新闻…",
+        "fetching_rate":   "💱 正在获取汇率…",
+        "reading_url":     "🌐 正在读取",
+        "running_code":    "⚙️ 正在运行",
+        "run_btn":         "▶ 运行",
+        "live_preview":    "🖥️ 预览",
+        "live_game":       "🎮 实时游戏!",
+        "live_app":        "🚀 实时应用",
+        "live_software":   "⚙️ 实时软件",
+        "live_design":     "✨ 实时设计",
+        "download":        "⬇️ 下载",
+        "example_q":       "💡 示例问题：",
+        "ex1": "这张图片里有什么？",
+        "ex2": "读取文字",
+        "ex3": "解这道数学题",
+        "ex4": "解释这段代码",
+        "ex5": "分析这个图表",
+        "unit_placeholder":"例：100公里转英里",
+        "calc_placeholder":"例：sqrt(144)",
+        "qr_placeholder":  "文本或URL",
+        "amount":          "金额",
+        "from_curr":       "从",
+        "to_curr":         "到",
+        "no_results":      "无结果。",
+        "stat_memory":     "🧠 记忆",
+        "stat_vision":     "👁️ 视觉AI",
+        "stat_sports":     "🏏 实时体育",
+        "stat_games":      "🎮 游戏和应用",
+        "stat_files":      "📁 文件和URL",
+        "stat_live":       "💱 实时数据",
+        "language_label":  "🌍 语言",
+        "sys_prompt_lang": "请用中文回答。",
+    },
+    "ar": {
+        "title":           "Nova AI",
+        "subtitle":        "أذكى ذكاء اصطناعي في العالم — يرى الصور، يبني التطبيقات، يعرف كل شيء مباشرة.",
+        "badge":           "مباشر · مجاني · غير محدود · رؤية AI",
+        "chat_placeholder":"اسأل أي شيء — اكتب هنا أو انقر على 🖼️ صورة / 📄 ملف…",
+        "clear":           "🗑️ مسح",
+        "msgs":            "رسالة",
+        "msgp":            "رسائل",
+        "hero_q":          "ماذا تريد أن تفعل اليوم؟",
+        "cat_vision":      "رؤية AI",
+        "cat_vision_ex":   "ارفع أي صورة\nالذكاء الاصطناعي يقرأ ويحلل",
+        "cat_games":       "ألعاب",
+        "cat_games_ex":    "Snake · Tetris\nشطرنج · 2048\nPacman · RPG",
+        "cat_apps":        "تطبيقات",
+        "cat_apps_ex":     "لوحة تحكم · مهام\nتجارة إلكترونية\nمحفظة",
+        "cat_code":        "كود",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL وأكثر",
+        "cat_files":       "ملفات",
+        "cat_files_ex":    "CSV · JSON · كود\nالذكاء الاصطناعي يحللها",
+        "cat_live":        "بيانات مباشرة",
+        "cat_live_ex":     "كريكيت · أسهم\nطقس · أخبار\nأي URL",
+        "img_btn":         "🖼️ صورة",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 ملف",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ مساعدة",
+        "settings":        "⚙️ إعدادات النموذج",
+        "temperature":     "الحرارة",
+        "max_length":      "الطول الأقصى",
+        "ai_mode":         "🎭 وضع AI",
+        "quick_tools":     "🛠️ أدوات سريعة",
+        "currency":        "💱 عملة",
+        "units":           "📐 وحدات",
+        "calculator":      "🔢 حاسبة",
+        "qr_code":         "📱 رمز QR",
+        "export":          "💾 تصدير",
+        "no_msgs":         "لا توجد رسائل بعد.",
+        "convert_btn":     "تحويل 💱",
+        "calc_btn":        "احسب 🔢",
+        "unit_btn":        "تحويل 📐",
+        "qr_btn":          "إنشاء QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ ارفع صورة لرؤية AI",
+        "img_upload_hint": "مدعوم: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 ارفع ملف للتحليل",
+        "file_upload_hint": "مدعوم: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "جاهز · اكتب سؤالك أدناه ↓",
+        "file_ready":      "اسألني أي شيء عن هذا الملف",
+        "analyzing":       "👁️ جاري تحليل الصورة…",
+        "searching":       "🔍 جاري البحث…",
+        "fetching_weather":"🌤️ جاري جلب الطقس…",
+        "fetching_stock":  "📈 جاري جلب",
+        "fetching_sports": "🏏 جاري جلب بيانات الرياضة…",
+        "fetching_news":   "📰 جاري جلب الأخبار…",
+        "fetching_rate":   "💱 جاري جلب أسعار الصرف…",
+        "reading_url":     "🌐 جاري قراءة",
+        "running_code":    "⚙️ جاري تشغيل",
+        "run_btn":         "▶ تشغيل",
+        "live_preview":    "🖥️ معاينة",
+        "live_game":       "🎮 لعبة مباشرة!",
+        "live_app":        "🚀 تطبيق مباشر",
+        "live_software":   "⚙️ برنامج مباشر",
+        "live_design":     "✨ تصميم مباشر",
+        "download":        "⬇️ تحميل",
+        "example_q":       "💡 أسئلة مثالية:",
+        "ex1": "ماذا يوجد في هذه الصورة؟",
+        "ex2": "اقرأ النص",
+        "ex3": "حل هذه الرياضيات",
+        "ex4": "اشرح هذا الكود",
+        "ex5": "حلل هذا الرسم البياني",
+        "unit_placeholder":"مثال: 100 كم إلى ميل",
+        "calc_placeholder":"مثال: sqrt(144)",
+        "qr_placeholder":  "نص أو URL",
+        "amount":          "المبلغ",
+        "from_curr":       "من",
+        "to_curr":         "إلى",
+        "no_results":      "لا توجد نتائج.",
+        "stat_memory":     "🧠 ذاكرة",
+        "stat_vision":     "👁️ رؤية AI",
+        "stat_sports":     "🏏 رياضة مباشرة",
+        "stat_games":      "🎮 ألعاب وتطبيقات",
+        "stat_files":      "📁 ملفات وURLs",
+        "stat_live":       "💱 بيانات مباشرة",
+        "language_label":  "🌍 اللغة",
+        "sys_prompt_lang": "أجب باللغة العربية.",
+    },
+    "ru": {
+        "title":           "Nova AI",
+        "subtitle":        "Самый умный ИИ в мире — видит изображения, создаёт приложения, знает всё в реальном времени.",
+        "badge":           "LIVE · БЕСПЛАТНО · БЕЗЛИМИТНО · VISION AI",
+        "chat_placeholder":"Спросите что угодно — введите здесь или нажмите 🖼️ Изображение / 📄 Файл…",
+        "clear":           "🗑️ Очистить",
+        "msgs":            "сообщение",
+        "msgp":            "сообщений",
+        "hero_q":          "Что вы хотите сделать сегодня?",
+        "cat_vision":      "Vision ИИ",
+        "cat_vision_ex":   "Загрузите любое изображение\nИИ читает и анализирует",
+        "cat_games":       "Игры",
+        "cat_games_ex":    "Змейка · Тетрис\nШахматы · 2048\nPacman · RPG",
+        "cat_apps":        "Приложения",
+        "cat_apps_ex":     "Дашборд · Задачи\nИнтернет-магазин\nПортфолио",
+        "cat_code":        "Код",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL и другие",
+        "cat_files":       "Файлы",
+        "cat_files_ex":    "CSV · JSON · Код\nИИ анализирует",
+        "cat_live":        "Живые данные",
+        "cat_live_ex":     "Крикет · Акции\nПогода · Новости\nЛюбой URL",
+        "img_btn":         "🖼️ Фото",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 Файл",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Помощь",
+        "settings":        "⚙️ Настройки модели",
+        "temperature":     "Температура",
+        "max_length":      "Макс. длина",
+        "ai_mode":         "🎭 Режим ИИ",
+        "quick_tools":     "🛠️ Быстрые инструменты",
+        "currency":        "💱 Валюта",
+        "units":           "📐 Единицы",
+        "calculator":      "🔢 Калькулятор",
+        "qr_code":         "📱 QR-код",
+        "export":          "💾 Экспорт",
+        "no_msgs":         "Сообщений пока нет.",
+        "convert_btn":     "Конвертировать 💱",
+        "calc_btn":        "Вычислить 🔢",
+        "unit_btn":        "Конвертировать 📐",
+        "qr_btn":          "Создать QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Загрузить изображение для Vision ИИ",
+        "img_upload_hint": "Поддерживается: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Загрузить файл для анализа",
+        "file_upload_hint": "Поддерживается: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Готово · Введите вопрос ниже ↓",
+        "file_ready":      "Задайте любой вопрос об этом файле",
+        "analyzing":       "👁️ Анализ изображения…",
+        "searching":       "🔍 Поиск…",
+        "fetching_weather":"🌤️ Загрузка погоды…",
+        "fetching_stock":  "📈 Загрузка данных",
+        "fetching_sports": "🏏 Загрузка спортивных данных…",
+        "fetching_news":   "📰 Загрузка новостей…",
+        "fetching_rate":   "💱 Загрузка курсов…",
+        "reading_url":     "🌐 Чтение",
+        "running_code":    "⚙️ Выполнение",
+        "run_btn":         "▶ Запустить",
+        "live_preview":    "🖥️ Предпросмотр",
+        "live_game":       "🎮 Живая игра!",
+        "live_app":        "🚀 Живое приложение",
+        "live_software":   "⚙️ Живой софт",
+        "live_design":     "✨ Живой дизайн",
+        "download":        "⬇️ Скачать",
+        "example_q":       "💡 Примеры вопросов:",
+        "ex1": "Что на этом изображении?",
+        "ex2": "Прочитать текст",
+        "ex3": "Решить эту математику",
+        "ex4": "Объяснить этот код",
+        "ex5": "Проанализировать график",
+        "unit_placeholder":"напр. 100 км в мили",
+        "calc_placeholder":"напр. sqrt(144)",
+        "qr_placeholder":  "Текст или URL",
+        "amount":          "Сумма",
+        "from_curr":       "Из",
+        "to_curr":         "В",
+        "no_results":      "Нет результатов.",
+        "stat_memory":     "🧠 Память",
+        "stat_vision":     "👁️ Vision ИИ",
+        "stat_sports":     "🏏 Live спорт",
+        "stat_games":      "🎮 Игры и приложения",
+        "stat_files":      "📁 Файлы и URLs",
+        "stat_live":       "💱 Живые данные",
+        "language_label":  "🌍 Язык",
+        "sys_prompt_lang": "Отвечайте на русском языке.",
+    },
+    "pt": {
+        "title":           "Nova AI",
+        "subtitle":        "A IA mais inteligente do mundo — vê imagens, cria apps, sabe tudo ao vivo.",
+        "badge":           "AO VIVO · GRÁTIS · ILIMITADO · IA DE VISÃO",
+        "chat_placeholder":"Pergunte qualquer coisa — digite aqui ou clique em 🖼️ Imagem / 📄 Arquivo…",
+        "clear":           "🗑️ Limpar",
+        "msgs":            "mensagem",
+        "msgp":            "mensagens",
+        "hero_q":          "O que você quer fazer hoje?",
+        "cat_vision":      "IA de Visão",
+        "cat_vision_ex":   "Envie qualquer imagem\nIA lê e analisa",
+        "cat_games":       "Jogos",
+        "cat_games_ex":    "Snake · Tetris\nXadrez · 2048\nPacman · RPG",
+        "cat_apps":        "Aplicativos",
+        "cat_apps_ex":     "Dashboard · Tarefas\nE-commerce\nPortfólio",
+        "cat_code":        "Código",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL e mais",
+        "cat_files":       "Arquivos",
+        "cat_files_ex":    "CSV · JSON · Código\nIA analisa",
+        "cat_live":        "Dados ao Vivo",
+        "cat_live_ex":     "Críquete · Ações\nClima · Notícias\nQualquer URL",
+        "img_btn":         "🖼️ Imagem",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 Arquivo",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ Ajuda",
+        "settings":        "⚙️ Configurações",
+        "temperature":     "Temperatura",
+        "max_length":      "Comprimento máx.",
+        "ai_mode":         "🎭 Modo IA",
+        "quick_tools":     "🛠️ Ferramentas rápidas",
+        "currency":        "💱 Moeda",
+        "units":           "📐 Unidades",
+        "calculator":      "🔢 Calculadora",
+        "qr_code":         "📱 Código QR",
+        "export":          "💾 Exportar",
+        "no_msgs":         "Ainda não há mensagens.",
+        "convert_btn":     "Converter 💱",
+        "calc_btn":        "Calcular 🔢",
+        "unit_btn":        "Converter 📐",
+        "qr_btn":          "Gerar QR",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ Enviar imagem para IA de Visão",
+        "img_upload_hint": "Suporta: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 Enviar arquivo para análise",
+        "file_upload_hint": "Suporta: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "Pronto · Digite sua pergunta abaixo ↓",
+        "file_ready":      "Pergunte qualquer coisa sobre este arquivo",
+        "analyzing":       "👁️ Analisando imagem…",
+        "searching":       "🔍 Pesquisando…",
+        "fetching_weather":"🌤️ Obtendo clima…",
+        "fetching_stock":  "📈 Obtendo",
+        "fetching_sports": "🏏 Obtendo dados esportivos…",
+        "fetching_news":   "📰 Obtendo notícias…",
+        "fetching_rate":   "💱 Obtendo taxas…",
+        "reading_url":     "🌐 Lendo",
+        "running_code":    "⚙️ Executando",
+        "run_btn":         "▶ Executar",
+        "live_preview":    "🖥️ Visualização",
+        "live_game":       "🎮 Jogo ao Vivo!",
+        "live_app":        "🚀 App ao Vivo",
+        "live_software":   "⚙️ Software ao Vivo",
+        "live_design":     "✨ Design ao Vivo",
+        "download":        "⬇️ Baixar",
+        "example_q":       "💡 Exemplos de perguntas:",
+        "ex1": "O que há nesta imagem?",
+        "ex2": "Ler o texto",
+        "ex3": "Resolver esta matemática",
+        "ex4": "Explicar este código",
+        "ex5": "Analisar este gráfico",
+        "unit_placeholder":"ex. 100 km para milhas",
+        "calc_placeholder":"ex. sqrt(144)",
+        "qr_placeholder":  "Texto ou URL",
+        "amount":          "Valor",
+        "from_curr":       "De",
+        "to_curr":         "Para",
+        "no_results":      "Sem resultados.",
+        "stat_memory":     "🧠 Memória",
+        "stat_vision":     "👁️ Visão IA",
+        "stat_sports":     "🏏 Esportes ao Vivo",
+        "stat_games":      "🎮 Jogos e Apps",
+        "stat_files":      "📁 Arquivos e URLs",
+        "stat_live":       "💱 Dados ao Vivo",
+        "language_label":  "🌍 Idioma",
+        "sys_prompt_lang": "Responda em português.",
+    },
+    "ko": {
+        "title":           "Nova AI",
+        "subtitle":        "세계 최고의 AI — 이미지를 보고, 앱을 만들고, 실시간으로 모든 것을 알고 있습니다.",
+        "badge":           "실시간 · 무료 · 무제한 · 비전 AI",
+        "chat_placeholder":"무엇이든 물어보세요 — 여기 입력하거나 🖼️ 이미지 / 📄 파일 클릭…",
+        "clear":           "🗑️ 지우기",
+        "msgs":            "메시지",
+        "msgp":            "메시지",
+        "hero_q":          "오늘 무엇을 하시겠습니까?",
+        "cat_vision":      "비전 AI",
+        "cat_vision_ex":   "이미지 업로드\nAI가 읽고 분석",
+        "cat_games":       "게임",
+        "cat_games_ex":    "뱀 · 테트리스\n체스 · 2048\n팩맨 · RPG",
+        "cat_apps":        "앱",
+        "cat_apps_ex":     "대시보드 · 할일\n이커머스\n포트폴리오",
+        "cat_code":        "코드",
+        "cat_code_ex":     "Python · JS · Java\nC++ · Go · Rust\nSQL 등",
+        "cat_files":       "파일",
+        "cat_files_ex":    "CSV · JSON · 코드\nAI가 분석",
+        "cat_live":        "실시간 데이터",
+        "cat_live_ex":     "크리켓 · 주식\n날씨 · 뉴스\n모든 URL",
+        "img_btn":         "🖼️ 이미지",
+        "img_btn_done":    "🖼️ ✓",
+        "file_btn":        "📄 파일",
+        "file_btn_done":   "📄 ✓",
+        "help_btn":        "❓ 도움말",
+        "settings":        "⚙️ 모델 설정",
+        "temperature":     "온도",
+        "max_length":      "최대 길이",
+        "ai_mode":         "🎭 AI 모드",
+        "quick_tools":     "🛠️ 빠른 도구",
+        "currency":        "💱 통화",
+        "units":           "📐 단위",
+        "calculator":      "🔢 계산기",
+        "qr_code":         "📱 QR 코드",
+        "export":          "💾 내보내기",
+        "no_msgs":         "아직 메시지가 없습니다.",
+        "convert_btn":     "변환 💱",
+        "calc_btn":        "계산 🔢",
+        "unit_btn":        "변환 📐",
+        "qr_btn":          "QR 생성",
+        "download_md":     "📝 MD",
+        "download_json":   "📊 JSON",
+        "img_upload_title":"👁️ 비전 AI용 이미지 업로드",
+        "img_upload_hint": "지원: JPG, PNG, GIF, BMP, WebP, TIFF",
+        "file_upload_title":"📁 분석용 파일 업로드",
+        "file_upload_hint": "지원: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown",
+        "img_ready":       "준비 완료 · 아래에 질문 입력 ↓",
+        "file_ready":      "이 파일에 대해 무엇이든 물어보세요",
+        "analyzing":       "👁️ 이미지 분석 중…",
+        "searching":       "🔍 검색 중…",
+        "fetching_weather":"🌤️ 날씨 가져오는 중…",
+        "fetching_stock":  "📈 데이터 가져오는 중",
+        "fetching_sports": "🏏 실시간 스포츠 데이터 가져오는 중…",
+        "fetching_news":   "📰 뉴스 가져오는 중…",
+        "fetching_rate":   "💱 환율 가져오는 중…",
+        "reading_url":     "🌐 읽는 중",
+        "running_code":    "⚙️ 실행 중",
+        "run_btn":         "▶ 실행",
+        "live_preview":    "🖥️ 미리보기",
+        "live_game":       "🎮 라이브 게임!",
+        "live_app":        "🚀 라이브 앱",
+        "live_software":   "⚙️ 라이브 소프트웨어",
+        "live_design":     "✨ 라이브 디자인",
+        "download":        "⬇️ 다운로드",
+        "example_q":       "💡 예시 질문:",
+        "ex1": "이 이미지에 무엇이 있나요?",
+        "ex2": "텍스트 읽기",
+        "ex3": "이 수학 풀기",
+        "ex4": "이 코드 설명하기",
+        "ex5": "이 차트 분석하기",
+        "unit_placeholder":"예: 100 km를 miles로",
+        "calc_placeholder":"예: sqrt(144)",
+        "qr_placeholder":  "텍스트 또는 URL",
+        "amount":          "금액",
+        "from_curr":       "에서",
+        "to_curr":         "로",
+        "no_results":      "결과 없음.",
+        "stat_memory":     "🧠 메모리",
+        "stat_vision":     "👁️ 비전 AI",
+        "stat_sports":     "🏏 실시간 스포츠",
+        "stat_games":      "🎮 게임 및 앱",
+        "stat_files":      "📁 파일 및 URL",
+        "stat_live":       "💱 실시간 데이터",
+        "language_label":  "🌍 언어",
+        "sys_prompt_lang": "한국어로 답변해 주세요.",
+    },
+}
+
+def T(key: str) -> str:
+    """Get translated string for current language."""
+    lang_code = st.session_state.get("lang_code", "en")
+    return UI_TEXT.get(lang_code, UI_TEXT["en"]).get(key, UI_TEXT["en"].get(key, key))
+
+def is_rtl() -> bool:
+    return st.session_state.get("lang_code", "en") == "ar"
+
 st.set_page_config(
     page_title="Nova AI",
     page_icon="✨",
@@ -14,11 +1087,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+# ── RTL support injected dynamically ─────────────────────────────────────────
+rtl_css = """
+body, [data-testid="stAppViewContainer"] {
+    direction: rtl !important;
+    text-align: right !important;
+}
+[data-testid="stChatInput"] { direction: rtl !important; }
+[data-testid="stSidebar"] { direction: rtl !important; }
+""" if is_rtl() else ""
 
-:root {
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@300;400;500;600&family=Noto+Sans+Arabic:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+:root {{
     --bg:       #0a0c10;
     --surface:  #111318;
     --surface2: #1a1d24;
@@ -33,276 +1116,249 @@ st.markdown("""
     --red:      #ef4444;
     --pink:     #ec4899;
     --radius:   14px;
-}
+}}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
 
-html, body, [data-testid="stAppViewContainer"] {
+html, body, [data-testid="stAppViewContainer"] {{
     background: var(--bg) !important;
     color: var(--text) !important;
-    font-family: 'DM Sans', sans-serif !important;
-}
+    font-family: 'DM Sans','Noto Sans Devanagari','Noto Sans Bengali',
+                 'Noto Sans Arabic','Noto Sans JP','Noto Sans KR',
+                 'Noto Sans SC', sans-serif !important;
+}}
 
 [data-testid="stHeader"], [data-testid="stToolbar"],
-.stDeployButton, #MainMenu, footer { display: none !important; }
+.stDeployButton, #MainMenu, footer {{ display: none !important; }}
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar {{ width: 4px; }}
+::-webkit-scrollbar-track {{ background: var(--bg); }}
+::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 4px; }}
 
-[data-testid="stAppViewContainer"] > .main > .block-container {
+[data-testid="stAppViewContainer"] > .main > .block-container {{
     max-width: 860px !important;
     padding: 0 1.5rem 10rem !important;
     margin: 0 auto !important;
-}
+}}
 
-/* ── Sidebar ── */
-[data-testid="stSidebar"] {
+[data-testid="stSidebar"] {{
     background: var(--surface) !important;
     border-right: 1px solid var(--border) !important;
-}
-[data-testid="stSidebar"] * { color: var(--text) !important; }
+}}
+[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
 [data-testid="stSidebar"] .stSelectbox > div,
-[data-testid="stSidebar"] .stTextInput > div > div {
+[data-testid="stSidebar"] .stTextInput > div > div {{
     background: var(--surface2) !important;
     border-color: var(--border) !important;
-}
-[data-testid="stSidebar"] label { color: var(--muted) !important; font-size: 12px !important; }
-[data-testid="stSidebar"] h3 {
+}}
+[data-testid="stSidebar"] label {{ color: var(--muted) !important; font-size: 12px !important; }}
+[data-testid="stSidebar"] h3 {{
     color: var(--accent) !important;
     font-family: 'Space Mono', monospace !important;
     font-size: 13px !important; margin: .8rem 0 .4rem !important;
-}
-[data-testid="stSidebar"] hr { border-color: var(--border) !important; }
-[data-testid="stSidebar"] .stButton > button {
+}}
+[data-testid="stSidebar"] hr {{ border-color: var(--border) !important; }}
+[data-testid="stSidebar"] .stButton > button {{
     width: 100% !important; background: var(--surface2) !important;
     border: 1px solid var(--border) !important; color: var(--muted) !important;
     border-radius: 8px !important; font-size: 12px !important;
-}
-[data-testid="stSidebar"] .stButton > button:hover {
+}}
+[data-testid="stSidebar"] .stButton > button:hover {{
     border-color: var(--accent) !important; color: var(--accent) !important;
-}
-[data-testid="stSidebar"] .stDownloadButton > button {
+}}
+[data-testid="stSidebar"] .stDownloadButton > button {{
     width: 100% !important; background: rgba(0,229,255,.08) !important;
     border: 1px solid rgba(0,229,255,.25) !important; color: var(--accent) !important;
     border-radius: 8px !important; font-size: 12px !important;
-}
-[data-testid="stSidebar"] .stExpander {
+}}
+[data-testid="stSidebar"] .stExpander {{
     background: var(--surface2) !important;
     border: 1px solid var(--border) !important;
     border-radius: 10px !important; margin-bottom: .4rem !important;
-}
+}}
 
-/* ── Hero ── */
-.hero { text-align: center; padding: 2.5rem 1rem 1.5rem; position: relative; }
-.hero::before {
+.hero {{ text-align: center; padding: 2.5rem 1rem 1.5rem; position: relative; }}
+.hero::before {{
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 600px; height: 300px;
     background: radial-gradient(ellipse at center, rgba(0,229,255,.07) 0%, transparent 70%);
     pointer-events: none;
-}
-.hero-badge {
+}}
+.hero-badge {{
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2);
     border-radius: 999px; padding: 4px 14px;
     font-family: 'Space Mono', monospace; font-size: 11px;
     color: var(--accent); letter-spacing: .05em; margin-bottom: 1rem;
-}
-.hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-.hero h1 {
+}}
+.hero-badge::before {{ content: '●'; font-size: 8px; animation: pulse 2s infinite; }}
+@keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:.3}} }}
+.hero h1 {{
     font-family: 'Space Mono', monospace !important;
     font-size: clamp(1.8rem,4vw,2.6rem) !important;
     font-weight: 700 !important; color: #fff !important;
     line-height: 1.15 !important; letter-spacing: -.02em; margin-bottom: .5rem !important;
-}
-.hero h1 span { color: var(--accent); }
-.hero p { font-size: .95rem; color: var(--muted); font-weight: 300; max-width: 460px; margin: 0 auto; }
-.divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:1.2rem 0; }
+}}
+.hero h1 span {{ color: var(--accent); }}
+.hero p {{ font-size: .95rem; color: var(--muted); font-weight: 300; max-width: 460px; margin: 0 auto; }}
+.divider {{ height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:1.2rem 0; }}
 
-/* ── Stats ── */
-.stats-row { display:flex; gap:.6rem; margin:1rem 0 1.5rem; justify-content:center; flex-wrap:wrap; }
-.stat-pill {
+.stats-row {{ display:flex; gap:.6rem; margin:1rem 0 1.5rem; justify-content:center; flex-wrap:wrap; }}
+.stat-pill {{
     display:flex; align-items:center; gap:6px;
     background:var(--surface); border:1px solid var(--border);
     border-radius:999px; padding:5px 12px; font-size:12px; color:var(--muted);
-}
-.stat-pill .dot { width:6px; height:6px; border-radius:50%; }
-.dot-green  { background:var(--green);  box-shadow:0 0 5px var(--green); }
-.dot-blue   { background:var(--accent); box-shadow:0 0 5px var(--accent); }
-.dot-purple { background:var(--purple); box-shadow:0 0 5px var(--purple); }
-.dot-orange { background:var(--orange); box-shadow:0 0 5px var(--orange); }
-.dot-pink   { background:var(--pink);   box-shadow:0 0 5px var(--pink); }
+}}
+.stat-pill .dot {{ width:6px; height:6px; border-radius:50%; }}
+.dot-green  {{ background:var(--green);  box-shadow:0 0 5px var(--green); }}
+.dot-blue   {{ background:var(--accent); box-shadow:0 0 5px var(--accent); }}
+.dot-purple {{ background:var(--purple); box-shadow:0 0 5px var(--purple); }}
+.dot-orange {{ background:var(--orange); box-shadow:0 0 5px var(--orange); }}
+.dot-pink   {{ background:var(--pink);   box-shadow:0 0 5px var(--pink); }}
 
-/* ── Chat messages ── */
-[data-testid="stChatMessage"] { background:transparent !important; border:none !important; padding:0 !important; }
-[data-testid="stChatMessage"] > div { background:transparent !important; }
-[data-testid="stChatMessageContent"] { background:transparent !important; }
-.stChatMessage {
+[data-testid="stChatMessage"] {{ background:transparent !important; border:none !important; padding:0 !important; }}
+[data-testid="stChatMessage"] > div {{ background:transparent !important; }}
+[data-testid="stChatMessageContent"] {{ background:transparent !important; }}
+.stChatMessage {{
     border-radius:var(--radius) !important; padding:1rem 1.2rem !important;
     border:1px solid var(--border) !important; margin-bottom:.6rem !important;
     background:var(--surface) !important; animation:fadeUp .25s ease;
-}
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.stChatMessage:has([data-testid="chatAvatarIcon-user"]) {
+}}
+@keyframes fadeUp {{ from{{opacity:0;transform:translateY(8px)}} to{{opacity:1;transform:translateY(0)}} }}
+.stChatMessage:has([data-testid="chatAvatarIcon-user"]) {{
     background:var(--user-bg) !important; border-color:rgba(0,229,255,.15) !important;
-}
+}}
 
-/* ── Code ── */
-pre, code { font-family:'Space Mono',monospace !important; font-size:13px !important; }
-pre {
+pre, code {{ font-family:'Space Mono',monospace !important; font-size:13px !important; }}
+pre {{
     background:#0d1117 !important; border:1px solid var(--border) !important;
     border-left:3px solid var(--accent) !important; border-radius:10px !important;
     padding:1rem 1.2rem !important; overflow-x:auto !important;
-}
-code:not(pre code) {
+}}
+code:not(pre code) {{
     background:rgba(0,229,255,.08) !important; color:var(--accent) !important;
     border-radius:5px !important; padding:2px 6px !important; font-size:12.5px !important;
-}
+}}
 
-/* ══════════════════════════════════════════════════════════
-   CHAT INPUT AREA — fixed bottom with image upload button
-══════════════════════════════════════════════════════════ */
-[data-testid="stChatInputContainer"] {
+[data-testid="stChatInputContainer"] {{
     position: fixed !important; bottom: 0 !important; left: 50% !important;
     transform: translateX(-50%) !important; width: 100% !important;
     max-width: 860px !important; padding: 0.5rem 1.5rem 1.2rem !important;
     background: linear-gradient(to top, var(--bg) 80%, transparent) !important;
     backdrop-filter: blur(12px); z-index: 999 !important;
-}
-[data-testid="stChatInput"] {
+}}
+[data-testid="stChatInput"] {{
     background: var(--surface2) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; color: var(--text) !important;
-    font-family: 'DM Sans', sans-serif !important; font-size: 15px !important;
-}
-[data-testid="stChatInput"]:focus {
+    font-size: 15px !important;
+}}
+[data-testid="stChatInput"]:focus {{
     border-color: var(--accent) !important;
     box-shadow: 0 0 0 3px rgba(0,229,255,.1) !important; outline: none !important;
-}
-[data-testid="stChatInputSubmitButton"] button {
+}}
+[data-testid="stChatInputSubmitButton"] button {{
     background: var(--accent) !important; border: none !important;
     border-radius: 8px !important; color: #000 !important; font-weight: 600 !important;
-}
+}}
 
-/* Upload toolbar above chat input */
-.upload-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 4px;
-    margin-bottom: 4px;
-    flex-wrap: wrap;
-}
-.upload-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 999px; padding: 5px 14px;
-    font-size: 12px; color: var(--muted);
-    cursor: pointer; transition: all .2s;
-    font-family: 'DM Sans', sans-serif;
-}
-.upload-pill:hover { border-color: var(--accent); color: var(--accent); }
-.upload-pill.active { 
-    border-color: var(--pink); color: var(--pink);
-    background: rgba(236,72,153,.08);
-}
-
-/* Pending image preview */
-.pending-image-box {
-    background: var(--surface2);
-    border: 1px solid rgba(236,72,153,.4);
-    border-radius: 12px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
-    animation: fadeUp .2s ease;
-}
-.pending-image-thumb {
-    width: 48px; height: 48px;
-    border-radius: 8px; object-fit: cover;
-    border: 1px solid var(--border);
-}
-.pending-image-info { flex: 1; }
-.pending-image-name { font-size: 13px; color: var(--text); font-weight: 500; }
-.pending-image-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-/* Badges */
-.badge {
+.badge {{
     display:inline-flex; align-items:center; gap:5px;
     border-radius:6px; padding:3px 10px; font-size:11px;
-    margin-bottom:.5rem; font-family:'DM Sans',sans-serif;
-}
-.badge-green  { background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.25); color:var(--green); }
-.badge-red    { background:rgba(239,68,68,.08);   border:1px solid rgba(239,68,68,.3);   color:#fca5a5; }
-.badge-purple { background:rgba(124,58,237,.08);  border:1px solid rgba(124,58,237,.3);  color:#a78bfa; }
-.badge-orange { background:rgba(245,158,11,.08);  border:1px solid rgba(245,158,11,.3);  color:var(--orange); }
-.badge-blue   { background:rgba(0,229,255,.08);   border:1px solid rgba(0,229,255,.25);  color:var(--accent); }
-.badge-pink   { background:rgba(236,72,153,.08);  border:1px solid rgba(236,72,153,.3);  color:var(--pink); }
+    margin-bottom:.5rem;
+}}
+.badge-green  {{ background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.25); color:var(--green); }}
+.badge-red    {{ background:rgba(239,68,68,.08);   border:1px solid rgba(239,68,68,.3);   color:#fca5a5; }}
+.badge-purple {{ background:rgba(124,58,237,.08);  border:1px solid rgba(124,58,237,.3);  color:#a78bfa; }}
+.badge-orange {{ background:rgba(245,158,11,.08);  border:1px solid rgba(245,158,11,.3);  color:var(--orange); }}
+.badge-blue   {{ background:rgba(0,229,255,.08);   border:1px solid rgba(0,229,255,.25);  color:var(--accent); }}
+.badge-pink   {{ background:rgba(236,72,153,.08);  border:1px solid rgba(236,72,153,.3);  color:var(--pink); }}
 
-/* Result boxes */
-.output-box {
+.output-box {{
     background:#0d1117; border:1px solid var(--border);
     border-left:3px solid var(--green); border-radius:10px;
     padding:.8rem 1.2rem; font-family:'Space Mono',monospace;
     font-size:13px; color:#a3e635; margin-top:.5rem; white-space:pre-wrap;
-}
-.error-box {
+}}
+.error-box {{
     background:#1a0a0a; border:1px solid #7f1d1d;
     border-left:3px solid var(--red); border-radius:10px;
     padding:.8rem 1.2rem; font-family:'Space Mono',monospace;
     font-size:13px; color:#fca5a5; margin-top:.5rem; white-space:pre-wrap;
-}
-.result-box {
+}}
+.result-box {{
     background:linear-gradient(135deg,#0d1117,#111827);
     border:1px solid var(--border); border-radius:10px;
     padding:.8rem 1.2rem; font-size:14px; color:var(--text); margin:.5rem 0;
-}
-.result-box.orange { border-left:3px solid var(--orange); }
-.result-box.green  { border-left:3px solid var(--green); }
+}}
+.result-box.orange {{ border-left:3px solid var(--orange); }}
+.result-box.green  {{ border-left:3px solid var(--green); }}
 
-.btn-download {
+.btn-download {{
     display:inline-flex; align-items:center; gap:5px;
     background:rgba(0,229,255,.1); border:1px solid rgba(0,229,255,.3);
     color:var(--accent); padding:6px 14px; border-radius:8px;
-    text-decoration:none; font-size:12px; font-family:'DM Sans',sans-serif;
-    font-weight:500; margin-top:.5rem;
-}
+    text-decoration:none; font-size:12px; font-weight:500; margin-top:.5rem;
+}}
 
-.stButton > button {
+.stButton > button {{
     background:var(--surface2) !important; border:1px solid var(--border) !important;
     color:var(--muted) !important; border-radius:8px !important;
-    font-family:'DM Sans',sans-serif !important; font-size:13px !important;
-    font-weight:500 !important; padding:.4rem 1rem !important; transition:all .2s !important;
-}
-.stButton > button:hover {
+    font-size:13px !important; font-weight:500 !important;
+    padding:.4rem 1rem !important; transition:all .2s !important;
+}}
+.stButton > button:hover {{
     border-color:var(--accent) !important; color:var(--accent) !important;
     background:rgba(0,229,255,.06) !important;
-}
+}}
 
-/* Category grid */
-.category-grid {
+.category-grid {{
     display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
     gap:.8rem; margin:1.2rem 0;
-}
-.category-card {
+}}
+.category-card {{
     background:var(--surface); border:1px solid var(--border);
     border-radius:12px; padding:1rem; text-align:center;
     transition:border-color .2s,transform .2s;
-}
-.category-card:hover { border-color:var(--accent); transform:translateY(-2px); }
-.category-icon  { font-size:1.6rem; margin-bottom:.4rem; }
-.category-title { font-size:12.5px; font-weight:600; color:#94a3b8; margin-bottom:.2rem; }
-.category-examples { font-size:11px; color:var(--muted); line-height:1.6; }
+}}
+.category-card:hover {{ border-color:var(--accent); transform:translateY(-2px); }}
+.category-icon  {{ font-size:1.6rem; margin-bottom:.4rem; }}
+.category-title {{ font-size:12.5px; font-weight:600; color:#94a3b8; margin-bottom:.2rem; }}
+.category-examples {{ font-size:11px; color:var(--muted); line-height:1.6; }}
 
-/* Image in chat */
-.chat-image {
+.chat-image {{
     max-width: 360px; max-height: 280px;
     border-radius: 12px; border: 1px solid var(--border);
-    margin-bottom: 8px; display: block;
-    object-fit: cover;
-}
+    margin-bottom: 8px; display: block; object-fit: cover;
+}}
+
+/* Language selector pill */
+.lang-selector-wrap {{
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,229,255,.05);
+    border: 1px solid rgba(0,229,255,.15);
+    border-radius: 12px; padding: 8px 12px; margin-bottom: 8px;
+}}
+.lang-flag {{ font-size: 18px; }}
+.lang-name {{ font-size: 13px; color: var(--accent); font-weight: 500; }}
+
+/* Language grid in sidebar */
+.lang-grid {{
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px; margin-top: 6px;
+}}
+.lang-item {{
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 8px;
+    font-size: 12px; color: var(--muted);
+    cursor: pointer; text-align: center;
+    transition: all .2s;
+}}
+.lang-item:hover, .lang-item.active {{
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(0,229,255,.06);
+}}
+
+{rtl_css}
 </style>
 """, unsafe_allow_html=True)
 
@@ -323,48 +1379,35 @@ MAX_HISTORY  = 20
 #  IMAGE PROCESSING
 # ══════════════════════════════════════════════════════════════════════════════
 def image_to_base64(uploaded_file) -> tuple:
-    """Convert uploaded image → base64. Returns (b64, mime, w, h)"""
     try:
         uploaded_file.seek(0)
         img  = Image.open(uploaded_file)
         fmt  = img.format or "PNG"
         mime = f"image/{fmt.lower()}"
         if mime == "image/jpg": mime = "image/jpeg"
-
-        # Resize if too large
         max_size = 1568
         if max(img.size) > max_size:
             ratio    = max_size / max(img.size)
             new_size = (int(img.size[0]*ratio), int(img.size[1]*ratio))
             img      = img.resize(new_size, Image.LANCZOS)
-
         buf      = io.BytesIO()
         save_fmt = "JPEG" if fmt in ("JPEG","JPG") else "PNG"
         if img.mode in ("RGBA","P") and save_fmt == "JPEG":
             img = img.convert("RGB")
         img.save(buf, format=save_fmt, quality=85)
         buf.seek(0)
-
         b64  = base64.b64encode(buf.read()).decode()
         mime = f"image/{save_fmt.lower()}"
         return b64, mime, img.size[0], img.size[1]
     except Exception as e:
         return None, None, 0, 0
 
-def get_image_thumbnail_html(b64: str, mime: str, name: str = "") -> str:
-    """Return an <img> tag for inline display."""
-    return (
-        f'<img src="data:{mime};base64,{b64}" '
-        f'class="chat-image" alt="{name}" />'
-    )
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  VISION ANALYSIS
 # ══════════════════════════════════════════════════════════════════════════════
 def get_vision_prompt(user_text: str) -> str:
     q = user_text.lower()
-    if any(k in q for k in ["read","text","ocr","extract text","what does it say",
-                              "what text","words","written","transcribe"]):
+    if any(k in q for k in ["read","text","ocr","extract text","what does it say","what text","words","written","transcribe"]):
         return f"Read and transcribe ALL text visible in this image exactly as written. Then answer: {user_text}"
     elif any(k in q for k in ["solve","calculate","math","equation","problem","formula"]):
         return f"Solve the math problem shown in this image. Show step-by-step working. {user_text}"
@@ -391,9 +1434,9 @@ def get_vision_prompt(user_text: str) -> str:
         )
 
 def analyze_image_stream(b64: str, mime: str, user_prompt: str) -> str:
-    """Stream vision model response."""
     placeholder = st.empty()
     full        = ""
+    lang_instruction = T("sys_prompt_lang")
     try:
         stream = client.chat.completions.create(
             model    = VISION_MODEL,
@@ -401,30 +1444,22 @@ def analyze_image_stream(b64: str, mime: str, user_prompt: str) -> str:
                 {
                     "role": "system",
                     "content": (
-                        "You are Nova AI with powerful vision. Created by Samiran. "
-                        "Analyze images with exceptional detail and accuracy. "
-                        "Read text perfectly (OCR), identify objects, solve problems, "
-                        "analyze data, review code, and answer any question about images. "
-                        "Be thorough, accurate, and helpful."
+                        f"You are Nova AI with powerful vision. Created by Samiran. "
+                        f"Analyze images with exceptional detail and accuracy. "
+                        f"Read text perfectly (OCR), identify objects, solve problems, "
+                        f"analyze data, review code, and answer any question about images. "
+                        f"Be thorough, accurate, and helpful. {lang_instruction}"
                     )
                 },
                 {
                     "role": "user",
                     "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:{mime};base64,{b64}"}
-                        },
-                        {
-                            "type": "text",
-                            "text": user_prompt
-                        }
+                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+                        {"type": "text",      "text": user_prompt}
                     ]
                 }
             ],
-            max_tokens  = 2048,
-            temperature = 0.2,
-            stream      = True,
+            max_tokens=2048, temperature=0.2, stream=True,
         )
         for chunk in stream:
             delta = chunk.choices[0].delta.content
@@ -873,19 +1908,20 @@ def get_badge(ct):
             "general":""}.get(ct,"")
 
 def get_spinner_text(ct):
-    return {"game":"🎮 Building your game…","app":"🚀 Building your app…",
-            "software":"⚙️ Engineering software…","design":"✨ Crafting design…",
+    return {"game":T("live_game"),"app":T("live_app"),
+            "software":T("live_software"),"design":T("live_design"),
             "code":"💻 Writing world-class code…","general":"✨ Thinking…"}.get(ct,"✨ Thinking…")
 
 def get_system_prompt(ct):
     mode=st.session_state.get("ai_mode","🤖 Default")
     mode_extra=MODE_PROMPTS.get(mode,""); td=today_str()
+    lang_instruction = T("sys_prompt_lang")
     base=(f"You are Nova AI — world's BEST AI assistant with vision, created by Samiran. "
           f"Today: {td}. If asked who made you: 'Nova AI, created by Samiran.' "
           f"Never mention Meta, Llama, OpenAI, Groq. Full conversation memory. "
           f"NEVER write partial code. ALWAYS complete implementations. "
           f"Do NOT generate images — you can ANALYZE images but not create them. "
-          f"{mode_extra}\n\n"
+          f"{lang_instruction} {mode_extra}\n\n"
           f"LIVE DATA: When real-time data provided, use as ABSOLUTE TRUTH. "
           f"Answer directly. NEVER redirect to external sites. Today is {td}.\n\n")
     if ct=="game":
@@ -956,87 +1992,151 @@ for key,default in [
     ("uploaded_file_name",None),("pending_image_b64",None),
     ("pending_image_mime",None),("pending_image_name",None),
     ("show_image_uploader",False),("show_file_uploader",False),
+    ("lang_code","en"),("lang_name","🌐 English"),
 ]:
     if key not in st.session_state: st.session_state[key]=default
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  SIDEBAR  (settings only — no file upload here)
+#  SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
     <div style='text-align:center;padding:1.2rem 0 .8rem'>
         <div style='font-size:1.4rem;font-weight:700;font-family:Space Mono,monospace;color:#00e5ff'>✨ Nova AI</div>
-        <div style='font-size:11px;color:#64748b;margin-top:.3rem'>Created by Samiran · v4.0</div>
+        <div style='font-size:11px;color:#64748b;margin-top:.3rem'>Created by Samiran · v5.0</div>
     </div>""", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("### ⚙️ Model Settings")
-    st.session_state["temperature"]=st.slider("Temperature",0.0,1.0,
-        value=st.session_state["temperature"],step=0.05,help="Low=factual | High=creative")
-    st.session_state["max_tokens"]=st.select_slider("Max Length",
-        options=[512,1024,2048,4096,8192],value=st.session_state["max_tokens"])
+    # ── 🌍 LANGUAGE SELECTOR ──────────────────────────────────────────────────
+    st.markdown(f"### {T('language_label')}")
+
+    # Current language display
+    st.markdown(f"""
+    <div class="lang-selector-wrap">
+        <span class="lang-flag">{st.session_state['lang_name'].split()[0]}</span>
+        <span class="lang-name">{st.session_state['lang_name']}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Language selectbox
+    lang_choice = st.selectbox(
+        "Choose Language",
+        options=list(LANGUAGES.keys()),
+        index=list(LANGUAGES.keys()).index(st.session_state["lang_name"]),
+        label_visibility="collapsed",
+        key="lang_select"
+    )
+    if lang_choice != st.session_state["lang_name"]:
+        st.session_state["lang_name"] = lang_choice
+        st.session_state["lang_code"] = LANGUAGES[lang_choice]
+        st.rerun()
+
+    # Quick language flags grid
+    st.markdown("""
+    <div style='font-size:10px;color:#64748b;margin-top:6px;margin-bottom:4px'>
+        Quick select:
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Show flags in a compact grid using columns
+    lang_keys = list(LANGUAGES.keys())
+    cols = st.columns(4)
+    for i, lk in enumerate(lang_keys):
+        with cols[i % 4]:
+            flag = lk.split()[0]
+            code = LANGUAGES[lk]
+            is_active = code == st.session_state["lang_code"]
+            btn_style = "border-color:var(--accent);color:var(--accent);" if is_active else ""
+            if st.button(flag, key=f"lang_flag_{code}",
+                         help=lk,
+                         use_container_width=True):
+                st.session_state["lang_name"] = lk
+                st.session_state["lang_code"] = code
+                st.rerun()
+
     st.divider()
 
-    st.markdown("### 🎭 AI Mode")
-    st.session_state["ai_mode"]=st.selectbox("Mode",list(MODE_PROMPTS.keys()),
-        index=0,label_visibility="collapsed")
+    # ── Settings ──────────────────────────────────────────────────────────────
+    st.markdown(f"### {T('settings')}")
+    st.session_state["temperature"]=st.slider(
+        T("temperature"),0.0,1.0,
+        value=st.session_state["temperature"],step=0.05,
+        help="Low=factual | High=creative"
+    )
+    st.session_state["max_tokens"]=st.select_slider(
+        T("max_length"),
+        options=[512,1024,2048,4096,8192],
+        value=st.session_state["max_tokens"]
+    )
     st.divider()
 
-    st.markdown("### 🛠️ Quick Tools")
-    with st.expander("💱 Currency"):
-        amt=st.number_input("Amount",value=1.0,min_value=0.0,key="sb_amt")
+    st.markdown(f"### {T('ai_mode')}")
+    st.session_state["ai_mode"]=st.selectbox(
+        "Mode",list(MODE_PROMPTS.keys()),
+        index=0,label_visibility="collapsed"
+    )
+    st.divider()
+
+    st.markdown(f"### {T('quick_tools')}")
+    with st.expander(T("currency")):
+        amt=st.number_input(T("amount"),value=1.0,min_value=0.0,key="sb_amt")
         c1,c2=st.columns(2)
-        with c1: fc=st.selectbox("From",CURRENCIES,index=0,key="sb_fc")
-        with c2: tc=st.selectbox("To",CURRENCIES,index=3,key="sb_tc")
-        if st.button("Convert 💱",key="sb_conv"): st.markdown(get_exchange_rate(fc,tc,amt))
+        with c1: fc=st.selectbox(T("from_curr"),CURRENCIES,index=0,key="sb_fc")
+        with c2: tc=st.selectbox(T("to_curr"),CURRENCIES,index=3,key="sb_tc")
+        if st.button(T("convert_btn"),key="sb_conv"):
+            st.markdown(get_exchange_rate(fc,tc,amt))
 
-    with st.expander("📐 Units"):
-        uin=st.text_input("e.g. 100 km to miles",key="sb_uin")
-        if st.button("Convert 📐",key="sb_unit"):
+    with st.expander(T("units")):
+        uin=st.text_input(T("unit_placeholder"),key="sb_uin")
+        if st.button(T("unit_btn"),key="sb_unit"):
             res=convert_unit(uin)
             st.markdown(res if res else "⚠️ Try: '100 km to miles'")
 
-    with st.expander("🔢 Calculator"):
-        cin=st.text_input("e.g. sqrt(144)",key="sb_cin")
-        if st.button("Calculate 🔢",key="sb_calc"):
+    with st.expander(T("calculator")):
+        cin=st.text_input(T("calc_placeholder"),key="sb_cin")
+        if st.button(T("calc_btn"),key="sb_calc"):
             res=solve_math(cin)
             if res: st.markdown(f"**= {res}**")
             else: st.warning("Could not evaluate.")
 
-    with st.expander("📱 QR Code"):
-        qin=st.text_input("Text or URL",key="sb_qin")
-        if st.button("Generate QR",key="sb_qr") and qin:
+    with st.expander(T("qr_code")):
+        qin=st.text_input(T("qr_placeholder"),key="sb_qin")
+        if st.button(T("qr_btn"),key="sb_qr") and qin:
             url=qr_url(qin)
             st.image(url,width=180)
             st.markdown(f"[⬇️ Download]({url})")
 
     st.divider()
-    st.markdown("### 💾 Export")
+    st.markdown(f"### {T('export')}")
     if st.session_state["messages"]:
         ca,cb=st.columns(2)
         ts=datetime.now().strftime("%Y%m%d_%H%M")
-        with ca: st.download_button("📝 MD",data=export_md(),file_name=f"nova_{ts}.md",mime="text/markdown",use_container_width=True)
-        with cb: st.download_button("📊 JSON",data=export_json_chat(),file_name=f"nova_{ts}.json",mime="application/json",use_container_width=True)
-    else: st.caption("No messages yet.")
+        with ca: st.download_button(T("download_md"),data=export_md(),file_name=f"nova_{ts}.md",mime="text/markdown",use_container_width=True)
+        with cb: st.download_button(T("download_json"),data=export_json_chat(),file_name=f"nova_{ts}.json",mime="application/json",use_container_width=True)
+    else: st.caption(T("no_msgs"))
     st.divider()
-    st.markdown(f"<div style='text-align:center;font-size:10px;color:#374151'>Nova AI · Samiran · v4.0<br>{datetime.now().strftime('%B %Y')}</div>",unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='text-align:center;font-size:10px;color:#374151'>"
+        f"Nova AI · Samiran · v5.0<br>{datetime.now().strftime('%B %Y')}</div>",
+        unsafe_allow_html=True
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  HERO
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("""
+st.markdown(f"""
 <div class="hero">
-    <div class="hero-badge">LIVE · FREE · UNLIMITED · VISION AI</div>
+    <div class="hero-badge">{T('badge')}</div>
     <h1>Nova<span> AI</span></h1>
-    <p>The world's smartest AI — sees images, builds apps, knows everything live.</p>
+    <p>{T('subtitle')}</p>
 </div>
 <div class="stats-row">
-    <div class="stat-pill"><span class="dot dot-purple"></span>🧠 Memory</div>
-    <div class="stat-pill"><span class="dot dot-pink"></span>👁️ Vision AI</div>
-    <div class="stat-pill"><span class="dot dot-blue"></span>🏏 Live Sports</div>
-    <div class="stat-pill"><span class="dot dot-orange"></span>🎮 Games & Apps</div>
-    <div class="stat-pill"><span class="dot dot-green"></span>📁 Files & URLs</div>
-    <div class="stat-pill"><span class="dot dot-green"></span>💱 Live Data</div>
+    <div class="stat-pill"><span class="dot dot-purple"></span>{T('stat_memory')}</div>
+    <div class="stat-pill"><span class="dot dot-pink"></span>{T('stat_vision')}</div>
+    <div class="stat-pill"><span class="dot dot-blue"></span>{T('stat_sports')}</div>
+    <div class="stat-pill"><span class="dot dot-orange"></span>{T('stat_games')}</div>
+    <div class="stat-pill"><span class="dot dot-green"></span>{T('stat_files')}</div>
+    <div class="stat-pill"><span class="dot dot-green"></span>{T('stat_live')}</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -1045,26 +2145,28 @@ st.markdown("""
 col1,col2,col3=st.columns([5,1,1])
 with col2:
     count=len([m for m in st.session_state.messages if m["role"]=="user"])
-    st.markdown(f"<p style='text-align:right;color:var(--muted);font-size:12px;padding-top:.5rem'>{count} msg{'s' if count!=1 else ''}</p>",unsafe_allow_html=True)
+    label = f"{count} {T('msgp') if count!=1 else T('msgs')}"
+    st.markdown(f"<p style='text-align:right;color:var(--muted);font-size:12px;padding-top:.5rem'>{label}</p>",unsafe_allow_html=True)
 with col3:
-    if st.button("🗑️ Clear"): st.session_state.messages=[]; st.rerun()
+    if st.button(T("clear")):
+        st.session_state.messages=[]; st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CHAT HISTORY
 # ══════════════════════════════════════════════════════════════════════════════
 if not st.session_state.messages:
-    st.markdown("""
+    st.markdown(f"""
     <div style="text-align:center;padding:1rem 1rem .5rem">
         <div style="font-size:2rem;margin-bottom:.5rem">✨</div>
-        <p style="font-size:.95rem;font-weight:600;color:#94a3b8;margin-bottom:1rem">What would you like to do today?</p>
+        <p style="font-size:.95rem;font-weight:600;color:#94a3b8;margin-bottom:1rem">{T('hero_q')}</p>
     </div>
     <div class="category-grid">
-        <div class="category-card"><div class="category-icon">👁️</div><div class="category-title">Vision AI</div><div class="category-examples">Click 📎 below<br>Upload any image<br>AI reads & analyzes</div></div>
-        <div class="category-card"><div class="category-icon">🎮</div><div class="category-title">Games</div><div class="category-examples">Snake · Tetris<br>Chess · 2048<br>Pacman · RPG</div></div>
-        <div class="category-card"><div class="category-icon">🚀</div><div class="category-title">Apps</div><div class="category-examples">Dashboard · Todo<br>E-commerce<br>Portfolio</div></div>
-        <div class="category-card"><div class="category-icon">💻</div><div class="category-title">Code</div><div class="category-examples">Python · JS · Java<br>C++ · Go · Rust<br>SQL & more</div></div>
-        <div class="category-card"><div class="category-icon">📁</div><div class="category-title">Files</div><div class="category-examples">Click 📄 below<br>CSV · JSON · Code<br>AI analyzes it</div></div>
-        <div class="category-card"><div class="category-icon">🌐</div><div class="category-title">Live Data</div><div class="category-examples">Cricket · Stocks<br>Weather · News<br>Any URL</div></div>
+        <div class="category-card"><div class="category-icon">👁️</div><div class="category-title">{T('cat_vision')}</div><div class="category-examples">{T('cat_vision_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">🎮</div><div class="category-title">{T('cat_games')}</div><div class="category-examples">{T('cat_games_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">🚀</div><div class="category-title">{T('cat_apps')}</div><div class="category-examples">{T('cat_apps_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">💻</div><div class="category-title">{T('cat_code')}</div><div class="category-examples">{T('cat_code_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">📁</div><div class="category-title">{T('cat_files')}</div><div class="category-examples">{T('cat_files_ex')}</div></div>
+        <div class="category-card"><div class="category-icon">🌐</div><div class="category-title">{T('cat_live')}</div><div class="category-examples">{T('cat_live_ex')}</div></div>
     </div>
     <div class="divider"></div>
     """, unsafe_allow_html=True)
@@ -1073,7 +2175,6 @@ else:
         with st.chat_message(msg["role"]):
             if msg.get("meta"):
                 st.markdown(msg["meta"],unsafe_allow_html=True)
-            # Show image inline if this message had one
             if msg.get("image_b64") and msg.get("image_mime"):
                 try:
                     img_bytes=base64.b64decode(msg["image_b64"])
@@ -1083,13 +2184,10 @@ else:
             st.markdown(msg["content"])
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  BOTTOM INPUT AREA  — image + file upload buttons ABOVE chat input
+#  BOTTOM INPUT AREA
 # ══════════════════════════════════════════════════════════════════════════════
-
-# Show pending image preview above input
 if st.session_state.get("pending_image_b64"):
     fname = st.session_state.get("pending_image_name","image")
-    # Decode and show thumbnail
     try:
         img_bytes = base64.b64decode(st.session_state["pending_image_b64"])
         img       = Image.open(io.BytesIO(img_bytes))
@@ -1100,7 +2198,7 @@ if st.session_state.get("pending_image_b64"):
             st.markdown(
                 f"<div style='padding-top:8px'>"
                 f"<div style='font-size:13px;color:#e2e8f0;font-weight:500'>🖼️ {fname}</div>"
-                f"<div style='font-size:11px;color:#64748b'>Ready · Type your question below ↓</div>"
+                f"<div style='font-size:11px;color:#64748b'>{T('img_ready')}</div>"
                 f"</div>",
                 unsafe_allow_html=True
             )
@@ -1112,13 +2210,12 @@ if st.session_state.get("pending_image_b64"):
                 st.rerun()
     except: pass
 
-# Show pending file preview
 if st.session_state.get("uploaded_file_content"):
     fname = st.session_state.get("uploaded_file_name","file")
     col_fi, col_fx = st.columns([8,1])
     with col_fi:
         st.markdown(
-            f'<div class="badge badge-purple" style="margin:4px 0">📁 {fname} — Ask me anything about this file</div>',
+            f'<div class="badge badge-purple" style="margin:4px 0">📁 {fname} — {T("file_ready")}</div>',
             unsafe_allow_html=True
         )
     with col_fx:
@@ -1127,44 +2224,38 @@ if st.session_state.get("uploaded_file_content"):
             st.session_state["uploaded_file_name"]    = None
             st.rerun()
 
-# ── Upload toolbar row ─────────────────────────────────────────────────────────
-st.markdown('<div class="upload-toolbar">', unsafe_allow_html=True)
-
+# ── Upload toolbar ─────────────────────────────────────────────────────────────
 tb_col1, tb_col2, tb_col3, tb_col4 = st.columns([1,1,1,6])
 
 with tb_col1:
-    img_btn_label = "🖼️ Image" if not st.session_state.get("pending_image_b64") else "🖼️ ✓"
-    if st.button(img_btn_label, key="toggle_img_upload",
-                 help="Upload an image for AI to analyze"):
+    img_btn_label = T("img_btn_done") if st.session_state.get("pending_image_b64") else T("img_btn")
+    if st.button(img_btn_label, key="toggle_img_upload", help="Upload an image for AI to analyze"):
         st.session_state["show_image_uploader"] = not st.session_state["show_image_uploader"]
         st.session_state["show_file_uploader"]  = False
         st.rerun()
 
 with tb_col2:
-    file_btn_label = "📄 File" if not st.session_state.get("uploaded_file_content") else "📄 ✓"
-    if st.button(file_btn_label, key="toggle_file_upload",
-                 help="Upload a file for AI to analyze"):
+    file_btn_label = T("file_btn_done") if st.session_state.get("uploaded_file_content") else T("file_btn")
+    if st.button(file_btn_label, key="toggle_file_upload", help="Upload a file for AI to analyze"):
         st.session_state["show_file_uploader"]  = not st.session_state["show_file_uploader"]
         st.session_state["show_image_uploader"] = False
         st.rerun()
 
 with tb_col3:
-    if st.button("❓ Help", key="show_help", help="What can Nova AI do?"):
+    if st.button(T("help_btn"), key="show_help"):
         st.session_state["show_image_uploader"] = False
         st.session_state["show_file_uploader"]  = False
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # ── Image uploader panel ───────────────────────────────────────────────────────
 if st.session_state.get("show_image_uploader"):
-    st.markdown("""
+    st.markdown(f"""
     <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;
                 padding:1.2rem;margin-bottom:.5rem;'>
         <div style='font-size:13px;color:#00e5ff;font-weight:600;margin-bottom:.5rem'>
-            👁️ Upload Image for Vision AI
+            {T('img_upload_title')}
         </div>
         <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>
-            Supports: JPG, PNG, GIF, BMP, WebP, TIFF
+            {T('img_upload_hint')}
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1177,15 +2268,12 @@ if st.session_state.get("show_image_uploader"):
     )
 
     if img_file is not None:
-        # Process immediately
         b64, mime, w, h = image_to_base64(img_file)
         if b64:
             st.session_state["pending_image_b64"]  = b64
             st.session_state["pending_image_mime"] = mime
             st.session_state["pending_image_name"] = img_file.name
             st.session_state["show_image_uploader"]= False
-
-            # Show preview
             col_prev, col_info = st.columns([1,2])
             with col_prev:
                 img_bytes = base64.b64decode(b64)
@@ -1194,39 +2282,34 @@ if st.session_state.get("show_image_uploader"):
             with col_info:
                 st.success(f"✅ {img_file.name}")
                 st.caption(f"Size: {w}×{h}px · {mime}")
-                st.info("Now type your question in the chat below!")
+                st.info(T("img_ready"))
         else:
             st.error("❌ Could not process image. Try a different format.")
 
-    # Example prompts
-    st.markdown("""
+    # Example prompts — translated
+    st.markdown(f"""
     <div style='margin-top:.8rem'>
-        <div style='font-size:11px;color:#64748b;margin-bottom:.4rem'>💡 Example questions:</div>
+        <div style='font-size:11px;color:#64748b;margin-bottom:.4rem'>{T('example_q')}</div>
         <div style='display:flex;flex-wrap:wrap;gap:6px'>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;
-                         padding:3px 10px;font-size:11px;color:#94a3b8'>What is in this image?</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;
-                         padding:3px 10px;font-size:11px;color:#94a3b8'>Read the text</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;
-                         padding:3px 10px;font-size:11px;color:#94a3b8'>Solve this math</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;
-                         padding:3px 10px;font-size:11px;color:#94a3b8'>Explain this code</span>
-            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;
-                         padding:3px 10px;font-size:11px;color:#94a3b8'>Analyze this chart</span>
+            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex1')}</span>
+            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex2')}</span>
+            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex3')}</span>
+            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex4')}</span>
+            <span style='background:#1a1d24;border:1px solid #232730;border-radius:999px;padding:3px 10px;font-size:11px;color:#94a3b8'>{T('ex5')}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 # ── File uploader panel ────────────────────────────────────────────────────────
 if st.session_state.get("show_file_uploader"):
-    st.markdown("""
+    st.markdown(f"""
     <div style='background:#1a1d24;border:1px solid #232730;border-radius:14px;
                 padding:1.2rem;margin-bottom:.5rem;'>
         <div style='font-size:13px;color:#a78bfa;font-weight:600;margin-bottom:.5rem'>
-            📁 Upload File for Analysis
+            {T('file_upload_title')}
         </div>
         <div style='font-size:11px;color:#64748b;margin-bottom:.8rem'>
-            Supports: TXT, CSV, JSON, Python, JS, HTML, CSS, Java, C++, Markdown
+            {T('file_upload_hint')}
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1244,12 +2327,12 @@ if st.session_state.get("show_file_uploader"):
         st.session_state["uploaded_file_name"]    = doc_file.name
         st.session_state["show_file_uploader"]    = False
         st.success(f"✅ {doc_file.name} ready!")
-        st.info("Now type your question in the chat below!")
+        st.info(T("file_ready"))
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CHAT INPUT
 # ══════════════════════════════════════════════════════════════════════════════
-if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 📄 File above…"):
+if prompt := st.chat_input(T("chat_placeholder")):
 
     has_image = bool(st.session_state.get("pending_image_b64"))
     has_file  = bool(st.session_state.get("uploaded_file_content"))
@@ -1274,7 +2357,7 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
     with st.chat_message("assistant"):
         response=""; meta=""
 
-        # ── 🖼️ IMAGE ANALYSIS — TOP PRIORITY ─────────────────────────────────
+        # ── 🖼️ IMAGE ANALYSIS ────────────────────────────────────────────────
         if has_image:
             b64  = st.session_state["pending_image_b64"]
             mime = st.session_state["pending_image_mime"]
@@ -1282,33 +2365,29 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
             meta = f'<div class="badge badge-pink">👁️ Vision AI · {name}</div>'
             st.markdown(meta, unsafe_allow_html=True)
             vision_prompt = get_vision_prompt(prompt)
-            with st.spinner("👁️ Analyzing image…"):
+            with st.spinner(T("analyzing")):
                 response = analyze_image_stream(b64, mime, vision_prompt)
-            # Clear
             st.session_state["pending_image_b64"]  = None
             st.session_state["pending_image_mime"] = None
             st.session_state["pending_image_name"] = None
 
-        # ── QR ────────────────────────────────────────────────────────────────
         elif is_qr_query(prompt):
             content=extract_qr_content(prompt); url=qr_url(content)
             meta='<div class="badge badge-green">📱 QR Code</div>'
             st.markdown(meta,unsafe_allow_html=True)
             st.markdown(f"**QR for:** `{content}`")
             st.image(url,width=260)
-            st.markdown(f'<a href="{url}" class="btn-download" target="_blank">⬇️ Download QR</a>',unsafe_allow_html=True)
+            st.markdown(f'<a href="{url}" class="btn-download" target="_blank">{T("download")} QR</a>',unsafe_allow_html=True)
             response=f"✅ QR Code generated for: `{content}`"
 
-        # ── CURRENCY ──────────────────────────────────────────────────────────
         elif is_currency_query(prompt):
             amount,fc,tc=extract_currency_params(prompt)
-            with st.spinner("💱 Fetching rates…"): result=get_exchange_rate(fc,tc,amount)
+            with st.spinner(T("fetching_rate")): result=get_exchange_rate(fc,tc,amount)
             meta='<div class="badge badge-green">💱 Live rate</div>'
             st.markdown(meta,unsafe_allow_html=True)
             st.markdown(f'<div class="result-box green">{result}</div>',unsafe_allow_html=True)
             response=result
 
-        # ── UNIT ──────────────────────────────────────────────────────────────
         elif is_unit_query(prompt):
             result=convert_unit(prompt)
             if result:
@@ -1317,7 +2396,6 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
                 st.markdown(f'<div class="result-box orange">{result}</div>',unsafe_allow_html=True)
                 response=result
 
-        # ── MATH ──────────────────────────────────────────────────────────────
         if not response and is_math_query(prompt):
             result=solve_math(prompt)
             if result:
@@ -1328,17 +2406,15 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
                 explanation=stream_response(msgs,max_tokens=200,temperature=st.session_state["temperature"])
                 response=f"= **{result}**\n\n{explanation}"
 
-        # ── URL ───────────────────────────────────────────────────────────────
         if not response and is_url_query(prompt):
             url=extract_url(prompt)
             if url:
-                with st.spinner(f"🌐 Reading {url[:50]}…"): page=fetch_url_content(url)
+                with st.spinner(f"{T('reading_url')} {url[:50]}…"): page=fetch_url_content(url)
                 meta=f'<div class="badge badge-green">🌐 URL read</div>'
                 st.markdown(meta,unsafe_allow_html=True)
                 msgs=build_messages(f"URL: {url}\nContent:\n{page}\n\nRequest: {prompt}")
                 response=stream_response(msgs,max_tokens=st.session_state["max_tokens"],temperature=st.session_state["temperature"])
 
-        # ── FILE ──────────────────────────────────────────────────────────────
         if not response and has_file:
             fname=st.session_state.get("uploaded_file_name","file")
             meta=f'<div class="badge badge-purple">📁 {fname}</div>'
@@ -1347,11 +2423,10 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
             response=stream_response(msgs,max_tokens=st.session_state["max_tokens"],temperature=st.session_state["temperature"])
             st.session_state["uploaded_file_content"]=None; st.session_state["uploaded_file_name"]=None
 
-        # ── STOCK ─────────────────────────────────────────────────────────────
         if not response and is_stock_query(prompt):
             symbol,dname=extract_stock_symbol(prompt)
             if symbol:
-                with st.spinner(f"📈 Fetching {dname}…"): sd=get_stock(symbol,dname)
+                with st.spinner(f"{T('fetching_stock')} {dname}…"): sd=get_stock(symbol,dname)
                 if "failed" not in sd.lower():
                     L=dict(l.split(": ",1) for l in sd.strip().splitlines() if ": " in l)
                     meta='<div class="badge badge-green">📈 Live · Yahoo Finance</div>'
@@ -1365,9 +2440,8 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
                               f"| 🔢 Volume | {L.get('Volume','N/A')} |\n\n_Delayed ~15 min_")
                     st.markdown(response)
 
-        # ── SPORTS ────────────────────────────────────────────────────────────
         if not response and is_sports_query(prompt):
-            with st.spinner("🏏 Fetching live sports data…"):
+            with st.spinner(T("fetching_sports")):
                 cricket=fetch_live_cricket()
                 sport_term="general"
                 for k,v in SPORTS_MAP.items():
@@ -1379,18 +2453,16 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
             msgs=build_messages(prompt,search_results=sports_data)
             response=stream_response(msgs,max_tokens=1024,temperature=0.1)
 
-        # ── NEWS ──────────────────────────────────────────────────────────────
         if not response and is_news_query(prompt):
-            with st.spinner("📰 Fetching news…"):
+            with st.spinner(T("fetching_news")):
                 topic=extract_news_topic(prompt); news=get_news(topic)
             meta='<div class="badge badge-green">📰 Live news</div>'
             st.markdown(meta,unsafe_allow_html=True)
             response=f"### 📰 {topic.title()}\n\n{news}"
             st.markdown(response)
 
-        # ── WEATHER ───────────────────────────────────────────────────────────
         if not response and is_weather_query(prompt):
-            with st.spinner("🌤️ Fetching weather…"):
+            with st.spinner(T("fetching_weather")):
                 city=extract_city(prompt); wd=get_weather(city)
             if "failed" not in wd.lower():
                 L=dict(l.split(": ",1) for l in wd.strip().splitlines() if ": " in l)
@@ -1409,11 +2481,10 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
                 response=f"❌ Could not fetch weather for **{city}**."
                 st.markdown(response)
 
-        # ── GENERAL / CODE / CREATION ─────────────────────────────────────────
         if not response:
             ct=classify_creation(prompt); search_results=""; searched=False
             if needs_search(prompt):
-                with st.spinner("🔍 Searching…"):
+                with st.spinner(T("searching")):
                     search_results=web_search(prompt)
                     facts=get_current_facts(prompt)
                     if facts: search_results+="\n\nRecent headlines:\n"+facts
@@ -1444,17 +2515,18 @@ if prompt := st.chat_input("Ask anything — type here or click 🖼️ Image / 
                         html_src=build_html_preview(blocks)
                         if html_src:
                             st.markdown("---")
-                            plabels={"game":"🎮 Live Game!","app":"🚀 Live App","software":"⚙️ Live Software","design":"✨ Live Design"}
-                            st.markdown(f"### {plabels.get(ct,'🖥️ Preview')}")
+                            plabels={"game":T("live_game"),"app":T("live_app"),
+                                     "software":T("live_software"),"design":T("live_design")}
+                            st.markdown(f"### {plabels.get(ct,T('live_preview'))}")
                             h=650 if ct in ("game","app","software") else 520
                             st.components.v1.html(html_src,height=h,scrolling=True)
                             b64_html=base64.b64encode(html_src.encode()).decode()
                             fname={"game":"nova_game.html","app":"nova_app.html","software":"nova_software.html","design":"nova_design.html"}.get(ct,"nova_ai.html")
-                            st.markdown(f'<a href="data:text/html;base64,{b64_html}" download="{fname}" class="btn-download">⬇️ Download {fname}</a>',unsafe_allow_html=True)
+                            st.markdown(f'<a href="data:text/html;base64,{b64_html}" download="{fname}" class="btn-download">{T("download")} {fname}</a>',unsafe_allow_html=True)
                     elif code and lang and lang not in ("html","css"):
                         rk=f"run_{len(st.session_state.messages)}"
-                        if st.button(f"▶ Run {lang.title()}",key=rk):
-                            with st.spinner(f"⚙️ Running {lang}…"): out=run_code(code,lang)
+                        if st.button(f"{T('run_btn')} {lang.title()}",key=rk):
+                            with st.spinner(f"{T('running_code')} {lang}…"): out=run_code(code,lang)
                             cls="error-box" if "❌" in out else "output-box"
                             st.markdown(f'<div class="{cls}">{out}</div>',unsafe_allow_html=True)
                     break
